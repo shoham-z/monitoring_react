@@ -24,3 +24,13 @@
   flex-grow: 1;  /* Allow text to take remaining space */
   line-height: 30px;  /* Vertically center the text next to the image */
 }
+
+
+.reachable {
+  background-color: rgb(0, 253, 34);
+
+}
+
+.unreachable {
+  background-color: rgb(253, 8, 0);
+}
