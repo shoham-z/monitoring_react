@@ -1,0 +1,6 @@
+/* Control the left side */
+.switch_div {
+  left: 0;
+  width: 80%;
+  background-color: #FF1;
+}

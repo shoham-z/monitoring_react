@@ -1,0 +1,6 @@
+/* Control the right side */
+.notification-panel {
+  right: 0;
+  width: 20%;
+  background-color: #f81;
+}
