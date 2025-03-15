@@ -1,0 +1,26 @@
+ /* Style the image inside the centered container, if needed */
+ .switch-item img {
+  width: 50px;
+  height: 50px;
+}
+
+.switch-item {
+  display: flex;         /* Set each item to be a flex container */
+  flex-direction: column; /* Stack the image and text vertically */
+  align-items: center;    /* Center them horizontally */
+
+  width: 100px; /* Fixed size for each item */
+  height: 100px; /* Optional: Fixed height for each item */
+  margin: 5px; /* Optional: spacing between items */
+  background-color: lightblue;
+  text-align: center;
+  line-height: 50px; /* Vertically center the text */
+  border: 1px black solid;
+}
+
+.item-text {
+  text-align: flex-end;  /* Center the text horizontally */
+
+  flex-grow: 1;  /* Allow text to take remaining space */
+  line-height: 30px;  /* Vertically center the text next to the image */
+}

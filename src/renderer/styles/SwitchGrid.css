@@ -4,3 +4,7 @@
   width: 80%;
   background-color: #FF1;
 }
+
+.container_flex{
+  display: flex;
+}
