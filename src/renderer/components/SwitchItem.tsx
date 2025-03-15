@@ -11,12 +11,12 @@ function SwitchItem(props: {name: string, reachability: any}) {
   const styleclass = reachability==="up" ? "reachable" : "unreachable";
 
   function showSwitchContextMenu(){
-
+    alert("bob")
   }
 
   return (
     <div className={`switch-item ${  styleclass}`}>
-      <img src="../../img/killjoy_kirby" alt="killjoy kirby" onClick={() => showSwitchContextMenu()}/>
+      <img src="../../../img/killjoy_kirby" alt="killjoy kirby" onContextMenu={() => showSwitchContextMenu()}/>
       <p>{switchName}</p>
     </div>
   );
