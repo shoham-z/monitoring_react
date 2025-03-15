@@ -2,6 +2,8 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable prettier/prettier */
 import { useState } from "react";
+import ContextMenu from './ContextMenu';
+import switchImg from '../../img/switch.png'
 import '../styles/SwitchItem.css';
 
 function SwitchItem(props: {name: string, reachability: any}) {
@@ -10,13 +12,18 @@ function SwitchItem(props: {name: string, reachability: any}) {
 
   const styleclass = reachability==="up" ? "reachable" : "unreachable";
 
-  function showSwitchContextMenu(){
-    alert("bob")
+  function showSwitchContextMenu(event){
+    event.preventDefault();
+
+    const xPos = `${event.pageX  }px`;
+    const yPos = `${event.pageY  }px`;
+
+    <ContextMenu top={xPos} left={yPos}  />
   }
 
   return (
     <div className={`switch-item ${  styleclass}`}>
-      <img src="../../../img/killjoy_kirby" alt="killjoy kirby" onContextMenu={() => showSwitchContextMenu()}/>
+      <img src={switchImg} alt="killjoy kirby" onContextMenu={showSwitchContextMenu}/>
       <p>{switchName}</p>
     </div>
   );
