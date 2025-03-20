@@ -1,0 +1,45 @@
+/* src/contextMenu.css */
+
+:root {
+  --contexify-menu-bgColor: #fff;
+  --contexify-separator-color: rgba(0, 0, 0, 0.2);
+  --contexify-item-color: #333;
+  --contexify-activeItem-color: #fff;
+  --contexify-activeItem-bgColor: #3498db;
+  --contexify-rightSlot-color: #6f6e77;
+  --contexify-activeRightSlot-color: #fff;
+  --contexify-arrow-color: #6f6e77;
+  --contexify-activeArrow-color: #fff;
+}
+
+/* Now apply the CSS variables to style the menu */
+.context-menu {
+  width: 100px;
+  font-size: small;
+  background-color: var(--contexify-menu-bgColor);
+}
+
+.contexify_item {
+  color: var(--contexify-item-color);
+}
+
+.contexify_item--hover {
+  background-color: var(--contexify-activeItem-bgColor);
+  color: var(--contexify-activeItem-color);
+}
+
+.contextify_right-slot {
+  color: var(--contexify-rightSlot-color);
+}
+
+.contextify_right-slot--hover {
+  color: var(--contexify-activeRightSlot-color);
+}
+
+.contextify_arrow {
+  color: var(--contexify-arrow-color);
+}
+
+.contextify_arrow--active {
+  color: var(--contexify-activeArrow-color);
+}
