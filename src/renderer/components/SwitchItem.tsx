@@ -4,34 +4,44 @@
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 /* eslint-disable prettier/prettier */
 import { MouseEvent, useEffect, useState } from "react";
-import { Item, Menu, Separator, useContextMenu } from 'react-contexify';
+import { Item, Menu, RightSlot, Separator, useContextMenu } from 'react-contexify';
 import switchImg from '../../img/switch.png'
 import '../styles/SwitchItem.css';
-
-const MENU_ID = 'switch_context_menu';
+import 'react-contexify/ReactContexify.css';
 
 function SwitchItem(props: {name: string, reachability: any, ip: any}) {
-  const { show } = useContextMenu({ id: MENU_ID });
-
   const {name, reachability, ip} = props;
-  const [switchName, _setSwitchName] = useState(name);
+  const MENU_ID = ip;
 
+
+  const { show } = useContextMenu({ id: MENU_ID });
+  const [switchName, _setSwitchName] = useState(name);
 
   const styleclass = reachability === "up" ? "reachable" : "unreachable";
 
   const handleItemClick = (event) => {
-    console.log(event)
-    switch (event.id) {
-      case "copy":
-        console.log(event, props)
-        break;
-      case "cut":
-        console.log(event, props);
-        break;
 
+    // console.log(event)
+    switch (event.id) {
+      case "ping":
+        console.log("ping")
+        console.log(props)
+        break;
+      case "connect":
+        console.log("connect");
+        console.log(props)
+        break;
+      case "edit":
+        console.log("edit")
+        console.log(props)
+        break;
+      case "delete":
+        console.log("delete")
+        console.log(props)
+        break;
     }
 
-    console.log("HHHHHHHHHHHHHHHHHHAAAAAAAAAAAAAAAAAAA")
+    console.log("HHHHHHHHHHHHHHHHHAAAAAAAAAAAAAAAAAAA")
   }
 
   function displayMenu(e){
@@ -42,16 +52,32 @@ function SwitchItem(props: {name: string, reachability: any, ip: any}) {
     });
   }
 
+  const matchShortcutPing = (e: KeyboardEvent) => {
+    return e.ctrlKey && e.key === 'g';
+  }
+
+  const matchShortcutConnect = (e: KeyboardEvent) => {
+    return e.ctrlKey && e.key === 'h';
+  }
+
+
   return (
     <div className={`switch-item ${  styleclass}`} onContextMenu={displayMenu}>
       <img src={switchImg} alt="killjoy kirby"/>
       <p>{switchName}</p>
       <Menu id={MENU_ID} className="context-menu">
-        <Item id="copy" onClick={handleItemClick}>Ping {ip}</Item>
-        <Item id="cut" onClick={handleItemClick}>Cut</Item>
-        <Separator />
-        <Item disabled>Disabled</Item>
-        <Separator />
+        <Item id="ping" onClick={handleItemClick} keyMatcher={matchShortcutPing}>
+          Ping <RightSlot>Ctrl G</RightSlot>
+        </Item>
+        <Item id="cut" onClick={handleItemClick} keyMatcher={matchShortcutConnect}>
+          Connect <RightSlot>Ctrl H</RightSlot>
+        </Item>
+        <Item id="edit" onClick={handleItemClick}>
+          Edit
+        </Item>
+        <Item id="delete" onClick={handleItemClick}>
+          Delete
+        </Item>
       </Menu>
     </div>
   );
