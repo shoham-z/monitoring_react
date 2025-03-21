@@ -34,3 +34,34 @@
 .unreachable {
   background-color: rgb(253, 8, 0);
 }
+
+.switch-item.selected {
+  border-radius: 5px;
+  border-width: 2px;
+  width: 120px;
+  height: 120px;
+  color: white;
+}
+
+.contexify {
+  --react-contexify-item-padding: 4px 8px; /* Adjusts vertical and horizontal padding */
+
+  --contexify-menu-minWidth: 120px;
+  font-size: small;
+  &_item {
+      height: 30px;
+      min-height: 24px !important;
+      &:focus{
+        outline: 0;
+      }
+      &Content {
+        padding: 6px;
+        display: flex;
+        align-items: center;
+        white-space: nowrap;
+        color: #333;
+        position: relative;
+      }
+  }
+}
+
