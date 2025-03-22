@@ -14,7 +14,7 @@ function SwitchItem(props: {
   const { name, reachability, ip, setSelected, isSelected } = props;
   const MENU_ID = `switch-menu-${ip}`; // Same ID for all switches to allow only one open at a time
 
-  const reachabilityClass = reachability === 'up' ? 'reachable' : 'unreachable';
+  const reachabilityClass = reachability ? 'reachable' : 'unreachable';
 
   const { show } = useContextMenu({ id: MENU_ID });
 

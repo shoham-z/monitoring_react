@@ -138,22 +138,18 @@ app
   .catch(console.log);
 
 function parsePingResponge(output: string) {
+  console.log(output);
+
+  // Check for the presence of error messages (e.g., "Destination host unreachable")
+  if (output.includes('Destination host unreachable')) {
+    return false;
+  }
+
   const statsRegex =
     /Packets: Sent = (\d+), Received = (\d+), Lost = (\d+) \((\d+)% loss\)/;
-  const timeRegex = /Minimum = (\d+)ms, Maximum = (\d+)ms, Average = (\d+)ms/;
-
   const statsMatch = output.match(statsRegex);
-  const timeMatch = output.match(timeRegex);
-  if (statsMatch && timeMatch) {
-    return {
-      sent: parseInt(statsMatch[1], 10),
-      received: parseInt(statsMatch[2], 10),
-      lost: parseInt(statsMatch[3], 10),
-      lossPercent: parseInt(statsMatch[4], 10),
-      minTime: parseInt(timeMatch[1], 10),
-      maxTime: parseInt(timeMatch[2], 10),
-      avgTime: parseInt(timeMatch[3], 10),
-    };
+  if (statsMatch) {
+    return parseInt(statsMatch[1], 10) === parseInt(statsMatch[2], 10);
   }
   return { error: 'Invalid ping output format' };
 }
@@ -161,8 +157,11 @@ function parsePingResponge(output: string) {
 // Listen for ping request from React frontend
 ipcMain.on('ping-request', (event, host, count) => {
   exec(`ping -n ${count} ${host}`, (error, stdout, stderr) => {
-    const result = parsePingResponge(stdout);
-    result.ip = host;
+    const success = parsePingResponge(stdout);
+    const result = {
+      success,
+      ip: host,
+    };
     console.log(result);
     if (error) {
       event.reply('ping-response', `Error: ${stderr}`);
