@@ -162,7 +162,6 @@ ipcMain.on('ping-request', (event, host, count) => {
       success,
       ip: host,
     };
-    console.log(result);
     if (error) {
       event.reply('ping-response', `Error: ${stderr}`);
     } else {
