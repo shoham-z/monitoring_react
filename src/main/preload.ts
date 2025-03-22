@@ -21,6 +21,10 @@ const electronHandler = {
     once(channel: Channels, func: (...args: unknown[]) => void) {
       ipcRenderer.once(channel, (_event, ...args) => func(...args));
     },
+    sendPing: (host: any, count: any) =>
+      ipcRenderer.send('ping-request', host, count),
+    onPingResponse: (callback) =>
+      ipcRenderer.on('ping-response', (_event, data) => callback(data)),
   },
 };
 

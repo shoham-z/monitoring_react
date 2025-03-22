@@ -12,6 +12,7 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import { exec } from 'child_process';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -135,3 +136,38 @@ app
     });
   })
   .catch(console.log);
+
+function parsePingResponge(output: string) {
+  const statsRegex =
+    /Packets: Sent = (\d+), Received = (\d+), Lost = (\d+) \((\d+)% loss\)/;
+  const timeRegex = /Minimum = (\d+)ms, Maximum = (\d+)ms, Average = (\d+)ms/;
+
+  const statsMatch = output.match(statsRegex);
+  const timeMatch = output.match(timeRegex);
+  if (statsMatch && timeMatch) {
+    return {
+      sent: parseInt(statsMatch[1], 10),
+      received: parseInt(statsMatch[2], 10),
+      lost: parseInt(statsMatch[3], 10),
+      lossPercent: parseInt(statsMatch[4], 10),
+      minTime: parseInt(timeMatch[1], 10),
+      maxTime: parseInt(timeMatch[2], 10),
+      avgTime: parseInt(timeMatch[3], 10),
+    };
+  }
+  return { error: 'Invalid ping output format' };
+}
+
+// Listen for ping request from React frontend
+ipcMain.on('ping-request', (event, host, count) => {
+  exec(`ping -n ${count} ${host}`, (error, stdout, stderr) => {
+    const result = parsePingResponge(stdout);
+    result.ip = host;
+    console.log(result);
+    if (error) {
+      event.reply('ping-response', `Error: ${stderr}`);
+    } else {
+      event.reply('ping-response', result);
+    }
+  });
+});

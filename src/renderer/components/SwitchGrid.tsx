@@ -4,6 +4,17 @@ import '../styles/SwitchGrid.css';
 import SwitchItem from './SwitchItem';
 
 
+function ping(ip: number, count: number) {
+  window.electron.ipcRenderer.sendPing(ip, count)
+}
+
+window.electron.ipcRenderer.onPingResponse((data: any) => {
+  if(data.sent === data.received) console.log('ping good');
+  else console.log('ping bad')
+
+  // set switch reachability to the corresponding value
+});
+
 function SwitchGrid() {
   const [selectedIp, setSelectedIp] = useState(-1);
 
@@ -12,29 +23,27 @@ function SwitchGrid() {
       if (!selectedIp) return; // No div selected, ignore key events
 
       if (event.ctrlKey && event.key === "g") {
-        console.log(`Ctrl + G pressed on Div ${selectedIp}`);
+        ping(selectedIp, 4);
       } else if (event.ctrlKey && event.key === "h") {
         console.log(`Ctrl + H pressed on Div ${selectedIp}`);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown); // Cleanup
-  }, [selectedIp]); // Runs when `selectedId` changes
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [selectedIp]);
+
 
   const handleSelect = (ip: string) => {
-    console.log(ip)
     setSelectedIp(ip);
   };
-
-
 
   // send get request to get all switches/items
 
   // add multiple child objects
   const switchList = [{name:"kaban", reachability:"up", ip:"192.168.1.20"},
     {name:"ramad", reachability:"down", ip:"192.168.1.10"},
-    {name:"reshatot", reachability:"up", ip:"192.168.1.30"}];
+    {name:"reshatot", reachability:"up", ip:"8.8.8.8"}];
 
 
 
