@@ -10,8 +10,9 @@ function SwitchItem(props: {
   ip: any;
   setSelected: any;
   isSelected: any;
+  onPing: any;
 }) {
-  const { name, reachability, ip, setSelected, isSelected } = props;
+  const { name, reachability, ip, setSelected, isSelected, onPing } = props;
   const MENU_ID = `switch-menu-${ip}`; // Same ID for all switches to allow only one open at a time
 
   const reachabilityClass = reachability ? 'reachable' : 'unreachable';
@@ -22,6 +23,7 @@ function SwitchItem(props: {
     switch (event.id) {
       case 'ping':
         console.log(`ping ${ip}`);
+        onPing(ip, 1);
         break;
       case 'connect':
         console.log(`connect ${ip}`);

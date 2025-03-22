@@ -85,7 +85,8 @@ window.electron.ipcRenderer.onPingResponse((data: any) => {
             reachability={x.reachability}
             ip={x.ip}
             isSelected={selectedIp.toString() === x.ip}
-            setSelected={() => handleSelect(x.ip)}/>
+            setSelected={() => handleSelect(x.ip)}
+            onPing={ping}/>
     })}
       </div>
     </div>
