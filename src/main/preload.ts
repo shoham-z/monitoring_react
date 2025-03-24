@@ -23,7 +23,7 @@ const electronHandler = {
     },
     sendPing: (host: any, count: any) =>
       ipcRenderer.send('ping-request', host, count),
-    onPingResponse: (callback) =>
+    onPingResponse: (callback: (arg0: any) => void) =>
       ipcRenderer.on('ping-response', (_event, data) => callback(data)),
   },
 };

@@ -1,18 +1,24 @@
-import { useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useState } from 'react';
 import '../styles/SwitchGrid.css';
 import SwitchItem from './SwitchItem';
 
-function ping(ip: number, count: number) {
+interface SwitchEntry {
+  name: string;
+  reachability: boolean;
+  ip: string;
+}
+
+function ping(ip: string, count: number) {
   window.electron.ipcRenderer.sendPing(ip, count);
 }
 
-function connect(ip) {
+function connect(ip: string) {
   console.log(`connecting to ${ip}`);
 }
 
 function SwitchGrid() {
-  const [selectedIp, setSelectedIp] = useState(-1);
-  const [switchList, setSwitchList] = useState([]);
+  const [selectedIp, setSelectedIp] = useState('');
+  const [switchList, setSwitchList] = useState<Array<SwitchEntry>>([]);
   // send get request to get all switches/items
 
   // add multiple child objects
@@ -38,11 +44,11 @@ function SwitchGrid() {
 
   // used for the event listener for clicked item
   useEffect(() => {
-    const handleKeyDown = (event) => {
+    const handleKeyDown = (event: { ctrlKey: any; key: string }) => {
       if (!selectedIp) return; // No div selected, ignore key events
 
       if (event.ctrlKey && event.key === 'g') {
-        ping(selectedIp, 1);
+        ping(selectedIp.toString(), 1);
       } else if (event.ctrlKey && event.key === 'h') {
         connect(selectedIp);
       }
@@ -62,7 +68,7 @@ function SwitchGrid() {
     return () => clearInterval(intervalId);
   }, [switchList]);
 
-  const updateReachability = (ip, reachablilty) => {
+  const updateReachability = (ip: string, reachablilty: boolean) => {
     const updatedSwitchList = switchList.map((item) =>
       item.ip === ip ? { ...item, reachability: reachablilty } : item,
     );
@@ -75,7 +81,7 @@ function SwitchGrid() {
     // set switch reachability to the corresponding value
   });
 
-  const handleSelect = (ip: string) => {
+  const handleSelect = (ip: string | SetStateAction<string>) => {
     setSelectedIp(ip);
   };
 

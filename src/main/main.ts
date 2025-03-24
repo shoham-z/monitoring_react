@@ -9,7 +9,15 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  shell,
+  ipcMain,
+  Menu,
+  Tray,
+  nativeImage,
+} from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { exec } from 'child_process';
@@ -82,6 +90,12 @@ const createWindow = async () => {
     },
   });
 
+  // Handle window close event (hide instead of quitting)
+  mainWindow.on('close', (event) => {
+    event.preventDefault(); // Prevent default quit behavior
+    mainWindow?.hide(); // Hide the window instead
+  });
+
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
@@ -128,6 +142,44 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
+    // for dev build
+    const iconPath = path.join(__dirname, '../../assets/icons/golden_apple.png',);
+    // for prod build
+    // const iconPath = path.join(process.resourcesPath, 'assets/icons/golden_apple.png');
+
+    const icon = nativeImage.createFromPath(iconPath);
+
+    const tray = new Tray(icon);
+    const contextMenu = Menu.buildFromTemplate([
+      {
+        label: 'Ping All Switches',
+        click: () => {
+          console.log('Pinging');
+        },
+      },
+      {
+        label: 'Sync to Server',
+        click: () => {
+          console.log('Syncing');
+        },
+      },
+      {
+        label: 'Show Window',
+        click: () => {
+          mainWindow?.show();
+        },
+      },
+      {
+        label: 'Quit',
+        click: () => {
+          mainWindow?.destroy();
+          app.quit();
+        },
+      },
+    ]);
+    tray.setToolTip('Fuck Me Mommy');
+    tray.setContextMenu(contextMenu);
+
     createWindow();
     app.on('activate', () => {
       // On macOS it's common to re-create a window in the app when the
