@@ -1,6 +1,7 @@
 import { SetStateAction, useEffect, useState } from 'react';
 import '../styles/SwitchGrid.css';
 import SwitchItem from './SwitchItem';
+import TopPanel from './TopPanel';
 
 interface SwitchEntry {
   name: string;
@@ -12,8 +13,12 @@ function ping(ip: string, count: number) {
   window.electron.ipcRenderer.sendPing(ip, count);
 }
 
+function connectSSH(ip: string) {
+  window.electron.ipcRenderer.connectRemotely(ip);
+}
+
 function connect(ip: string) {
-  console.log(`connecting to ${ip}`);
+  connectSSH(ip);
 }
 
 function SwitchGrid() {
@@ -21,18 +26,15 @@ function SwitchGrid() {
   const [switchList, setSwitchList] = useState<Array<SwitchEntry>>([]);
   // send get request to get all switches/items
 
-  // add multiple child objects
-
   useEffect(() => {
-    console.log('Updated switchList:', switchList);
+    // console.log('Updated switchList:', switchList);
   }, [switchList]); // This will run whenever switchList changes
 
   useEffect(() => {
-    setSwitchList([
-      { name: 'kaban', reachability: true, ip: '192.168.1.20' },
-      { name: 'ramad', reachability: false, ip: '192.168.1.10' },
-      { name: 'reshatot', reachability: false, ip: '8.8.8.8' },
-    ]);
+    const l = [...Array(24).keys()].map((i) => {
+      return { name: `${i}`, reachability: true, ip: `192.168.1.${i}` };
+    });
+    setSwitchList(l);
 
     /**    fetch("http://google.com") // Replace with your API URL
         .then(response => response.json()) // Parse JSON response
@@ -44,11 +46,12 @@ function SwitchGrid() {
 
   // used for the event listener for clicked item
   useEffect(() => {
+    // ADD PREVIOUSLY SELECTED IP AS A STATE, THEN WHEN NEW SWITCH IS CHOSEN, REMOVE THE EVENT LISTENER FROM THE PREVIOUS ONE
     const handleKeyDown = (event: { ctrlKey: any; key: string }) => {
       if (!selectedIp) return; // No div selected, ignore key events
 
       if (event.ctrlKey && event.key === 'g') {
-        ping(selectedIp.toString(), 1);
+        ping(selectedIp, 1);
       } else if (event.ctrlKey && event.key === 'h') {
         connect(selectedIp);
       }
@@ -61,8 +64,7 @@ function SwitchGrid() {
   // used to ping all devices every 10 seconds
   useEffect(() => {
     const intervalId = setInterval(() => {
-      console.log('Function is running every 10 seconds!', new Date());
-      switchList.forEach((element) => ping(element.ip, 1));
+      // switchList.forEach((element) => ping(element.ip, 1));
     }, 10000);
 
     return () => clearInterval(intervalId);
@@ -86,22 +88,25 @@ function SwitchGrid() {
   };
 
   return (
-    <div className="split switch_div">
-      <div className="container_flex" id="container_flex">
-        {switchList.map((x) => (
-          <SwitchItem
-            key={x.name}
-            name={x.name}
-            reachability={x.reachability}
-            ip={x.ip}
-            isSelected={selectedIp.toString() === x.ip}
-            setSelected={() => handleSelect(x.ip)}
-            onPing={ping}
-            onConnect={connect}
-          />
-        ))}
+    <>
+      <TopPanel />
+      <div className="switch_div">
+        <div className="container_flex" id="container_flex">
+          {switchList.map((x) => (
+            <SwitchItem
+              key={x.name}
+              name={x.name}
+              reachability={x.reachability}
+              ip={x.ip}
+              isSelected={selectedIp.toString() === x.ip}
+              setSelected={() => handleSelect(x.ip)}
+              onPing={ping}
+              onConnect={connect}
+            />
+          ))}
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

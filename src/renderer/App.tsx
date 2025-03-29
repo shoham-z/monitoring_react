@@ -5,7 +5,7 @@ import NotificationPanel from './components/NotificationPanel';
 
 function Window() {
   return (
-    <div>
+    <div className="main-window">
       <SwitchGrid />
 
       <NotificationPanel />

@@ -25,6 +25,8 @@ const electronHandler = {
       ipcRenderer.send('ping-request', host, count),
     onPingResponse: (callback: (arg0: any) => void) =>
       ipcRenderer.on('ping-response', (_event, data) => callback(data)),
+    connectRemotely: (ip: any) => ipcRenderer.send('connect-remotely', ip),
+    // onPingResponse: (callback: (arg0: any) => void) => ipcRenderer.on('ping-response', (_event, data) => callback(data)),
   },
 };
 

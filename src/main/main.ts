@@ -20,7 +20,7 @@ import {
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -143,8 +143,11 @@ app
   .whenReady()
   .then(() => {
     // for dev build
+    // eslint-disable-next-line prettier/prettier
     const iconPath = path.join(__dirname, '../../assets/icons/golden_apple.png',);
+
     // for prod build
+    // eslint-disable-next-line prettier/prettier
     // const iconPath = path.join(process.resourcesPath, 'assets/icons/golden_apple.png');
 
     const icon = nativeImage.createFromPath(iconPath);
@@ -189,6 +192,8 @@ app
   })
   .catch(console.log);
 
+/// ========= START OF SECTION PING =========
+
 function parsePingResponge(output: string) {
   console.log(output);
 
@@ -221,3 +226,54 @@ ipcMain.on('ping-request', (event, host, count) => {
     }
   });
 });
+
+/// ========= END OF SECTION PING =========
+
+/// ========= START OF SECTION CONNECT REMOTELY =========
+
+function connectSSH(command: string) {
+  spawn('cmd.exe', ['/k', command], {
+    shell: true,
+    detached: true,
+    stdio: 'inherit', // Ensures it opens the window
+  });
+}
+
+function runConsoleApp() {
+  // Path to your console application
+  const exePath = 'C:\\path\\to\\your\\app.exe';
+
+  // Spawn the process
+  const child = spawn(exePath, [], { shell: true });
+
+  // Capture output
+  child.stdout.on('data', (data) => {
+    console.log(`Output: ${data}`);
+  });
+
+  child.stderr.on('data', (data) => {
+    console.error(`Error: ${data}`);
+  });
+
+  child.on('close', (code) => {
+    console.log(`Process exited with code ${code}`);
+  });
+
+  // Send input to the application (if needed)
+  setTimeout(() => {
+    child.stdin.write('Your input here\n'); // Send input to the application
+  }, 1000);
+
+  // Close input stream after some time (if needed)
+  setTimeout(() => {
+    child.stdin.end();
+  }, 3000);
+}
+
+ipcMain.on('connect-remotely', (event, ip) => {
+  console.log(`connecting to ${ip}`);
+  connectSSH(`ssh root@${ip}`);
+  // runConsoleApp();
+});
+
+/// ========= END OF SECTION CONNECT REMOTELY =========
