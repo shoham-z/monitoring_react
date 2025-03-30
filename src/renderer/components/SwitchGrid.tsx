@@ -64,11 +64,16 @@ function SwitchGrid() {
   // used to ping all devices every 10 seconds
   useEffect(() => {
     const intervalId = setInterval(() => {
-      // switchList.forEach((element) => ping(element.ip, 1));
+      switchList.forEach((element) => ping(element.ip, 1));
     }, 10000);
 
     return () => clearInterval(intervalId);
   }, [switchList]);
+
+  const addSwitch = (ip, hostname) => {
+    const newSwitch = { name: hostname, reachability: false, ip };
+    setSwitchList(switchList => [...switchList,newSwitch] );
+  };
 
   const updateReachability = (ip: string, reachablilty: boolean) => {
     const updatedSwitchList = switchList.map((item) =>
@@ -89,7 +94,7 @@ function SwitchGrid() {
 
   return (
     <>
-      <TopPanel />
+      <TopPanel addSwitch={addSwitch} />
       <div className="switch_div">
         <div className="container_flex" id="container_flex">
           {switchList.map((x) => (
