@@ -182,6 +182,7 @@ app
     ]);
     tray.setToolTip('Fuck Me Mommy');
     tray.setContextMenu(contextMenu);
+    tray.on('click', () => mainWindow?.show());
 
     createWindow();
     app.on('activate', () => {
