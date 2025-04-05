@@ -24,6 +24,7 @@ function connect(ip: string) {
 function SwitchGrid() {
   const [selectedIp, setSelectedIp] = useState('');
   const [switchList, setSwitchList] = useState<Array<SwitchEntry>>([]);
+  const [filter, setFilter] = useState('');
   // send get request to get all switches/items
 
   useEffect(() => {
@@ -94,23 +95,32 @@ function SwitchGrid() {
     setSelectedIp(ip);
   };
 
+  const updateFilter = (data: SetStateAction<string>) => setFilter(data);
+
   return (
     <>
-      <TopPanel addSwitch={addSwitch} />
+      <TopPanel addSwitch={addSwitch} updateFilter={updateFilter} />
       <div className="switch_div">
         <div className="container_flex" id="container_flex">
-          {switchList.map((x) => (
-            <SwitchItem
-              key={x.name}
-              name={x.name}
-              reachability={x.reachability}
-              ip={x.ip}
-              isSelected={selectedIp.toString() === x.ip}
-              setSelected={() => handleSelect(x.ip)}
-              onPing={ping}
-              onConnect={connect}
-            />
-          ))}
+          {switchList
+            .filter((el) => {
+              if (filter === '') return el;
+              if (filter.includes('.') && el.ip.includes(filter)) return el;
+              if (el.name.includes(filter)) return el;
+              return null;
+            })
+            .map((x) => (
+              <SwitchItem
+                key={x.name}
+                name={x.name}
+                reachability={x.reachability}
+                ip={x.ip}
+                isSelected={selectedIp.toString() === x.ip}
+                setSelected={() => handleSelect(x.ip)}
+                onPing={ping}
+                onConnect={connect}
+              />
+            ))}
         </div>
       </div>
     </>
