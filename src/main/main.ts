@@ -248,27 +248,25 @@ function runConsoleApp(ip: string) {
   });
 
   // Spawn the process
-  /**const child = spawn('cmd.exe', ['/c', 'start', exePath], {
+  /** const child = spawn('cmd.exe', ['/c', 'start', exePath], {
     detached: false,
     stdio: 'pipe',
-  });*/
+  }); */
 
   setTimeout(() => {
-    child.stdin.write("1");
-  }, 2000)
-  
-  
+    child.stdin.write('1');
+  }, 2000);
 
-  //child.stdin.write('1');
-  //child.stderr.on('data', (data) =>{console.log(`stdout: ${data}`);})
+  // child.stdin.write('1');
+  // child.stderr.on('data', (data) =>{console.log(`stdout: ${data}`);})
 
-  //child.unref();
+  // child.unref();
 }
 
 ipcMain.on('connect-remotely', (event, ip) => {
   console.log(`connecting to ${ip}`);
-  // connectSSH(`ssh root@${ip}`);
-  runConsoleApp(ip);
+  connectSSH(`ssh ubuntu@${ip}`);
+  // runConsoleApp(ip);
 });
 
 /// ========= END OF SECTION CONNECT REMOTELY =========
