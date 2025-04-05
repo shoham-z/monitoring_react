@@ -31,9 +31,10 @@ function SwitchGrid() {
   }, [switchList]); // This will run whenever switchList changes
 
   useEffect(() => {
-    const l = [...Array(24).keys()].map((i) => {
+    const a = [...Array(24).keys()].map((i) => {
       return { name: `${i}`, reachability: true, ip: `192.168.1.${i}` };
     });
+    const l = [{ name: 'rotem', reachability: false, ip: '192.168.100.2' }];
     setSwitchList(l);
 
     /**    fetch("http://google.com") // Replace with your API URL
@@ -70,9 +71,10 @@ function SwitchGrid() {
     return () => clearInterval(intervalId);
   }, [switchList]);
 
-  const addSwitch = (ip, hostname) => {
+  const addSwitch = (ip: any, hostname: any) => {
     const newSwitch = { name: hostname, reachability: false, ip };
-    setSwitchList(switchList => [...switchList,newSwitch] );
+    setSwitchList((switchList) => [...switchList, newSwitch]);
+    // send post request to the server, to add the item
   };
 
   const updateReachability = (ip: string, reachablilty: boolean) => {

@@ -196,8 +196,6 @@ app
 /// ========= START OF SECTION PING =========
 
 function parsePingResponge(output: string) {
-  console.log(output);
-
   // Check for the presence of error messages (e.g., "Destination host unreachable")
   if (output.includes('Destination host unreachable')) {
     return false;
@@ -240,41 +238,37 @@ function connectSSH(command: string) {
   });
 }
 
-function runConsoleApp() {
+function runConsoleApp(ip: string) {
   // Path to your console application
-  const exePath = 'C:\\path\\to\\your\\app.exe';
+  const exePath = 'C:\\Users\\User\\Desktop\\RemoteCliClient_2_Windows.exe';
+
+  const child = spawn('cmd.exe', ['/k', exePath], {
+    detached: true,
+    stdio: 'pipe', // Ensures it opens the window
+  });
 
   // Spawn the process
-  const child = spawn(exePath, [], { shell: true });
+  /**const child = spawn('cmd.exe', ['/c', 'start', exePath], {
+    detached: false,
+    stdio: 'pipe',
+  });*/
 
-  // Capture output
-  child.stdout.on('data', (data) => {
-    console.log(`Output: ${data}`);
-  });
-
-  child.stderr.on('data', (data) => {
-    console.error(`Error: ${data}`);
-  });
-
-  child.on('close', (code) => {
-    console.log(`Process exited with code ${code}`);
-  });
-
-  // Send input to the application (if needed)
   setTimeout(() => {
-    child.stdin.write('Your input here\n'); // Send input to the application
-  }, 1000);
+    child.stdin.write("1");
+  }, 2000)
+  
+  
 
-  // Close input stream after some time (if needed)
-  setTimeout(() => {
-    child.stdin.end();
-  }, 3000);
+  //child.stdin.write('1');
+  //child.stderr.on('data', (data) =>{console.log(`stdout: ${data}`);})
+
+  //child.unref();
 }
 
 ipcMain.on('connect-remotely', (event, ip) => {
   console.log(`connecting to ${ip}`);
-  connectSSH(`ssh root@${ip}`);
-  // runConsoleApp();
+  // connectSSH(`ssh root@${ip}`);
+  runConsoleApp(ip);
 });
 
 /// ========= END OF SECTION CONNECT REMOTELY =========
