@@ -32,13 +32,13 @@ function SwitchGrid() {
   }, [switchList]); // This will run whenever switchList changes
 
   useEffect(() => {
-    const a = [...Array(24).keys()].map((i) => {
+    const l = [...Array(35).keys()].map((i) => {
       return { name: `${i}`, reachability: true, ip: `192.168.1.${i}` };
     });
-    const l = [{ name: 'rotem', reachability: false, ip: '192.168.100.2' }];
+    const a = [{ name: 'rotem', reachability: false, ip: '192.168.100.2' }];
     setSwitchList(l);
 
-    /**    fetch("http://google.com") // Replace with your API URL
+    /**    fetch(`http://${serverip}/api/getAll`) // Replace with your API URL
         .then(response => response.json()) // Parse JSON response
         .then(data => setSwitchList(data)) // Update state with fetched data
         .catch(error => console.error("Error fetching data:", error));
@@ -74,7 +74,7 @@ function SwitchGrid() {
 
   const addSwitch = (ip: any, hostname: any) => {
     const newSwitch = { name: hostname, reachability: false, ip };
-    setSwitchList((switchList) => [...switchList, newSwitch]);
+    setSwitchList([...switchList, newSwitch]);
     // send post request to the server, to add the item
   };
 
@@ -84,6 +84,14 @@ function SwitchGrid() {
     );
 
     setSwitchList(updatedSwitchList);
+  };
+
+  const deleteSwitch = (ip: string) => {
+    setSwitchList(
+      switchList.filter((el) => {
+        return el.ip !== ip ? el : null;
+      }),
+    );
   };
 
   window.electron.ipcRenderer.onPingResponse((data: any) => {
@@ -119,6 +127,7 @@ function SwitchGrid() {
                 setSelected={() => handleSelect(x.ip)}
                 onPing={ping}
                 onConnect={connect}
+                onDelete={deleteSwitch}
               />
             ))}
         </div>

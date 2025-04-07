@@ -4,8 +4,7 @@ import ButtonAddItem from './ButtonAddItem';
 function TopPanel(props: { addSwitch: any; updateFilter: any }) {
   const { addSwitch, updateFilter } = props;
 
-  const inputHandler = (e) => {
-    console.log(e.target.value);
+  const inputHandler = (e: { target: { value: any } }) => {
     updateFilter(e.target.value);
   };
 

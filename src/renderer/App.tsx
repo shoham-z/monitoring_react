@@ -7,7 +7,6 @@ function Window() {
   return (
     <div className="main-window">
       <SwitchGrid />
-
       <NotificationPanel />
     </div>
   );

@@ -1,8 +1,16 @@
-import { MouseEvent } from 'react';
-import { Item, Menu, RightSlot, useContextMenu } from 'react-contexify';
+import { MouseEvent, useState } from 'react';
+import {
+  Item,
+  ItemParams,
+  Menu,
+  RightSlot,
+  useContextMenu,
+} from 'react-contexify';
 import switchImg from '../../img/switch.png';
 import '../styles/SwitchItem.css';
 import 'react-contexify/ReactContexify.css';
+import AlertDialog from './AlertDialog';
+import PopupMassage from './PopupMassage';
 
 function SwitchItem(props: {
   name: string;
@@ -12,16 +20,43 @@ function SwitchItem(props: {
   isSelected: any;
   onPing: any;
   onConnect: any;
+  onDelete: any;
 }) {
-  const { name, reachability, ip, setSelected, isSelected, onPing, onConnect } =
-    props;
+  const {
+    name,
+    reachability,
+    ip,
+    setSelected,
+    isSelected,
+    onPing,
+    onConnect,
+    onDelete,
+  } = props;
   const MENU_ID = `switch-menu-${ip}`;
 
   const reachabilityClass = reachability ? 'reachable' : 'unreachable';
 
   const { show } = useContextMenu({ id: MENU_ID });
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [deleteItem, setDeleteItem] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
 
-  const handleItemClick = (event) => {
+  const handleItemDelete = () => {
+    setConfirmationOpen(true);
+  };
+
+  const handleChoice = (choice: boolean) => {
+    setConfirmationOpen(false);
+
+    setAlertTitle(choice ? 'AHHHHHHHH' : 'HAAAAAAAA');
+    setAlertMessage(choice ? 'bob is mad' : 'bob is happy');
+    setAlertOpen(true);
+    setDeleteItem(choice);
+  };
+
+  const handleItemClick = (event: ItemParams<any, any>) => {
     switch (event.id) {
       case 'ping':
         onPing(ip, 1);
@@ -33,7 +68,7 @@ function SwitchItem(props: {
         console.log(`edit ${ip}`);
         break;
       case 'delete':
-        console.log(`delete ${ip}`);
+        handleItemDelete();
         break;
       default:
         console.log(`default ${ip}`);
@@ -59,6 +94,20 @@ function SwitchItem(props: {
       onClick={() => setSelected(ip)}
       onContextMenu={displayMenu}
     >
+      <AlertDialog
+        isOpen={confirmationOpen}
+        setIsOpen={setConfirmationOpen}
+        returnChoice={handleChoice}
+      />
+      <PopupMassage
+        isOpen={alertOpen}
+        setIsOpen={setAlertOpen}
+        title={alertTitle}
+        message={alertMessage}
+        onDelete={() => {
+          if (deleteItem) onDelete(ip);
+        }}
+      />
       <img src={switchImg} alt="Switch" />
       <p>{name}</p>
 
