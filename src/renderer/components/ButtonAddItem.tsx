@@ -7,8 +7,8 @@ type Inputs = {
   ipAddress: string;
 };
 
-function ButtonAddItem(props: { addSwitch: any }) {
-  const { addSwitch } = props;
+function ButtonAddItem(props: { callback: any }) {
+  const { callback } = props;
 
   const {
     register,
@@ -22,10 +22,9 @@ function ButtonAddItem(props: { addSwitch: any }) {
     close: () => void,
   ) => {
     try {
-      console.log(data);
-      addSwitch(data.ipAddress, data.hostname);
-      close(); // close the popup
-      reset(); // optional: reset the form fields
+      callback(data.ipAddress, data.hostname);
+      close();
+      reset();
     } catch (err) {
       alert(`Error while adding switch: ${err}`);
       // Optionally: show error message to user

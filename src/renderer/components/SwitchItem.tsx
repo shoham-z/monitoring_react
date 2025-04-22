@@ -43,15 +43,21 @@ function SwitchItem(props: {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
 
-  const handleItemDelete = () => {
+  const handleDelete = () => {
     setConfirmationOpen(true);
   };
-
+  const handleEdit = () => {
+    console.log(`edit ${ip}`);
+  };
   const handleChoice = (choice: boolean) => {
     setConfirmationOpen(false);
 
-    setAlertTitle(choice ? 'AHHHHHHHH' : 'HAAAAAAAA');
-    setAlertMessage(choice ? 'bob is mad' : 'bob is happy');
+    setAlertTitle(choice ? 'The switch was deleted' : 'Cancelled');
+    setAlertMessage(
+      choice
+        ? `The switch with the following IP address was deleted: ${ip}`
+        : 'No switch was deleted',
+    );
     setAlertOpen(true);
     setDeleteItem(choice);
   };
@@ -65,10 +71,10 @@ function SwitchItem(props: {
         onConnect(ip);
         break;
       case 'edit':
-        console.log(`edit ${ip}`);
+        handleEdit();
         break;
       case 'delete':
-        handleItemDelete();
+        handleDelete();
         break;
       default:
         console.log(`default ${ip}`);

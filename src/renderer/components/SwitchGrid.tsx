@@ -48,9 +48,8 @@ function SwitchGrid() {
 
   // used for the event listener for clicked item
   useEffect(() => {
-    // ADD PREVIOUSLY SELECTED IP AS A STATE, THEN WHEN NEW SWITCH IS CHOSEN, REMOVE THE EVENT LISTENER FROM THE PREVIOUS ONE
     const handleKeyDown = (event: { ctrlKey: any; key: string }) => {
-      if (!selectedIp) return; // No div selected, ignore key events
+      if (!selectedIp) return;
 
       if (event.ctrlKey && event.key === 'g') {
         ping(selectedIp, 1);
@@ -63,7 +62,6 @@ function SwitchGrid() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [selectedIp]);
 
-  // used to ping all devices every 10 seconds
   useEffect(() => {
     const intervalId = setInterval(() => {
       switchList.forEach((element) => ping(element.ip, 1));
