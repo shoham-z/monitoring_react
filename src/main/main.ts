@@ -20,7 +20,8 @@ import {
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import { exec, spawn } from 'child_process';
+import spawn from 'child_process';
+import ping from 'ping';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -180,7 +181,7 @@ app
         },
       },
     ]);
-    tray.setToolTip('Fuck Me Mommy');
+    tray.setToolTip('Golden Apple');
     tray.setContextMenu(contextMenu);
     tray.on('click', () => mainWindow?.show());
 
@@ -195,7 +196,7 @@ app
 
 /// ========= START OF SECTION PING =========
 
-function parsePingResponge(output: string) {
+function parsePingResponse(output: string) {
   // Check for the presence of error messages (e.g., "Destination host unreachable")
   if (output.includes('Destination host unreachable')) {
     return false;
@@ -210,20 +211,28 @@ function parsePingResponge(output: string) {
   return { error: 'Invalid ping output format' };
 }
 
-// Listen for ping request from React frontend
-ipcMain.on('ping-request', (event, host, count) => {
-  exec(`ping -n ${count} ${host}`, (error, stdout, stderr) => {
-    const success = parsePingResponge(stdout);
+// Handle a single ping request
+ipcMain.on('ping-request', async (event, host: string) => {
+  try {
+    const res = await ping.promise.probe(host, {
+      timeout: 1,
+      min_reply: 1,
+    });
+
     const result = {
-      success,
+      success: res.alive,
       ip: host,
     };
-    if (error) {
-      event.reply('ping-response', `Error: ${stderr}`);
-    } else {
-      event.reply('ping-response', result);
-    }
-  });
+
+    console.log('Ping result:', result);
+    event.reply('ping-response', result);
+  } catch (error) {
+    console.error('Ping error:', error);
+    event.reply('ping-response', {
+      success: false,
+      ip: host,
+    });
+  }
 });
 
 /// ========= END OF SECTION PING =========

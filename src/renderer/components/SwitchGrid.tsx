@@ -9,8 +9,8 @@ interface SwitchEntry {
   ip: string;
 }
 
-function ping(ip: string, count: number) {
-  window.electron.ipcRenderer.sendPing(ip, count);
+function ping(ip: string) {
+  window.electron.ipcRenderer.sendPing(ip);
 }
 
 function connectSSH(ip: string) {
@@ -52,7 +52,7 @@ function SwitchGrid() {
       if (!selectedIp) return;
 
       if (event.ctrlKey && event.key === 'g') {
-        ping(selectedIp, 1);
+        ping(selectedIp);
       } else if (event.ctrlKey && event.key === 'h') {
         connect(selectedIp);
       }
@@ -63,11 +63,29 @@ function SwitchGrid() {
   }, [selectedIp]);
 
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      switchList.forEach((element) => ping(element.ip, 1));
-    }, 10000);
+    const intervals = switchList.map((element) =>
+      setTimeout(
+        () =>
+          setInterval(() => {
+            ping(element.ip);
+            //console.log(`added event listener for ${element.ip}`);
+          }, 10000),
+        200,
+      ),
+    );
+    // const intervalId = setInterval(() => {
+    //   switchList.forEach((element) => {
+    //     ping(element.ip);
+    //     console.log(`added event listener for ${element.ip}`);
+    //   });
+    // }, 10000);
 
-    return () => clearInterval(intervalId);
+    return () => {
+      intervals.forEach((interval) => {
+        clearInterval(interval);
+        //console.log(`cleared interval ${interval}`);
+      });
+    };
   }, [switchList]);
 
   const addSwitch = (ip: any, hostname: any) => {
@@ -76,13 +94,19 @@ function SwitchGrid() {
     // send post request to the server, to add the item
   };
 
-  const updateReachability = (ip: string, reachablilty: boolean) => {
-    const updatedSwitchList = switchList.map((item) =>
-      item.ip === ip ? { ...item, reachability: reachablilty } : item,
+  const updateReachability = (ip: string, reachability: boolean) => {
+    setSwitchList((prevList) =>
+      prevList.map((item) =>
+        item.ip === ip ? { ...item, reachability } : item,
+      ),
     );
-
-    setSwitchList(updatedSwitchList);
   };
+
+  useEffect(() => {
+    window.electron.ipcRenderer.onPingResponse((data: any) => {
+      updateReachability(data.ip, data.success);
+    });
+  });
 
   const deleteSwitch = (ip: string) => {
     setSwitchList(
@@ -91,11 +115,6 @@ function SwitchGrid() {
       }),
     );
   };
-
-  window.electron.ipcRenderer.onPingResponse((data: any) => {
-    updateReachability(data.ip, data.success);
-    // set switch reachability to the corresponding value
-  });
 
   const handleSelect = (ip: string | SetStateAction<string>) => {
     setSelectedIp(ip);

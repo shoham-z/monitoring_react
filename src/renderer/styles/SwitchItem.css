@@ -49,13 +49,12 @@
   --contexify-menu-minWidth: 120px;
   font-size: small;
   &_item {
-      height: 30px;
       min-height: 24px !important;
       &:focus{
         outline: 0;
       }
       &Content {
-        padding: 6px;
+        padding: 2px;
         display: flex;
         align-items: center;
         white-space: nowrap;
