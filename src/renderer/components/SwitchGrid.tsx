@@ -68,22 +68,14 @@ function SwitchGrid() {
         () =>
           setInterval(() => {
             ping(element.ip);
-            //console.log(`added event listener for ${element.ip}`);
           }, 10000),
         200,
       ),
     );
-    // const intervalId = setInterval(() => {
-    //   switchList.forEach((element) => {
-    //     ping(element.ip);
-    //     console.log(`added event listener for ${element.ip}`);
-    //   });
-    // }, 10000);
 
     return () => {
       intervals.forEach((interval) => {
         clearInterval(interval);
-        //console.log(`cleared interval ${interval}`);
       });
     };
   }, [switchList]);
@@ -108,12 +100,22 @@ function SwitchGrid() {
     });
   });
 
+  const editSwitch = (ip: string, hostname: string) => {
+    setSwitchList((prevList) =>
+      prevList.map((item) =>
+        item.ip === ip ? { ...item, name: hostname } : item,
+      ),
+    );
+    // send post request to the server, to edit the item
+  };
+
   const deleteSwitch = (ip: string) => {
     setSwitchList(
       switchList.filter((el) => {
         return el.ip !== ip ? el : null;
       }),
     );
+    // send post request to the server, to delete the item
   };
 
   const handleSelect = (ip: string | SetStateAction<string>) => {
@@ -144,6 +146,7 @@ function SwitchGrid() {
                 setSelected={() => handleSelect(x.ip)}
                 onPing={ping}
                 onConnect={connect}
+                onEdit={editSwitch}
                 onDelete={deleteSwitch}
               />
             ))}

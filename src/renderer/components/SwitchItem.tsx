@@ -11,6 +11,7 @@ import '../styles/SwitchItem.css';
 import 'react-contexify/ReactContexify.css';
 import AlertDialog from './AlertDialog';
 import PopupMassage from './PopupMassage';
+import PopupEditItem from './PopupEditItem';
 
 function SwitchItem(props: {
   name: string;
@@ -20,6 +21,7 @@ function SwitchItem(props: {
   isSelected: any;
   onPing: any;
   onConnect: any;
+  onEdit: any;
   onDelete: any;
 }) {
   const {
@@ -30,6 +32,7 @@ function SwitchItem(props: {
     isSelected,
     onPing,
     onConnect,
+    onEdit,
     onDelete,
   } = props;
   const MENU_ID = `switch-menu-${ip}`;
@@ -42,13 +45,16 @@ function SwitchItem(props: {
   const [deleteItem, setDeleteItem] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
+  const [isEditOpen, setIsEditOpen] = useState(false);
 
   const handleDelete = () => {
     setConfirmationOpen(true);
   };
+
   const handleEdit = () => {
-    console.log(`edit ${ip}`);
+    setIsEditOpen(true);
   };
+
   const handleChoice = (choice: boolean) => {
     setConfirmationOpen(false);
 
@@ -139,6 +145,13 @@ function SwitchItem(props: {
           Delete
         </Item>
       </Menu>
+      <PopupEditItem
+        isOpen={isEditOpen}
+        setIsOpen={setIsEditOpen}
+        initialHostname={name}
+        initialIpAddress={ip}
+        onSubmitEdit={onEdit}
+      />
     </div>
   );
 }
