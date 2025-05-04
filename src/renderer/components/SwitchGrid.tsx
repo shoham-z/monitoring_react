@@ -1,9 +1,11 @@
 import { SetStateAction, useEffect, useState } from 'react';
+import axios from 'axios';
 import '../styles/SwitchGrid.css';
 import SwitchItem from './SwitchItem';
 import TopPanel from './TopPanel';
 
 interface SwitchEntry {
+  index: number;
   name: string;
   reachability: boolean;
   ip: string;
@@ -36,14 +38,13 @@ function SwitchGrid() {
       return { name: `${i}`, reachability: true, ip: `192.168.1.${i}` };
     });
     const a = [{ name: 'rotem', reachability: false, ip: '192.168.100.2' }];
-    setSwitchList(l);
+    // setSwitchList(l);
 
-    /**    fetch(`http://${serverip}/api/getAll`) // Replace with your API URL
-        .then(response => response.json()) // Parse JSON response
-        .then(data => setSwitchList(data)) // Update state with fetched data
-        .catch(error => console.error("Error fetching data:", error));
-
-         */
+    axios
+      .get('http://192.168.1.10:3001/api/getAll')
+      .then((response) => response.data) // Parse JSON response
+      .then((data) => setSwitchList(data)) // Update state with fetched data
+      .catch((error) => console.error('Error fetching data:', error));
   }, []); // Empty dependency array = runs once on mount
 
   // used for the event listener for clicked item
@@ -81,9 +82,22 @@ function SwitchGrid() {
   }, [switchList]);
 
   const addSwitch = (ip: any, hostname: any) => {
-    const newSwitch = { name: hostname, reachability: false, ip };
+    const newSwitch = {
+      index: switchList.length + 1,
+      name: hostname,
+      reachability: false,
+      ip,
+    };
     setSwitchList([...switchList, newSwitch]);
-    // send post request to the server, to add the item
+
+    axios
+      .post(
+        'http://192.168.1.10:3001/api/add',
+        { ip, name: hostname },
+        { headers: { 'Content-Type': 'application/json' } },
+      )
+      .then((data) => console.log(data))
+      .catch((error) => console.log(`Error: ${error}`));
   };
 
   const updateReachability = (ip: string, reachability: boolean) => {
@@ -100,13 +114,18 @@ function SwitchGrid() {
     });
   });
 
-  const editSwitch = (ip: string, hostname: string) => {
+  const editSwitch = (index: string, ip: string, hostname: string) => {
     setSwitchList((prevList) =>
       prevList.map((item) =>
         item.ip === ip ? { ...item, name: hostname } : item,
       ),
     );
-    // send post request to the server, to edit the item
+    axios
+      .put('http://192.168.1.10:3001/api/edit', {
+        data: { index, ip, name: hostname },
+      })
+      .then((data) => console.log(data))
+      .catch((error) => console.log(`Error: ${error}`));
   };
 
   const deleteSwitch = (ip: string) => {
@@ -115,7 +134,10 @@ function SwitchGrid() {
         return el.ip !== ip ? el : null;
       }),
     );
-    // send post request to the server, to delete the item
+    axios
+      .delete('http://192.168.1.10:3001/api/delete', { data: { ip } })
+      .then((data) => console.log(data))
+      .catch((error) => console.log(`Error: ${error}`));
   };
 
   const handleSelect = (ip: string | SetStateAction<string>) => {
@@ -138,7 +160,7 @@ function SwitchGrid() {
             })
             .map((x) => (
               <SwitchItem
-                key={x.name}
+                key={x.index}
                 name={x.name}
                 reachability={x.reachability}
                 ip={x.ip}

@@ -195,22 +195,6 @@ app
   .catch(console.log);
 
 /// ========= START OF SECTION PING =========
-
-function parsePingResponse(output: string) {
-  // Check for the presence of error messages (e.g., "Destination host unreachable")
-  if (output.includes('Destination host unreachable')) {
-    return false;
-  }
-
-  const statsRegex =
-    /Packets: Sent = (\d+), Received = (\d+), Lost = (\d+) \((\d+)% loss\)/;
-  const statsMatch = output.match(statsRegex);
-  if (statsMatch) {
-    return parseInt(statsMatch[1], 10) === parseInt(statsMatch[2], 10);
-  }
-  return { error: 'Invalid ping output format' };
-}
-
 // Handle a single ping request
 ipcMain.on('ping-request', async (event, host: string) => {
   try {
@@ -224,10 +208,10 @@ ipcMain.on('ping-request', async (event, host: string) => {
       ip: host,
     };
 
-    console.log('Ping result:', result);
+    //console.log('Ping result:', result);
     event.reply('ping-response', result);
   } catch (error) {
-    console.error('Ping error:', error);
+    //console.error('Ping error:', error);
     event.reply('ping-response', {
       success: false,
       ip: host,

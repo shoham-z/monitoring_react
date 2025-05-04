@@ -10,7 +10,7 @@ function TopPanel(props: { addSwitch: any; updateFilter: any }) {
 
   return (
     <div className="top-panel">
-      <ButtonAddItem addSwitch={addSwitch} />
+      <ButtonAddItem callback={addSwitch} />
 
       <input type="text" onChange={inputHandler} />
     </div>

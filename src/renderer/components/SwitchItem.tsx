@@ -14,6 +14,7 @@ import PopupMassage from './PopupMassage';
 import PopupEditItem from './PopupEditItem';
 
 function SwitchItem(props: {
+  index: any;
   name: string;
   reachability: any;
   ip: any;
@@ -25,6 +26,7 @@ function SwitchItem(props: {
   onDelete: any;
 }) {
   const {
+    index,
     name,
     reachability,
     ip,
@@ -49,6 +51,10 @@ function SwitchItem(props: {
 
   const handleDelete = () => {
     setConfirmationOpen(true);
+  };
+
+  const handlesubmitEdit = (newIp: string, newName: string) => {
+    onEdit(index, newIp, newName);
   };
 
   const handleEdit = () => {
@@ -150,7 +156,7 @@ function SwitchItem(props: {
         setIsOpen={setIsEditOpen}
         initialHostname={name}
         initialIpAddress={ip}
-        onSubmitEdit={onEdit}
+        onSubmitEdit={handlesubmitEdit}
       />
     </div>
   );
