@@ -84,7 +84,7 @@ function SwitchGrid() {
   const addSwitch = (ip: any, hostname: any) => {
     const newId = switchList.reduce((prev, current) =>
       prev && prev.id > current.id ? prev : current,
-    );
+    ).id;
 
     const newSwitch = {
       id: newId,
