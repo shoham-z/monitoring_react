@@ -5,11 +5,13 @@ import SwitchItem from './SwitchItem';
 import TopPanel from './TopPanel';
 
 interface SwitchEntry {
-  index: number;
+  id: number;
   name: string;
   reachability: boolean;
   ip: string;
 }
+
+const SERVER_IP = 'http://localhost:3001';
 
 function ping(ip: string) {
   window.electron.ipcRenderer.sendPing(ip);
@@ -34,15 +36,13 @@ function SwitchGrid() {
   }, [switchList]); // This will run whenever switchList changes
 
   useEffect(() => {
-    const l = [...Array(35).keys()].map((i) => {
-      return { name: `${i}`, reachability: true, ip: `192.168.1.${i}` };
-    });
-    const a = [{ name: 'rotem', reachability: false, ip: '192.168.100.2' }];
-    // setSwitchList(l);
-
     axios
-      .get('http://192.168.1.10:3001/api/getAll')
+      .get(`${SERVER_IP}/api/getAll`)
       .then((response) => response.data) // Parse JSON response
+      .then((data) => {
+        console.log(data);
+        return data;
+      })
       .then((data) => setSwitchList(data)) // Update state with fetched data
       .catch((error) => console.error('Error fetching data:', error));
   }, []); // Empty dependency array = runs once on mount
@@ -82,8 +82,12 @@ function SwitchGrid() {
   }, [switchList]);
 
   const addSwitch = (ip: any, hostname: any) => {
+    const newId = switchList.reduce((prev, current) =>
+      prev && prev.id > current.id ? prev : current,
+    );
+
     const newSwitch = {
-      index: switchList.length + 1,
+      id: newId,
       name: hostname,
       reachability: false,
       ip,
@@ -92,7 +96,7 @@ function SwitchGrid() {
 
     axios
       .post(
-        'http://192.168.1.10:3001/api/add',
+        `${SERVER_IP}/api/add`,
         { ip, name: hostname },
         { headers: { 'Content-Type': 'application/json' } },
       )
@@ -121,7 +125,7 @@ function SwitchGrid() {
       ),
     );
     axios
-      .put('http://192.168.1.10:3001/api/edit', {
+      .put(`${SERVER_IP}/api/edit`, {
         data: { index, ip, name: hostname },
       })
       .then((data) => console.log(data))
@@ -135,7 +139,7 @@ function SwitchGrid() {
       }),
     );
     axios
-      .delete('http://192.168.1.10:3001/api/delete', { data: { ip } })
+      .delete(`${SERVER_IP}/api/delete`, { data: { ip } })
       .then((data) => console.log(data))
       .catch((error) => console.log(`Error: ${error}`));
   };
@@ -160,7 +164,8 @@ function SwitchGrid() {
             })
             .map((x) => (
               <SwitchItem
-                key={x.index}
+                key={x.id}
+                index={x.id}
                 name={x.name}
                 reachability={x.reachability}
                 ip={x.ip}
