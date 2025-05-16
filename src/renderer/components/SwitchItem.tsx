@@ -127,7 +127,7 @@ function SwitchItem(props: {
         }}
       />
       <img src={switchImg} alt="Switch" />
-      <p>{name}</p>
+      <p>{name + index}</p>
 
       <Menu id={MENU_ID} className="context-menu">
         <Item

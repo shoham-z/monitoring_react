@@ -35,7 +35,7 @@ function SwitchGrid() {
     // console.log('Updated switchList:', switchList);
   }, [switchList]); // This will run whenever switchList changes
 
-  useEffect(() => {
+  const fetchFromServer = () => {
     axios
       .get(`${SERVER_IP}/api/getAll`)
       .then((response) => response.data) // Parse JSON response
@@ -45,6 +45,9 @@ function SwitchGrid() {
       })
       .then((data) => setSwitchList(data)) // Update state with fetched data
       .catch((error) => console.error('Error fetching data:', error));
+  };
+  useEffect(() => {
+    fetchFromServer();
   }, []); // Empty dependency array = runs once on mount
 
   // used for the event listener for clicked item
@@ -82,18 +85,6 @@ function SwitchGrid() {
   }, [switchList]);
 
   const addSwitch = (ip: any, hostname: any) => {
-    const newId = switchList.reduce((prev, current) =>
-      prev && prev.id > current.id ? prev : current,
-    ).id;
-
-    const newSwitch = {
-      id: newId,
-      name: hostname,
-      reachability: false,
-      ip,
-    };
-    setSwitchList([...switchList, newSwitch]);
-
     axios
       .post(
         `${SERVER_IP}/api/add`,
@@ -101,6 +92,7 @@ function SwitchGrid() {
         { headers: { 'Content-Type': 'application/json' } },
       )
       .then((data) => console.log(data))
+      .then(() => fetchFromServer())
       .catch((error) => console.log(`Error: ${error}`));
   };
 
@@ -119,28 +111,20 @@ function SwitchGrid() {
   });
 
   const editSwitch = (index: string, ip: string, hostname: string) => {
-    setSwitchList((prevList) =>
-      prevList.map((item) =>
-        item.ip === ip ? { ...item, name: hostname } : item,
-      ),
-    );
     axios
       .put(`${SERVER_IP}/api/edit`, {
-        data: { index, ip, name: hostname },
+        data: { id: index, ip, name: hostname },
       })
       .then((data) => console.log(data))
+      .then(() => fetchFromServer())
       .catch((error) => console.log(`Error: ${error}`));
   };
 
   const deleteSwitch = (ip: string) => {
-    setSwitchList(
-      switchList.filter((el) => {
-        return el.ip !== ip ? el : null;
-      }),
-    );
     axios
       .delete(`${SERVER_IP}/api/delete`, { data: { ip } })
       .then((data) => console.log(data))
+      .then(() => fetchFromServer())
       .catch((error) => console.log(`Error: ${error}`));
   };
 
