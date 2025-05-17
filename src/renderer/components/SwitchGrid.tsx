@@ -25,6 +25,10 @@ function connect(ip: string) {
   connectSSH(ip);
 }
 
+function alertDown(ip: string, name: string) {
+  window.electron.ipcRenderer.alertDown(ip, name);
+}
+
 function SwitchGrid() {
   const [selectedIp, setSelectedIp] = useState('');
   const [switchList, setSwitchList] = useState<Array<SwitchEntry>>([]);
@@ -43,7 +47,14 @@ function SwitchGrid() {
         console.log(data);
         return data;
       })
-      .then((data) => setSwitchList(data)) // Update state with fetched data
+      .then((data) => {
+        const updatedData = data.map((item: any) => ({
+          ...item,
+          reachability: true, // Add or override the 'up' property
+        }));
+        return setSwitchList(updatedData);
+      })
+      // Update state with fetched data
       .catch((error) => console.error('Error fetching data:', error));
   };
   useEffect(() => {
@@ -85,6 +96,31 @@ function SwitchGrid() {
   }, [switchList]);
 
   const addSwitch = (ip: any, hostname: any) => {
+    // FOR THE NEW ID, NEED TO FETCH FROM SERVER AND GET THE MAX ID + 1
+
+    const getMaxId = (list: any[]) => {
+      return Math.max(...list.map((item) => item.id));
+    };
+    axios
+      .get(`${SERVER_IP}/api/getAll`)
+      .then((response) => response.data) // Parse JSON response
+      .then((data) => {
+        console.log(data);
+        return data;
+      })
+      .then((data) => {
+        const newId = getMaxId(data) + 1;
+        const newSwitch = {
+          id: newId,
+          name: hostname,
+          reachability: false,
+          ip,
+        };
+        setSwitchList([...switchList, newSwitch]);
+        return null;
+      })
+      .catch((error) => console.error('Error fetching data:', error));
+
     axios
       .post(
         `${SERVER_IP}/api/add`,
@@ -92,15 +128,25 @@ function SwitchGrid() {
         { headers: { 'Content-Type': 'application/json' } },
       )
       .then((data) => console.log(data))
-      .then(() => fetchFromServer())
       .catch((error) => console.log(`Error: ${error}`));
+  };
+
+  const notifyDown = (ip: string, name: string) => {
+    alertDown(ip, name);
+    // call function to add new event in events window
   };
 
   const updateReachability = (ip: string, reachability: boolean) => {
     setSwitchList((prevList) =>
-      prevList.map((item) =>
-        item.ip === ip ? { ...item, reachability } : item,
-      ),
+      prevList.map((item) => {
+        if (
+          item.ip === ip &&
+          item.reachability === true &&
+          reachability === false
+        )
+          notifyDown(ip, item.name);
+        return item.ip === ip ? { ...item, reachability } : item;
+      }),
     );
   };
 
@@ -111,20 +157,30 @@ function SwitchGrid() {
   });
 
   const editSwitch = (index: string, ip: string, hostname: string) => {
+    setSwitchList((prevList) =>
+      prevList.map((item) =>
+        item.ip === ip ? { ...item, name: hostname } : item,
+      ),
+    );
+
     axios
       .put(`${SERVER_IP}/api/edit`, {
         data: { id: index, ip, name: hostname },
       })
       .then((data) => console.log(data))
-      .then(() => fetchFromServer())
       .catch((error) => console.log(`Error: ${error}`));
   };
 
   const deleteSwitch = (ip: string) => {
+    setSwitchList(
+      switchList.filter((el) => {
+        return el.ip !== ip ? el : null;
+      }),
+    );
+
     axios
       .delete(`${SERVER_IP}/api/delete`, { data: { ip } })
       .then((data) => console.log(data))
-      .then(() => fetchFromServer())
       .catch((error) => console.log(`Error: ${error}`));
   };
 

@@ -263,3 +263,10 @@ ipcMain.on('connect-remotely', (event, ip) => {
 });
 
 /// ========= END OF SECTION CONNECT REMOTELY =========
+
+/// ========= START OF SECTION NOTIFY DOWN =========
+ipcMain.on('alert-down', (event, ip, name) => {
+  console.log(`switch ${name} with address ${ip} is down`);
+});
+
+/// ========= END OF SECTION NOTIFY DOWN =========
