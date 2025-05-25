@@ -9,8 +9,8 @@
   flex-direction: column; /* Stack the image and text vertically */
   align-items: center;    /* Center them horizontally */
 
-  width: 100px; /* Fixed size for each item */
-  height: 100px; /* Optional: Fixed height for each item */
+  width: 125px; /* Fixed size for each item */
+  height: 125px; /* Optional: Fixed height for each item */
   margin: 5px; /* Optional: spacing between items */
   background-color: lightblue;
   text-align: center;
@@ -41,6 +41,19 @@
   width: 120px;
   height: 120px;
   color: white;
+}
+
+.switch-item-text {
+  max-width: 100%;
+  padding: 0 4px;
+  font-size: 14px;
+  line-height: 1.2;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  text-align: center;
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .contexify {

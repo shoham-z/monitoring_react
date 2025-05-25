@@ -20,7 +20,7 @@ import {
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import spawn from 'child_process';
+import { spawn, execFile } from 'child_process';
 import ping from 'ping';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
@@ -97,6 +97,8 @@ const createWindow = async () => {
     mainWindow?.hide(); // Hide the window instead
   });
 
+  mainWindow.webContents.openDevTools();
+
   mainWindow.loadURL(resolveHtmlPath('index.html'));
 
   mainWindow.on('ready-to-show', () => {
@@ -144,12 +146,14 @@ app
   .whenReady()
   .then(() => {
     // for dev build
-    // eslint-disable-next-line prettier/prettier
-    const iconPath = path.join(__dirname, '../../assets/icons/golden_apple.png',);
+    // const iconPath = path.join(__dirname, '../../assets/icons/golden_apple.png',);
 
     // for prod build
-    // eslint-disable-next-line prettier/prettier
     // const iconPath = path.join(process.resourcesPath, 'assets/icons/golden_apple.png');
+
+    const iconPath = app.isPackaged
+      ? path.join(process.resourcesPath, 'assets/icons/golden_apple.png')
+      : path.join(__dirname, '../../assets/icons/golden_apple.png');
 
     const icon = nativeImage.createFromPath(iconPath);
 
@@ -208,10 +212,8 @@ ipcMain.on('ping-request', async (event, host: string) => {
       ip: host,
     };
 
-    //console.log('Ping result:', result);
     event.reply('ping-response', result);
   } catch (error) {
-    //console.error('Ping error:', error);
     event.reply('ping-response', {
       success: false,
       ip: host,
@@ -222,16 +224,25 @@ ipcMain.on('ping-request', async (event, host: string) => {
 /// ========= END OF SECTION PING =========
 
 /// ========= START OF SECTION CONNECT REMOTELY =========
+ipcMain.on('connect-ssh', (event, ip) => {
+  console.log(`connecting ssh to ${ip}`);
 
-function connectSSH(command: string) {
-  spawn('cmd.exe', ['/k', command], {
-    shell: true,
-    detached: true,
-    stdio: 'inherit', // Ensures it opens the window
+  const basePath = app.isPackaged
+    ? path.join(process.resourcesPath, 'assets') // for production
+    : path.join(__dirname, '../..', 'assets'); // for development
+
+  const puttyPath = path.join(basePath, 'putty.exe');
+
+  execFile(puttyPath, ['-ssh', ip], (error: any) => {
+    if (error) {
+      console.error('Failed to start PuTTY:', error);
+    }
   });
-}
+});
 
-function runConsoleApp(ip: string) {
+ipcMain.on('connect-remotely', (event, ip) => {
+  console.log(`connecting to ${ip}`);
+
   // Path to your console application
   const exePath = 'C:\\Users\\User\\Desktop\\RemoteCliClient_2_Windows.exe';
 
@@ -240,11 +251,7 @@ function runConsoleApp(ip: string) {
     stdio: 'pipe', // Ensures it opens the window
   });
 
-  // Spawn the process
-  /** const child = spawn('cmd.exe', ['/c', 'start', exePath], {
-    detached: false,
-    stdio: 'pipe',
-  }); */
+  console.log(ip);
 
   setTimeout(() => {
     child.stdin.write('1');
@@ -254,12 +261,6 @@ function runConsoleApp(ip: string) {
   // child.stderr.on('data', (data) =>{console.log(`stdout: ${data}`);})
 
   // child.unref();
-}
-
-ipcMain.on('connect-remotely', (event, ip) => {
-  console.log(`connecting to ${ip}`);
-  connectSSH(`ssh ubuntu@${ip}`);
-  // runConsoleApp(ip);
 });
 
 /// ========= END OF SECTION CONNECT REMOTELY =========

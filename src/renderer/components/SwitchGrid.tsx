@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { SetStateAction, useEffect, useState } from 'react';
 import axios from 'axios';
 import '../styles/SwitchGrid.css';
@@ -17,13 +18,13 @@ function ping(ip: string) {
   window.electron.ipcRenderer.sendPing(ip);
 }
 
-function connectSSH(ip: string) {
-  window.electron.ipcRenderer.connectRemotely(ip);
-}
-
-function connect(ip: string) {
-  connectSSH(ip);
-}
+const connect = (ip: string) => {
+  if (ip.endsWith('100.254') || ip.endsWith('100.253')) {
+    window.electron.ipcRenderer.connectSSH(ip);
+  } else {
+    window.electron.ipcRenderer.connectRemotely(ip);
+  }
+};
 
 function alertDown(ip: string, name: string) {
   window.electron.ipcRenderer.alertDown(ip, name);
@@ -33,11 +34,6 @@ function SwitchGrid() {
   const [selectedIp, setSelectedIp] = useState('');
   const [switchList, setSwitchList] = useState<Array<SwitchEntry>>([]);
   const [filter, setFilter] = useState('');
-  // send get request to get all switches/items
-
-  useEffect(() => {
-    // console.log('Updated switchList:', switchList);
-  }, [switchList]); // This will run whenever switchList changes
 
   const fetchFromServer = () => {
     axios
@@ -57,6 +53,11 @@ function SwitchGrid() {
       // Update state with fetched data
       .catch((error) => console.error('Error fetching data:', error));
   };
+  // send get request to get all switches/items
+  useEffect(() => {
+    // console.log('Updated switchList:', switchList);
+  }, [switchList]); // This will run whenever switchList changes
+
   useEffect(() => {
     fetchFromServer();
   }, []); // Empty dependency array = runs once on mount
@@ -78,21 +79,13 @@ function SwitchGrid() {
   }, [selectedIp]);
 
   useEffect(() => {
-    const intervals = switchList.map((element) =>
-      setTimeout(
-        () =>
-          setInterval(() => {
-            ping(element.ip);
-          }, 10000),
-        200,
-      ),
-    );
-
-    return () => {
-      intervals.forEach((interval) => {
-        clearInterval(interval);
+    const interval = setInterval(() => {
+      switchList.forEach((element) => {
+        ping(element.ip);
       });
-    };
+    }, 10000); // Ping every 10 seconds
+
+    return () => clearInterval(interval);
   }, [switchList]);
 
   const addSwitch = (ip: any, hostname: any) => {
@@ -151,10 +144,18 @@ function SwitchGrid() {
   };
 
   useEffect(() => {
-    window.electron.ipcRenderer.onPingResponse((data: any) => {
+    const handler = (data: any) => {
       updateReachability(data.ip, data.success);
-    });
-  });
+    };
+
+    window.electron.ipcRenderer.onPingResponse(handler);
+
+    // Cleanup function to remove the listener when component unmounts or re-renders
+    // return () => {
+    //   window.electron.ipcRenderer.removeListener('ping-response', handler);
+    // };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty array to only run this once on mount
 
   const editSwitch = (index: string, ip: string, hostname: string) => {
     setSwitchList((prevList) =>
