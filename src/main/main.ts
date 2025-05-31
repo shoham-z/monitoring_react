@@ -200,24 +200,33 @@ app
 
 /// ========= START OF SECTION PING =========
 // Handle a single ping request
-ipcMain.on('ping-request', async (event, host: string) => {
+// ipcMain.on('ping-request', async (event, host: string) => {
+//   try {
+//     const res = await ping.promise.probe(host, {
+//       timeout: 1,
+//       min_reply: 1,
+//     });
+
+//     const result = {
+//       success: res.alive,
+//       ip: host,
+//     };
+
+//     event.reply('ping-response', result);
+//   } catch (error) {
+//     event.reply('ping-response', {
+//       success: false,
+//       ip: host,
+//     });
+//   }
+// });
+
+ipcMain.handle('ping-request', async (_event, host) => {
   try {
-    const res = await ping.promise.probe(host, {
-      timeout: 1,
-      min_reply: 1,
-    });
-
-    const result = {
-      success: res.alive,
-      ip: host,
-    };
-
-    event.reply('ping-response', result);
-  } catch (error) {
-    event.reply('ping-response', {
-      success: false,
-      ip: host,
-    });
+    const result = await ping.promise.probe(host);
+    return { ip: result.host, success: result.alive }; // returned directly to renderer
+  } catch (err: any) {
+    return { alive: false, error: err.message };
   }
 });
 
@@ -265,9 +274,11 @@ ipcMain.on('connect-remotely', (event, ip) => {
 
 /// ========= END OF SECTION CONNECT REMOTELY =========
 
-/// ========= START OF SECTION NOTIFY DOWN =========
-ipcMain.on('alert-down', (event, ip, name) => {
-  console.log(`switch ${name} with address ${ip} is down`);
-});
+/// ========= START OF SECTION NOTIFY =========
 
-/// ========= END OF SECTION NOTIFY DOWN =========
+// ipcMain.on('alert-down', (event, ip, name) => {
+//   console.log(`switch ${name} with address ${ip} is down`);
+//   event.reply('send-notif', { ip, name });
+// });
+
+/// ========= END OF SECTION NOTIFY =========

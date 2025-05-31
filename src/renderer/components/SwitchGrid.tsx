@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { SetStateAction, useEffect, useState } from 'react';
+import { SetStateAction, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import '../styles/SwitchGrid.css';
 import SwitchItem from './SwitchItem';
@@ -8,15 +8,15 @@ import TopPanel from './TopPanel';
 interface SwitchEntry {
   id: number;
   name: string;
-  reachability: boolean;
   ip: string;
 }
 
-const SERVER_IP = 'http://localhost:3001';
-
-function ping(ip: string) {
-  window.electron.ipcRenderer.sendPing(ip);
+interface ReachableEntry {
+  id: number;
+  reachability: boolean;
 }
+
+const SERVER_IP = 'http://localhost:3001';
 
 const connect = (ip: string) => {
   if (ip.endsWith('100.254') || ip.endsWith('100.253')) {
@@ -26,41 +26,100 @@ const connect = (ip: string) => {
   }
 };
 
-function alertDown(ip: string, name: string) {
-  window.electron.ipcRenderer.alertDown(ip, name);
-}
-
-function SwitchGrid() {
+function SwitchGrid(props: { addNotification: (message: string) => void }) {
+  const { addNotification } = props;
   const [selectedIp, setSelectedIp] = useState('');
   const [switchList, setSwitchList] = useState<Array<SwitchEntry>>([]);
+  const [reachabilityList, setReachabilityList] = useState<
+    Array<ReachableEntry>
+  >([]);
   const [filter, setFilter] = useState('');
+  const lastNotifiedStatus = useRef<Record<string, boolean | undefined>>({});
 
   const fetchFromServer = () => {
     axios
       .get(`${SERVER_IP}/api/getAll`)
-      .then((response) => response.data) // Parse JSON response
-      .then((data) => {
+      // eslint-disable-next-line promise/always-return
+      .then((response) => {
+        const { data } = response;
         console.log(data);
-        return data;
-      })
-      .then((data) => {
-        const updatedData = data.map((item: any) => ({
-          ...item,
-          reachability: true, // Add or override the 'up' property
-        }));
-        return setSwitchList(updatedData);
+
+        // Set switch list
+        setSwitchList(data);
+
+        setReachabilityList((prev) => {
+          if (prev.length === 0) {
+            return data.map((item: SwitchEntry) => ({
+              id: item.id,
+              reachability: true, // or false based on your logic
+            }));
+          }
+          return prev;
+        });
       })
       // Update state with fetched data
       .catch((error) => console.error('Error fetching data:', error));
   };
-  // send get request to get all switches/items
-  useEffect(() => {
-    // console.log('Updated switchList:', switchList);
-  }, [switchList]); // This will run whenever switchList changes
 
+  // get new switch list
   useEffect(() => {
     fetchFromServer();
+    setInterval(() => fetchFromServer(), 30000);
   }, []); // Empty dependency array = runs once on mount
+
+  const updateReachability = (
+    ip: string,
+    newReachability: boolean,
+  ): string | null => {
+    const matchedSwitch = switchList.find((sw) => sw.ip === ip);
+    if (!matchedSwitch) return null;
+
+    const currentStatus = reachabilityList.find(
+      (r) => r.id === matchedSwitch.id,
+    );
+    const lastStatus = lastNotifiedStatus.current[matchedSwitch.id];
+
+    let notifyMessage: string | null = null;
+
+    if (!currentStatus || currentStatus.reachability !== newReachability) {
+      // Update UI state
+      setReachabilityList((prevList) => {
+        const updated = prevList.map((r) =>
+          r.id === matchedSwitch.id
+            ? { ...r, reachability: newReachability }
+            : r,
+        );
+
+        if (!currentStatus) {
+          return [
+            ...prevList,
+            { id: matchedSwitch.id, reachability: newReachability },
+          ];
+        }
+
+        return updated;
+      });
+
+      // Only notify if the state actually changed since last notification
+      if (lastStatus !== newReachability) {
+        notifyMessage = `${matchedSwitch.name} is ${newReachability ? 'up' : 'down'}. IP is ${ip}`;
+        lastNotifiedStatus.current[matchedSwitch.id] = newReachability;
+      }
+    }
+
+    return notifyMessage;
+  };
+
+  const doPing = async (ip: string) => {
+    const result = await window.electron.ipcRenderer.sendPing(ip);
+    const message = updateReachability(result.ip, result.success);
+    if (message) {
+      // console.log(`[NOTIFY] ${message}`);
+      addNotification(message);
+    } else {
+      // console.log(`[SKIP] No change for ${result.ip}`);
+    }
+  };
 
   // used for the event listener for clicked item
   useEffect(() => {
@@ -68,7 +127,7 @@ function SwitchGrid() {
       if (!selectedIp) return;
 
       if (event.ctrlKey && event.key === 'g') {
-        ping(selectedIp);
+        doPing(selectedIp);
       } else if (event.ctrlKey && event.key === 'h') {
         connect(selectedIp);
       }
@@ -81,9 +140,9 @@ function SwitchGrid() {
   useEffect(() => {
     const interval = setInterval(() => {
       switchList.forEach((element) => {
-        ping(element.ip);
+        doPing(element.ip);
       });
-    }, 10000); // Ping every 10 seconds
+    }, 1000); // Ping every 10 seconds
 
     return () => clearInterval(interval);
   }, [switchList]);
@@ -122,25 +181,6 @@ function SwitchGrid() {
       )
       .then((data) => console.log(data))
       .catch((error) => console.log(`Error: ${error}`));
-  };
-
-  const notifyDown = (ip: string, name: string) => {
-    alertDown(ip, name);
-    // call function to add new event in events window
-  };
-
-  const updateReachability = (ip: string, reachability: boolean) => {
-    setSwitchList((prevList) =>
-      prevList.map((item) => {
-        if (
-          item.ip === ip &&
-          item.reachability === true &&
-          reachability === false
-        )
-          notifyDown(ip, item.name);
-        return item.ip === ip ? { ...item, reachability } : item;
-      }),
-    );
   };
 
   useEffect(() => {
@@ -208,11 +248,13 @@ function SwitchGrid() {
                 key={x.id}
                 index={x.id}
                 name={x.name}
-                reachability={x.reachability}
+                reachability={
+                  reachabilityList.find((el) => el.id === x.id)?.reachability
+                }
                 ip={x.ip}
                 isSelected={selectedIp.toString() === x.ip}
                 setSelected={() => handleSelect(x.ip)}
-                onPing={ping}
+                onPing={doPing}
                 onConnect={connect}
                 onEdit={editSwitch}
                 onDelete={deleteSwitch}
