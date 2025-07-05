@@ -32,6 +32,8 @@ const electronHandler = {
 
     connectRemotely: (ip: any) => ipcRenderer.send('connect-remotely', ip),
 
+    readServerIp: async () => ipcRenderer.invoke('read-servers'),
+
     // alertDown: (ip: any, name: any) => ipcRenderer.send('alert-down', ip, name),
 
     // onNotif: (callback: (arg0: any) => void) =>

@@ -16,8 +16,6 @@ interface ReachableEntry {
   reachability: boolean;
 }
 
-const SERVER_IP = 'http://localhost:3001';
-
 const connect = (ip: string) => {
   if (ip.endsWith('100.254') || ip.endsWith('100.253')) {
     window.electron.ipcRenderer.connectSSH(ip);
@@ -28,6 +26,8 @@ const connect = (ip: string) => {
 
 function SwitchGrid(props: { addNotification: (message: string) => void }) {
   const { addNotification } = props;
+  const [SERVER_IP, SetServerIp] = useState('');
+  const [isReady, setIsReady] = useState(false);
   const [selectedIp, setSelectedIp] = useState('');
   const [switchList, setSwitchList] = useState<Array<SwitchEntry>>([]);
   const [reachabilityList, setReachabilityList] = useState<
@@ -35,6 +35,24 @@ function SwitchGrid(props: { addNotification: (message: string) => void }) {
   >([]);
   const [filter, setFilter] = useState('');
   const lastNotifiedStatus = useRef<Record<string, boolean | undefined>>({});
+
+  useEffect(() => {
+    const readServers = async () => {
+      const result = await window.electron.ipcRenderer.readServerIp();
+      if (result.success) {
+        let ip = result.content || '';
+        if (!ip.startsWith('http')) {
+          ip = `http://${ip}`;
+        }
+        SetServerIp(ip);
+        setIsReady(true); // ✅ Signal that the next effects can run
+      } else {
+        console.log(result.error || 'Unknown error');
+      }
+    };
+
+    readServers();
+  }, []);
 
   const fetchFromServer = () => {
     axios
@@ -63,9 +81,11 @@ function SwitchGrid(props: { addNotification: (message: string) => void }) {
 
   // get new switch list
   useEffect(() => {
+    if (!isReady) return;
+
     fetchFromServer();
     setInterval(() => fetchFromServer(), 30000);
-  }, []); // Empty dependency array = runs once on mount
+  }, [isReady]); // Empty dependency array = runs once on mount
 
   const updateReachability = (
     ip: string,
@@ -182,20 +202,6 @@ function SwitchGrid(props: { addNotification: (message: string) => void }) {
       .then((data) => console.log(data))
       .catch((error) => console.log(`Error: ${error}`));
   };
-
-  useEffect(() => {
-    const handler = (data: any) => {
-      updateReachability(data.ip, data.success);
-    };
-
-    window.electron.ipcRenderer.onPingResponse(handler);
-
-    // Cleanup function to remove the listener when component unmounts or re-renders
-    // return () => {
-    //   window.electron.ipcRenderer.removeListener('ping-response', handler);
-    // };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty array to only run this once on mount
 
   const editSwitch = (index: string, ip: string, hostname: string) => {
     setSwitchList((prevList) =>

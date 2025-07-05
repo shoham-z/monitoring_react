@@ -22,6 +22,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { spawn, execFile } from 'child_process';
 import ping from 'ping';
+import fs from 'fs';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -199,28 +200,6 @@ app
   .catch(console.log);
 
 /// ========= START OF SECTION PING =========
-// Handle a single ping request
-// ipcMain.on('ping-request', async (event, host: string) => {
-//   try {
-//     const res = await ping.promise.probe(host, {
-//       timeout: 1,
-//       min_reply: 1,
-//     });
-
-//     const result = {
-//       success: res.alive,
-//       ip: host,
-//     };
-
-//     event.reply('ping-response', result);
-//   } catch (error) {
-//     event.reply('ping-response', {
-//       success: false,
-//       ip: host,
-//     });
-//   }
-// });
-
 ipcMain.handle('ping-request', async (_event, host) => {
   try {
     const result = await ping.promise.probe(host);
@@ -274,11 +253,14 @@ ipcMain.on('connect-remotely', (event, ip) => {
 
 /// ========= END OF SECTION CONNECT REMOTELY =========
 
-/// ========= START OF SECTION NOTIFY =========
-
-// ipcMain.on('alert-down', (event, ip, name) => {
-//   console.log(`switch ${name} with address ${ip} is down`);
-//   event.reply('send-notif', { ip, name });
-// });
-
-/// ========= END OF SECTION NOTIFY =========
+ipcMain.handle('read-servers', async (_event) => {
+  try {
+    const filePath = app.isPackaged
+      ? path.join(process.resourcesPath, 'assets/server_ip.txt')
+      : path.join(__dirname, '../../assets/server_ip.txt');
+    const content = fs.readFileSync(filePath, 'utf-8');
+    return { success: true, content };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
