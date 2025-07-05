@@ -32,7 +32,8 @@ const electronHandler = {
 
     connectRemotely: (ip: any) => ipcRenderer.send('connect-remotely', ip),
 
-    readServerIp: async () => ipcRenderer.invoke('read-servers'),
+    readTextFile: async (filename: string) =>
+      ipcRenderer.invoke('read-text-file', filename),
 
     // alertDown: (ip: any, name: any) => ipcRenderer.send('alert-down', ip, name),
 

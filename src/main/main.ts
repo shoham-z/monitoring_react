@@ -253,11 +253,11 @@ ipcMain.on('connect-remotely', (event, ip) => {
 
 /// ========= END OF SECTION CONNECT REMOTELY =========
 
-ipcMain.handle('read-servers', async (_event) => {
+ipcMain.handle('read-text-file', async (_event, filename) => {
   try {
     const filePath = app.isPackaged
-      ? path.join(process.resourcesPath, 'assets/server_ip.txt')
-      : path.join(__dirname, '../../assets/server_ip.txt');
+      ? path.join(process.resourcesPath, 'assets/text_files/', filename)
+      : path.join(__dirname, '../../assets/text_files/', filename);
     const content = fs.readFileSync(filePath, 'utf-8');
     return { success: true, content };
   } catch (error) {

@@ -38,7 +38,8 @@ function SwitchGrid(props: { addNotification: (message: string) => void }) {
 
   useEffect(() => {
     const readServers = async () => {
-      const result = await window.electron.ipcRenderer.readServerIp();
+      const result =
+        await window.electron.ipcRenderer.readTextFile('server_ip.txt');
       if (result.success) {
         let ip = result.content || '';
         if (!ip.startsWith('http')) {
