@@ -17,10 +17,19 @@ interface ReachableEntry {
 }
 
 const connect = (ip: string) => {
-  if (ip.endsWith('100.254') || ip.endsWith('100.253')) {
+  const lastOctet = parseInt(ip.split('.').pop(), 10);
+
+  console.log(lastOctet);
+
+  if (lastOctet > 245 && lastOctet < 251) {
+    // if address between 246 and 250
     window.electron.ipcRenderer.connectSSH(ip);
-  } else {
+  } else if (lastOctet > 0 && lastOctet < 151) {
+    console.log('rotem');
     window.electron.ipcRenderer.connectRemotely(ip);
+    console.log('rotem2');
+  } else {
+    // alert of not being able to connect to device
   }
 };
 
@@ -48,13 +57,14 @@ function SwitchGrid(props: {
           ip = `http://${ip}`;
         }
         SetServerIp(ip);
-        setIsReady(true); // ✅ Signal that the next effects can run
+        setIsReady(true);
       } else {
         console.log(result.error || 'Unknown error');
       }
     };
 
     readServers();
+    setInterval(() => readServers(), 60 * 1000);
   }, []);
 
   const fetchFromServer = () => {

@@ -231,24 +231,17 @@ ipcMain.on('connect-ssh', (event, ip) => {
 ipcMain.on('connect-remotely', (event, ip) => {
   console.log(`connecting to ${ip}`);
 
-  // Path to your console application
-  const exePath = 'C:\\Users\\User\\Desktop\\RemoteCliClient_2_Windows.exe';
+  const basePath = app.isPackaged
+    ? path.join(process.resourcesPath, 'assets') // for production
+    : path.join(__dirname, '../..', 'assets'); // for development
 
-  const child = spawn('cmd.exe', ['/k', exePath], {
+  const appPath = path.join(basePath, 'C:\\RemoteCliClient_2_Windows.exe');
+
+  // Launch it in a new console window
+  spawn('cmd.exe', ['/c', 'start', '', 'C:\\RemoteCliClient_2_Windows.exe'], {
     detached: true,
-    stdio: 'pipe', // Ensures it opens the window
+    stdio: 'ignore', // Important: don't tie input/output to Electron
   });
-
-  console.log(ip);
-
-  setTimeout(() => {
-    child.stdin.write('1');
-  }, 2000);
-
-  // child.stdin.write('1');
-  // child.stderr.on('data', (data) =>{console.log(`stdout: ${data}`);})
-
-  // child.unref();
 });
 
 /// ========= END OF SECTION CONNECT REMOTELY =========
