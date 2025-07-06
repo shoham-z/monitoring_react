@@ -24,7 +24,9 @@ const connect = (ip: string) => {
   }
 };
 
-function SwitchGrid(props: { addNotification: (message: string) => void }) {
+function SwitchGrid(props: {
+  addNotification: (message: string, color: string) => void;
+}) {
   const { addNotification } = props;
   const [SERVER_IP, SetServerIp] = useState('');
   const [isReady, setIsReady] = useState(false);
@@ -136,7 +138,7 @@ function SwitchGrid(props: { addNotification: (message: string) => void }) {
     const message = updateReachability(result.ip, result.success);
     if (message) {
       // console.log(`[NOTIFY] ${message}`);
-      addNotification(message);
+      addNotification(message, result.success === true ? "green" : "red");
     } else {
       // console.log(`[SKIP] No change for ${result.ip}`);
     }

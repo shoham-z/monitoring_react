@@ -9,18 +9,20 @@ interface Notification {
   id: string;
   message: string;
   timestamp: string;
+  color: string;
 }
 
 function Window() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const addNotification = (message: string) => {
+  const addNotification = (message: string, color?: string) => {
     setNotifications((prev) => [
       ...prev,
       {
         id: uuidv4(), // simple unique ID
         message,
         timestamp: new Date().toLocaleString('en-GB'),
+        color: color || 'white',
       },
     ]);
   };

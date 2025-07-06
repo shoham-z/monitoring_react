@@ -50,13 +50,8 @@
 }
 
 .notification-table tbody td {
-  background-color: #fff;
   border-bottom: 1px solid #ccc;
   color: #333;
-}
-
-.notification-table tbody tr:hover {
-  background-color: #f0f0f0;
 }
 
 .read-btn {
@@ -76,4 +71,14 @@
   text-align: center;
   font-style: italic;
   color: #666;
+}
+
+.notification-table tbody .tr-green {
+  background-color: #78ff9f; /* light green */
+  color: #1a4731;            /* dark green text */
+}
+
+.notification-table tbody .tr-red {
+  background-color: rgb(255, 119, 119); /* light red */
+  color: #8b0000;            /* dark red text */
 }

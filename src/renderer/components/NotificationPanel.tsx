@@ -3,7 +3,12 @@ import { FaCheck } from 'react-icons/fa';
 import { MdDeleteSweep } from 'react-icons/md';
 
 function NotificationPanel(props: {
-  notifications: { id: string; message: string; timestamp: string }[];
+  notifications: {
+    id: string;
+    message: string;
+    timestamp: string;
+    color: string;
+  }[];
   deleteNotification: (id: string) => void;
   deleteAllNotifications: () => void;
 }) {
@@ -32,7 +37,7 @@ function NotificationPanel(props: {
         </thead>
         <tbody>
           {notifications.map((notif) => (
-            <tr key={notif.id}>
+            <tr key={notif.id} className={`tr-${notif.color}`}>
               <td>{notif.message}</td>
               <td>{notif.timestamp}</td>
               <td>
