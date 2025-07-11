@@ -1,45 +1,43 @@
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogContentText from '@material-ui/core/DialogContentText';
-import DialogTitle from '@material-ui/core/DialogTitle';
+/* eslint-disable react/button-has-type */
+import '../styles/AlertDialog.css';
 
 function AlertDialog(props: {
+  ip: string;
   isOpen: boolean;
   setIsOpen: any;
   returnChoice: any;
 }) {
-  const { isOpen, setIsOpen, returnChoice } = props;
+  const { ip, isOpen, setIsOpen, returnChoice } = props;
 
-  const handleClose = () => {
+  const handleClose = (choice: boolean) => {
     setIsOpen(false);
+    returnChoice(choice);
   };
 
   return (
-    <div>
-      <Dialog
-        open={isOpen}
-        onClose={handleClose}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">Successful Alert</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            You are successful in life!
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => returnChoice(false)} color="primary">
-            Disagree
-          </Button>
-          <Button onClick={() => returnChoice(true)} color="primary" autoFocus>
-            Agree
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </div>
+    isOpen && (
+      <div className="custom-dialog-backdrop">
+        <div className="custom-dialog">
+          <div className="custom-dialog-title">
+            Are you sure you want to delete item {ip}?
+          </div>
+          <div className="custom-dialog-actions">
+            <button
+              className="custom-dialog-button"
+              onClick={() => handleClose(false)}
+            >
+              No
+            </button>
+            <button
+              className="custom-dialog-button primary"
+              onClick={() => handleClose(true)}
+            >
+              Yes
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   );
 }
 
