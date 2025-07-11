@@ -7,6 +7,8 @@ import {
   useContextMenu,
 } from 'react-contexify';
 import switchImg from '../../img/switch.png';
+import computerImg from '../../img/computer.png';
+import encryptorImg from '../../img/encryptor.png';
 import '../styles/SwitchItem.css';
 import 'react-contexify/ReactContexify.css';
 import AlertDialog from './AlertDialog';
@@ -38,6 +40,16 @@ function SwitchItem(props: {
     onDelete,
   } = props;
   const MENU_ID = `switch-menu-${ip}`;
+
+  let image;
+  const lastOctet = parseInt(ip.split('.').pop(), 10);
+  if (lastOctet > 245 && lastOctet < 251) {
+    image = switchImg;
+  } else if (lastOctet > 0 && lastOctet < 151) {
+    image = encryptorImg;
+  } else {
+    image = computerImg;
+  }
 
   const reachabilityClass = reachability ? 'reachable' : 'unreachable';
 
@@ -130,7 +142,7 @@ function SwitchItem(props: {
           if (deleteItem) onDelete(ip);
         }}
       />
-      <img src={switchImg} alt="Switch" />
+      <img src={image} alt="Switch" />
       <p className="switch-item-text">{name}</p>
 
       <Menu id={MENU_ID} className="context-menu">
