@@ -8,7 +8,7 @@
   display: flex;         /* Set each item to be a flex container */
   flex-direction: column; /* Stack the image and text vertically */
   align-items: center;    /* Center them horizontally */
-
+  visibility: visible;
   width: 125px; /* Fixed size for each item */
   height: 125px; /* Optional: Fixed height for each item */
   margin: 5px; /* Optional: spacing between items */
@@ -44,6 +44,7 @@
 }
 
 .switch-item-text {
+  visibility: visible;
   max-width: 100%;
   padding: 0 4px;
   font-size: 14px;

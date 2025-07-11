@@ -14,6 +14,7 @@ import 'react-contexify/ReactContexify.css';
 import AlertDialog from './AlertDialog';
 import PopupMassage from './PopupMassage';
 import PopupEditItem from './PopupEditItem';
+import MyAlertDialog from './MyAlertDialog';
 
 function SwitchItem(props: {
   index: any;
@@ -128,11 +129,6 @@ function SwitchItem(props: {
       onClick={() => setSelected(ip)}
       onContextMenu={displayMenu}
     >
-      <AlertDialog
-        isOpen={confirmationOpen}
-        setIsOpen={setConfirmationOpen}
-        returnChoice={handleChoice}
-      />
       <PopupMassage
         isOpen={alertOpen}
         setIsOpen={setAlertOpen}
@@ -173,6 +169,12 @@ function SwitchItem(props: {
         initialHostname={name}
         initialIpAddress={ip}
         onSubmitEdit={handlesubmitEdit}
+      />
+      <MyAlertDialog
+        ip={ip}
+        isOpen={confirmationOpen}
+        setIsOpen={setConfirmationOpen}
+        returnChoice={handleChoice}
       />
     </div>
   );
