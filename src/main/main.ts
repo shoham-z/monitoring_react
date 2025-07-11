@@ -34,6 +34,10 @@ class AppUpdater {
   }
 }
 
+const basePath = app.isPackaged
+  ? process.resourcesPath // for production
+  : path.join(__dirname, '../..'); // for development
+
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
@@ -72,9 +76,7 @@ const createWindow = async () => {
     await installExtensions();
   }
 
-  const RESOURCES_PATH = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets')
-    : path.join(__dirname, '../../assets');
+  const RESOURCES_PATH = path.join(basePath, 'assets');
 
   const getAssetPath = (...paths: string[]): string => {
     return path.join(RESOURCES_PATH, ...paths);
@@ -88,7 +90,7 @@ const createWindow = async () => {
     webPreferences: {
       preload: app.isPackaged
         ? path.join(__dirname, 'preload.js')
-        : path.join(__dirname, '../../.erb/dll/preload.js'),
+        : path.join(__dirname, '../../', '.erb/dll/preload.js'),
     },
   });
 
@@ -146,15 +148,7 @@ app.on('window-all-closed', () => {
 app
   .whenReady()
   .then(() => {
-    // for dev build
-    // const iconPath = path.join(__dirname, '../../assets/icons/golden_apple.png',);
-
-    // for prod build
-    // const iconPath = path.join(process.resourcesPath, 'assets/icons/golden_apple.png');
-
-    const iconPath = app.isPackaged
-      ? path.join(process.resourcesPath, 'assets/icons/golden_apple.png')
-      : path.join(__dirname, '../../assets/icons/golden_apple.png');
+    const iconPath = path.join(basePath, 'assets/icons/golden_apple.png');
 
     const icon = nativeImage.createFromPath(iconPath);
 
@@ -209,17 +203,28 @@ ipcMain.handle('ping-request', async (_event, host) => {
   }
 });
 
+ipcMain.on('ping-request-visible', async (_event, host) => {
+  // 1st cmd  : /c   → run a command and exit
+  // start "" : open a *new* window; "Ping" is the window title
+  // 2nd cmd  : /k   → keep that new window open after ping
+  const child = spawn(
+    'cmd.exe',
+    ['/c', 'start', '"Ping"', 'cmd', '/k', `ping ${host}`],
+    {
+      windowsHide: false, // show the console
+      detached: true, // independent from Electron’s process
+    },
+  );
+
+  child.unref(); // let Electron quit without killing the console});
+});
 /// ========= END OF SECTION PING =========
 
 /// ========= START OF SECTION CONNECT REMOTELY =========
 ipcMain.on('connect-ssh', (event, ip) => {
   console.log(`connecting ssh to ${ip}`);
 
-  const basePath = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets') // for production
-    : path.join(__dirname, '../..', 'assets'); // for development
-
-  const puttyPath = path.join(basePath, 'putty.exe');
+  const puttyPath = path.join(basePath, 'assets', 'putty.exe');
 
   execFile(puttyPath, ['-ssh', ip], (error: any) => {
     if (error) {
@@ -230,12 +235,6 @@ ipcMain.on('connect-ssh', (event, ip) => {
 
 ipcMain.on('connect-remotely', (event, ip) => {
   console.log(`connecting to ${ip}`);
-
-  const basePath = app.isPackaged
-    ? path.join(process.resourcesPath, 'assets') // for production
-    : path.join(__dirname, '../..', 'assets'); // for development
-
-  const appPath = path.join(basePath, 'C:\\RemoteCliClient_2_Windows.exe');
 
   // Launch it in a new console window
   spawn('cmd.exe', ['/c', 'start', '', 'C:\\RemoteCliClient_2_Windows.exe'], {
@@ -248,9 +247,7 @@ ipcMain.on('connect-remotely', (event, ip) => {
 
 ipcMain.handle('read-text-file', async (_event, filename) => {
   try {
-    const filePath = app.isPackaged
-      ? path.join(process.resourcesPath, 'assets/text_files/', filename)
-      : path.join(__dirname, '../../assets/text_files/', filename);
+    const filePath = path.join(basePath, 'assets/text_files/', filename);
     const content = fs.readFileSync(filePath, 'utf-8');
     return { success: true, content };
   } catch (error) {

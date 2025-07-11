@@ -74,10 +74,14 @@ function SwitchItem(props: {
     setDeleteItem(choice);
   };
 
+  const handlePing = () => {
+    onPing(ip, true);
+  };
+
   const handleItemClick = (event: ItemParams<any, any>) => {
     switch (event.id) {
       case 'ping':
-        onPing(ip, 1);
+        handlePing();
         break;
       case 'connect':
         onConnect(ip);

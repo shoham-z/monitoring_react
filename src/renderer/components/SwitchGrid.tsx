@@ -19,15 +19,11 @@ interface ReachableEntry {
 const connect = (ip: string) => {
   const lastOctet = parseInt(ip.split('.').pop(), 10);
 
-  console.log(lastOctet);
-
   if (lastOctet > 245 && lastOctet < 251) {
     // if address between 246 and 250
     window.electron.ipcRenderer.connectSSH(ip);
   } else if (lastOctet > 0 && lastOctet < 151) {
-    console.log('rotem');
     window.electron.ipcRenderer.connectRemotely(ip);
-    console.log('rotem2');
   } else {
     // alert of not being able to connect to device
   }
@@ -73,7 +69,7 @@ function SwitchGrid(props: {
       // eslint-disable-next-line promise/always-return
       .then((response) => {
         const { data } = response;
-        console.log(data);
+        // console.log(data);
 
         // Set switch list
         setSwitchList(data);
@@ -143,12 +139,16 @@ function SwitchGrid(props: {
     return notifyMessage;
   };
 
-  const doPing = async (ip: string) => {
+  const doPing = async (ip: string, visible?: boolean) => {
+    if (visible) {
+      await window.electron.ipcRenderer.sendPingVisible(ip);
+      return;
+    }
     const result = await window.electron.ipcRenderer.sendPing(ip);
     const message = updateReachability(result.ip, result.success);
     if (message) {
       // console.log(`[NOTIFY] ${message}`);
-      addNotification(message, result.success === true ? "green" : "red");
+      addNotification(message, result.success === true ? 'green' : 'red');
     } else {
       // console.log(`[SKIP] No change for ${result.ip}`);
     }
@@ -175,7 +175,7 @@ function SwitchGrid(props: {
       switchList.forEach((element) => {
         doPing(element.ip);
       });
-    }, 1000); // Ping every 10 seconds
+    }, 5 * 1000); // Ping every 10 seconds
 
     return () => clearInterval(interval);
   }, [switchList]);

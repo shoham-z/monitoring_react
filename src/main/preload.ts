@@ -25,8 +25,10 @@ const electronHandler = {
 
     sendPing: async (host: string) => ipcRenderer.invoke('ping-request', host),
 
-    onPingResponse: (callback: (arg0: any) => void) =>
-      ipcRenderer.on('ping-response', (_event, data) => callback(data)),
+    sendPingVisible: async (host: string) => {
+      ipcRenderer.send('ping-request-visible', host);
+      ipcRenderer.invoke('ping-request', host);
+    },
 
     connectSSH: (ip: any) => ipcRenderer.send('connect-ssh', ip),
 
