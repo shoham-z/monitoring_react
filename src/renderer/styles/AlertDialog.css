@@ -1,71 +1,82 @@
-.popup-wrapper {
-  height: 100vh;                /* full screen height */
-  width: 100vw;                 /* full screen width */
-  display: flex;
-  align-items: center;          /* vertical centering */
-  justify-content: center;      /* horizontal centering */
-  background-color: rgba(0, 0, 0, 0.3); /* optional: dark backdrop */
-  z-index: 1300;                /* optional: top layer */
-  position: fixed;              /* if it's a popup/dialog */
-  top: 0;
-  left: 0;
-}
-
-.custom-dialog-backdrop {
+.mui-dialog-backdrop {
   position: fixed;
   inset: 0;
-  background-color: rgba(0, 0, 0, 0.5); /* semi-transparent overlay */
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1300; /* MUI dialog default */
+  z-index: 1300;
 }
 
-.custom-dialog {
-  background-color: #fff;
-  border-radius: 4px;
+.mui-dialog {
+  position: relative;
+  background: #fff;
+  border-radius: 8px;
   width: 400px;
   max-width: 90%;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-  padding: 24px;
-  font-family: "Roboto", sans-serif;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
+  overflow: hidden;
+  font-family: 'Roboto', sans-serif;
   animation: fadeInScale 0.3s ease;
 }
 
-.custom-dialog-title {
+/* Close "X" button */
+.mui-dialog-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #555;
+  transition: color 0.2s;
+}
+
+.mui-dialog-close:hover {
+  color: #000;
+}
+
+.mui-dialog-title {
   font-size: 1.25rem;
   font-weight: 500;
-  margin-bottom: 16px;
+  padding: 16px 24px 0;
   color: #333;
 }
 
-.custom-dialog-actions {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 24px;
+.mui-dialog-content {
+  padding: 16px 24px;
 }
 
-.custom-dialog-button {
-  font-size: 0.875rem;
+.mui-dialog-text {
+  font-size: 1rem;
+  color: #555;
+  margin: 0;
+}
+
+.mui-dialog-actions {
+  padding: 8px 16px 16px;
+  display: flex;
+  gap: 12px;
+}
+
+.mui-dialog-actions.center {
+  justify-content: center; /* center the action button */
+}
+
+.mui-button.primary {
+  background-color: #1976d2;
+  color: #fff;
+  font-size: 0.9rem;
   padding: 6px 16px;
-  background-color: #e0e0e0;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   transition: background-color 0.2s;
 }
 
-.custom-dialog-button:hover {
-  background-color: #d5d5d5;
-}
-
-.custom-dialog-button.primary {
-  background-color: #1976d2;
-  color: white;
-}
-
-.custom-dialog-button.primary:hover {
+.mui-button.primary:hover {
   background-color: #1565c0;
 }
 

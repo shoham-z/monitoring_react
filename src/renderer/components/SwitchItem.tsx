@@ -12,8 +12,8 @@ import encryptorImg from '../../img/encryptor.png';
 import '../styles/SwitchItem.css';
 import 'react-contexify/ReactContexify.css';
 import AlertDialog from './AlertDialog';
-import PopupMassage from './PopupMassage';
 import PopupEditItem from './PopupEditItem';
+import ConfirmationDialog from './ConfirmationDialog';
 
 function SwitchItem(props: {
   index: any;
@@ -128,15 +128,6 @@ function SwitchItem(props: {
       onClick={() => setSelected(ip)}
       onContextMenu={displayMenu}
     >
-      <PopupMassage
-        isOpen={alertOpen}
-        setIsOpen={setAlertOpen}
-        title={alertTitle}
-        message={alertMessage}
-        onDelete={() => {
-          if (deleteItem) onDelete(ip);
-        }}
-      />
       <img src={image} alt="Switch" />
       <p className="switch-item-text">{name}</p>
 
@@ -169,11 +160,21 @@ function SwitchItem(props: {
         initialIpAddress={ip}
         onSubmitEdit={handlesubmitEdit}
       />
-      <AlertDialog
+      <ConfirmationDialog
         ip={ip}
         isOpen={confirmationOpen}
         setIsOpen={setConfirmationOpen}
         returnChoice={handleChoice}
+      />
+
+      <AlertDialog
+        isOpen={alertOpen}
+        setIsOpen={setAlertOpen}
+        title={alertTitle}
+        message={alertMessage}
+        onDelete={() => {
+          if (deleteItem) onDelete(ip);
+        }}
       />
     </div>
   );

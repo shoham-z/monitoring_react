@@ -2,37 +2,40 @@
 import '../styles/AlertDialog.css';
 
 function AlertDialog(props: {
-  ip: string;
   isOpen: boolean;
   setIsOpen: any;
-  returnChoice: any;
+  title: string;
+  message: string;
+  onDelete: any;
 }) {
-  const { ip, isOpen, setIsOpen, returnChoice } = props;
+  const { isOpen, setIsOpen, title, message, onDelete } = props;
 
-  const handleClose = (choice: boolean) => {
+  const handleClose = () => {
     setIsOpen(false);
-    returnChoice(choice);
+    onDelete();
   };
 
   return (
     isOpen && (
-      <div className="custom-dialog-backdrop">
-        <div className="custom-dialog">
-          <div className="custom-dialog-title">
-            Are you sure you want to delete item {ip}?
+      <div className="mui-dialog-backdrop">
+        <div className="mui-dialog">
+          <button className="mui-dialog-close" onClick={handleClose}>
+            &times;
+          </button>
+
+          <div className="mui-dialog-title" id="alert-dialog-title">
+            {title}
           </div>
-          <div className="custom-dialog-actions">
-            <button
-              className="custom-dialog-button"
-              onClick={() => handleClose(false)}
-            >
-              No
-            </button>
-            <button
-              className="custom-dialog-button primary"
-              onClick={() => handleClose(true)}
-            >
-              Yes
+
+          <div className="mui-dialog-content">
+            <p className="mui-dialog-text" id="alert-dialog-description">
+              {message}
+            </p>
+          </div>
+
+          <div className="mui-dialog-actions center">
+            <button className="mui-button primary" onClick={handleClose}>
+              Okay
             </button>
           </div>
         </div>

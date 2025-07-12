@@ -1,0 +1,81 @@
+.popup-wrapper {
+  height: 100vh;                /* full screen height */
+  width: 100vw;                 /* full screen width */
+  display: flex;
+  align-items: center;          /* vertical centering */
+  justify-content: center;      /* horizontal centering */
+  background-color: rgba(0, 0, 0, 0.3); /* optional: dark backdrop */
+  z-index: 1300;                /* optional: top layer */
+  position: fixed;              /* if it's a popup/dialog */
+  top: 0;
+  left: 0;
+}
+
+.custom-dialog-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* semi-transparent overlay */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1300; /* MUI dialog default */
+}
+
+.custom-dialog {
+  background-color: #fff;
+  border-radius: 4px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  padding: 24px;
+  font-family: "Roboto", sans-serif;
+  animation: fadeInScale 0.3s ease;
+}
+
+.custom-dialog-title {
+  font-size: 1.25rem;
+  font-weight: 500;
+  margin-bottom: 16px;
+  color: #333;
+}
+
+.custom-dialog-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.custom-dialog-button {
+  font-size: 0.875rem;
+  padding: 6px 16px;
+  background-color: #e0e0e0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.custom-dialog-button:hover {
+  background-color: #d5d5d5;
+}
+
+.custom-dialog-button.primary {
+  background-color: #1976d2;
+  color: white;
+}
+
+.custom-dialog-button.primary:hover {
+  background-color: #1565c0;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
