@@ -1,14 +1,18 @@
 import { useForm } from 'react-hook-form';
-import Popup from 'reactjs-popup';
 import '../styles/ButtonAddItem.css';
+import { Dispatch, SetStateAction } from 'react';
 
 type Inputs = {
   hostname: string;
   ipAddress: string;
 };
 
-function ButtonAddItem(props: { callback: any }) {
-  const { callback } = props;
+function ButtonAddItem(props: {
+  callback: any;
+  isOpen: boolean;
+  setOpen: Dispatch<SetStateAction<boolean>>;
+}) {
+  const { callback, isOpen, setOpen } = props;
 
   const {
     register,
@@ -17,13 +21,10 @@ function ButtonAddItem(props: { callback: any }) {
     reset,
   } = useForm<Inputs>();
 
-  const onSubmit = (
-    data: { hostname: any; ipAddress: any },
-    close: () => void,
-  ) => {
+  const onSubmit = (data: { hostname: any; ipAddress: any }) => {
     try {
       callback(data.ipAddress, data.hostname);
-      close();
+      setOpen(false);
       reset();
     } catch (err) {
       alert(`Error while adding switch: ${err}`);
@@ -31,41 +32,60 @@ function ButtonAddItem(props: { callback: any }) {
     }
   };
 
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
-    <Popup
-      trigger={
-        <button type="button" className="button">
-          Add Switch
-        </button>
-      }
-      position="right center"
-      modal
-      nested
-    >
-      {(close: () => void) => (
+    isOpen && (
+      <div className="popup-wrapper">
         <form
-          className="popup-content"
+          className="mui-form"
           onSubmit={(e) => {
-            e.preventDefault(); // 👈 make sure this is here
-            handleSubmit((data) => onSubmit(data, close))(e);
+            e.preventDefault();
+            handleSubmit((data) => onSubmit(data))(e);
           }}
         >
-          <p>Ip Address</p>
-          <input
-            defaultValue="192.168."
-            {...register('ipAddress', { required: true })}
-          />
-          {errors.ipAddress && <span>This field is required</span>}
+          <div className="mui-form-group">
+            <label className="mui-label">IP Address</label>
+            <input
+              className="mui-input"
+              defaultValue="192.168."
+              {...register('ipAddress', { required: true })}
+            />
+            {errors.ipAddress && (
+              <span className="mui-error">This field is required</span>
+            )}
+          </div>
 
-          <p>Hostname</p>
-          <input {...register('hostname', { required: true })} />
+          <div className="mui-form-group">
+            <label className="mui-label">Hostname</label>
+            <input
+              className="mui-input"
+              {...register('hostname', { required: true })}
+            />
+            {errors.hostname && (
+              <span className="mui-error">This field is required</span>
+            )}
+          </div>
 
-          {errors.hostname && <span>This field is required</span>}
-
-          <input className="button" type="submit" />
+          <div className="mui-form-actions">
+            <button
+              type="button"
+              className="mui-button cancel"
+              onClick={() => handleClose()} // assuming you have a close handler
+            >
+              Cancel
+            </button>
+            <input
+              className="mui-button primary"
+              type="submit"
+              value="Submit"
+            />
+          </div>
         </form>
-      )}
-    </Popup>
+      </div>
+    )
   );
 }
 

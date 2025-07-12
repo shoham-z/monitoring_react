@@ -1,3 +1,16 @@
+.popup-wrapper {
+  height: 100vh;                /* full screen height */
+  width: 100vw;                 /* full screen width */
+  display: flex;
+  align-items: center;          /* vertical centering */
+  justify-content: center;      /* horizontal centering */
+  background-color: rgba(0, 0, 0, 0.3); /* optional: dark backdrop */
+  z-index: 1300;                /* optional: top layer */
+  position: fixed;              /* if it's a popup/dialog */
+  top: 0;
+  left: 0;
+}
+
 .custom-dialog-backdrop {
   position: fixed;
   inset: 0;
