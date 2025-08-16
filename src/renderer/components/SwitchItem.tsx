@@ -96,7 +96,7 @@ function SwitchItem(props: {
         handlePing();
         break;
       case 'connect':
-        onConnect(ip);
+        onConnect(ip, reachability);
         break;
       case 'edit':
         handleEdit();

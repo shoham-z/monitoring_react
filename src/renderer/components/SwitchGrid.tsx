@@ -4,6 +4,7 @@ import axios from 'axios';
 import '../styles/SwitchGrid.css';
 import SwitchItem from './SwitchItem';
 import TopPanel from './TopPanel';
+import AlertDialog from './AlertDialog';
 
 interface SwitchEntry {
   id: number;
@@ -15,19 +16,6 @@ interface ReachableEntry {
   id: number;
   reachability: boolean;
 }
-
-const connect = (ip: string) => {
-  const lastOctet = parseInt(ip.split('.').pop(), 10);
-
-  if (lastOctet > 245 && lastOctet < 251) {
-    // if address between 246 and 250
-    window.electron.ipcRenderer.connectSSH(ip);
-  } else if (lastOctet > 0 && lastOctet < 151) {
-    window.electron.ipcRenderer.connectRemotely(ip);
-  } else {
-    // alert of not being able to connect to device
-  }
-};
 
 function SwitchGrid(props: {
   addNotification: (message: string, color: string) => void;
@@ -42,6 +30,9 @@ function SwitchGrid(props: {
   >([]);
   const [filter, setFilter] = useState('');
   const lastNotifiedStatus = useRef<Record<string, boolean | undefined>>({});
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
 
   useEffect(() => {
     const readServers = async () => {
@@ -62,6 +53,27 @@ function SwitchGrid(props: {
     readServers();
     setInterval(() => readServers(), 60 * 1000);
   }, []);
+
+  const connect = (ip: string, reachable: boolean) => {
+    if (reachable) {
+      const lastOctet = parseInt(ip.split('.').pop(), 10);
+
+      if (lastOctet > 245 && lastOctet < 251) {
+        // if address between 246 and 250
+        window.electron.ipcRenderer.connectSSH(ip);
+      } else if (lastOctet > 0 && lastOctet < 151) {
+        window.electron.ipcRenderer.connectRemotely(ip);
+      } else {
+        setAlertTitle('Cant connect to this device');
+        //setAlertMessage('This device is not remotely connectable');
+        setAlertOpen(true);
+      }
+    } else {
+      setAlertTitle('Device Unreachable');
+      //setAlertMessage('This device is not reachable');
+      setAlertOpen(true);
+    }
+  };
 
   const fetchFromServer = () => {
     axios
@@ -162,7 +174,10 @@ function SwitchGrid(props: {
       if (event.ctrlKey && event.key === 'g') {
         doPing(selectedIp);
       } else if (event.ctrlKey && event.key === 'h') {
-        connect(selectedIp);
+        connect(
+          selectedIp,
+          reachabilityList.find((r) => r.id === selectedIp)?.reachability,
+        );
       }
     };
 
@@ -281,6 +296,13 @@ function SwitchGrid(props: {
             ))}
         </div>
       </div>
+      <AlertDialog
+        isOpen={alertOpen}
+        setIsOpen={setAlertOpen}
+        title={alertTitle}
+        message={alertMessage}
+        onDelete={() => {}}
+      />
     </>
   );
 }
