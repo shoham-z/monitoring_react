@@ -1,4 +1,3 @@
-/* eslint-disable react/button-has-type */
 import '../styles/AlertDialog.css';
 
 function AlertDialog(props: {
@@ -15,6 +14,13 @@ function AlertDialog(props: {
     onDelete();
   };
 
+  // Split the message by newlines and map each part to a <p> element
+  const messageLines = message.split('\n').map((line, index) => (
+    <p key={index} className="mui-dialog-text">
+      {line}
+    </p>
+  ));
+
   return (
     isOpen && (
       <div className="mui-dialog-backdrop">
@@ -28,9 +34,8 @@ function AlertDialog(props: {
           </div>
 
           <div className="mui-dialog-content">
-            <p className="mui-dialog-text" id="alert-dialog-description">
-              {message}
-            </p>
+            {/* Render each line of the message */}
+            {messageLines}
           </div>
 
           <div className="mui-dialog-actions center">

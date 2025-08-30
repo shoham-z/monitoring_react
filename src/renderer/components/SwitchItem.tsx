@@ -90,8 +90,18 @@ function SwitchItem(props: {
     onPing(ip, true);
   };
 
+  const openShow = () =>
+  {
+    setAlertTitle('Switch info');
+    setAlertMessage(`IP Address: ${ip}\nName: ${name}`);
+    setAlertOpen(true);
+  }
+
   const handleItemClick = (event: ItemParams<any, any>) => {
     switch (event.id) {
+      case 'show':
+        openShow();
+        break;
       case 'ping':
         handlePing();
         break;
@@ -121,17 +131,26 @@ function SwitchItem(props: {
     return e.ctrlKey && e.key === 'h';
   };
 
+  const doubleClicked = () =>
+  {
+    openShow();
+  }
+
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       className={`switch-item ${reachabilityClass} ${isSelected ? 'selected' : ''}`}
       onClick={() => setSelected(ip)}
       onContextMenu={displayMenu}
+      onDoubleClick={doubleClicked}
     >
       <img src={image} alt="Switch" />
       <p className="switch-item-text">{name}</p>
 
       <Menu id={MENU_ID} className="context-menu">
+        <Item id="show" onClick={handleItemClick}>
+          Show
+        </Item>
         <Item
           id="ping"
           onClick={handleItemClick}
