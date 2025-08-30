@@ -8,7 +8,6 @@ import {
 } from 'react-contexify';
 import switchImg from '../../img/switch.png';
 import computerImg from '../../img/computer.png';
-import encryptorImg from '../../img/encryptor.png';
 import '../styles/SwitchItem.css';
 import 'react-contexify/ReactContexify.css';
 import AlertDialog from './AlertDialog';
