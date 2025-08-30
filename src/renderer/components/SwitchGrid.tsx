@@ -56,18 +56,7 @@ function SwitchGrid(props: {
 
   const connect = (ip: string, reachable: boolean) => {
     if (reachable) {
-      const lastOctet = parseInt(ip.split('.').pop(), 10);
-
-      if (lastOctet > 245 && lastOctet < 251) {
-        // if address between 246 and 250
-        window.electron.ipcRenderer.connectSSH(ip);
-      } else if (lastOctet > 0 && lastOctet < 151) {
-        window.electron.ipcRenderer.connectRemotely(ip);
-      } else {
-        setAlertTitle('Cant connect to this device');
-        //setAlertMessage('This device is not remotely connectable');
-        setAlertOpen(true);
-      }
+      window.electron.ipcRenderer.connectSSH(ip);
     } else {
       setAlertTitle('Device Unreachable');
       //setAlertMessage('This device is not reachable');
