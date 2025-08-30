@@ -34,8 +34,6 @@ function SwitchGrid(props: {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
 
-  console.log("boo")
-
   useEffect(() => {
     const readServers = async () => {
       const result =
@@ -47,8 +45,6 @@ function SwitchGrid(props: {
         }
         SetServerIp(ip);
         setIsReady(true);
-        console.log("getting server ip")
-        console.log(ip)
       } else {
         console.log(result.error || 'Unknown error');
       }
@@ -80,7 +76,6 @@ function SwitchGrid(props: {
   };
 
   const fetchFromServer = () => {
-    console.log("sending request")
     axios
       .get(`${SERVER_IP}/api/getAll`)
       // eslint-disable-next-line promise/always-return
@@ -98,7 +93,6 @@ function SwitchGrid(props: {
               reachability: true, // or false based on your logic
             }));
           }
-           console.log("got data")
           return prev;
         });
       })
