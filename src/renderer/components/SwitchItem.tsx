@@ -42,13 +42,8 @@ function SwitchItem(props: {
 
   let image;
   const lastOctet = parseInt(ip.split('.').pop(), 10);
-  if (lastOctet > 245 && lastOctet < 251) {
-    image = switchImg;
-  } else if (lastOctet > 0 && lastOctet < 151) {
-    image = encryptorImg;
-  } else {
-    image = computerImg;
-  }
+  image = switchImg;
+
 
   const reachabilityClass = reachability ? 'reachable' : 'unreachable';
 
