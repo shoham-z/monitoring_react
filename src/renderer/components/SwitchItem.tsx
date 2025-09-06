@@ -96,8 +96,6 @@ function SwitchItem(props: {
         handlePing();
         break;
       case 'connect':
-        console.log("nein");
-        console.log(reachability);
         onConnect(ip, reachability);
         break;
       case 'edit':

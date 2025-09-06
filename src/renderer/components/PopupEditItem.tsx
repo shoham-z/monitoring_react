@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Popup from 'reactjs-popup';
-import '../styles/ButtonAddItem.css';
+import '../styles/PopupEditItem.css';
 
 type Inputs = {
   hostname: string;
@@ -52,23 +52,52 @@ function PopupEditItem({
       closeOnDocumentClick
       onClose={() => setIsOpen(false)}
     >
-      <form
-        className="popup-content"
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit(onSubmit)(e);
-        }}
-      >
-        <p>Ip Address</p>
-        <input {...register('ipAddress', { required: true })} />
-        {errors.ipAddress && <span>This field is required</span>}
+      <div className="mui-dialog">
+        <button className="mui-dialog-close" onClick={() => setIsOpen(false)}>
+          &times;
+        </button>
 
-        <p>Hostname</p>
-        <input {...register('hostname', { required: true })} />
-        {errors.hostname && <span>This field is required</span>}
+        <div className="mui-dialog-title">Edit Switch</div>
 
-        <input className="button" type="submit" value="Update Switch" />
-      </form>
+        <form
+          className="mui-dialog-content"
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleSubmit(onSubmit)(e);
+          }}
+        >
+          <label className="mui-label">IP Address</label>
+          <input
+            className="mui-input"
+            {...register('ipAddress', { required: true })}
+          />
+          {errors.ipAddress && (
+            <span className="mui-error">This field is required</span>
+          )}
+
+          <label className="mui-label">Hostname</label>
+          <input
+            className="mui-input"
+            {...register('hostname', { required: true })}
+          />
+          {errors.hostname && (
+            <span className="mui-error">This field is required</span>
+          )}
+
+          <div className="mui-dialog-actions center">
+            <button
+              type="button"
+              className="mui-button"
+              onClick={() => setIsOpen(false)}
+            >
+              Cancel
+            </button>
+            <button className="mui-button primary" type="submit">
+              Update Switch
+            </button>
+          </div>
+        </form>
+      </div>
     </Popup>
   );
 }
