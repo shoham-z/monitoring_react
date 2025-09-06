@@ -55,11 +55,13 @@ function SwitchGrid(props: {
   }, []);
 
   const connect = (ip: string, reachable: boolean) => {
+    console.log(ip);
+    console.log(reachable);
     if (reachable) {
       window.electron.ipcRenderer.connectSSH(ip);
     } else {
       setAlertTitle('Device Unreachable');
-      //setAlertMessage('This device is not reachable');
+      // setAlertMessage('This device is not reachable');
       setAlertOpen(true);
     }
   };
@@ -163,10 +165,11 @@ function SwitchGrid(props: {
       if (event.ctrlKey && event.key === 'g') {
         doPing(selectedIp);
       } else if (event.ctrlKey && event.key === 'h') {
-        connect(
-          selectedIp,
-          reachabilityList.find((r) => r.id === selectedIp)?.reachability,
-        );
+        const selectedId = switchList.find((r) => r.ip === selectedIp)?.id;
+        const reachability = reachabilityList.find(
+          (r) => r.id === selectedId,
+        )?.reachability;
+        connect(selectedIp, reachability);
       }
     };
 

@@ -40,10 +40,7 @@ function SwitchItem(props: {
   } = props;
   const MENU_ID = `switch-menu-${ip}`;
 
-  let image;
-  const lastOctet = parseInt(ip.split('.').pop(), 10);
-  image = switchImg;
-
+  const image = switchImg;
 
   const reachabilityClass = reachability ? 'reachable' : 'unreachable';
 
@@ -84,12 +81,11 @@ function SwitchItem(props: {
     onPing(ip, true);
   };
 
-  const openShow = () =>
-  {
+  const openShow = () => {
     setAlertTitle('Switch info');
     setAlertMessage(`IP Address: ${ip}\nName: ${name}`);
     setAlertOpen(true);
-  }
+  };
 
   const handleItemClick = (event: ItemParams<any, any>) => {
     switch (event.id) {
@@ -100,6 +96,8 @@ function SwitchItem(props: {
         handlePing();
         break;
       case 'connect':
+        console.log("nein");
+        console.log(reachability);
         onConnect(ip, reachability);
         break;
       case 'edit':
@@ -125,10 +123,9 @@ function SwitchItem(props: {
     return e.ctrlKey && e.key === 'h';
   };
 
-  const doubleClicked = () =>
-  {
+  const doubleClicked = () => {
     openShow();
-  }
+  };
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
