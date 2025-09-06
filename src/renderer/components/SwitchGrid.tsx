@@ -6,6 +6,9 @@ import SwitchItem from './SwitchItem';
 import TopPanel from './TopPanel';
 import AlertDialog from './AlertDialog';
 
+const SWITCH_IP_START = 239;
+const SWITCH_IP_END = 251;
+
 interface SwitchEntry {
   id: number;
   name: string;
@@ -58,8 +61,8 @@ function SwitchGrid(props: {
     if (reachable) {
       const lastOctet = parseInt(ip.split('.').pop(), 10);
 
-      if (lastOctet > 245 && lastOctet < 251) {
-        // if address between 246 and 250
+      if (lastOctet > SWITCH_IP_START && lastOctet < SWITCH_IP_END) {
+        // if address between 240 and 250
         window.electron.ipcRenderer.connectSSH(ip);
       } else if (lastOctet > 0 && lastOctet < 151) {
         window.electron.ipcRenderer.connectRemotely(ip);
@@ -174,10 +177,11 @@ function SwitchGrid(props: {
       if (event.ctrlKey && event.key === 'g') {
         doPing(selectedIp);
       } else if (event.ctrlKey && event.key === 'h') {
-        connect(
-          selectedIp,
-          reachabilityList.find((r) => r.id === selectedIp)?.reachability,
-        );
+        const selectedId = switchList.find((r) => r.ip === selectedIp)?.id;
+        const reachability = reachabilityList.find(
+          (r) => r.id === selectedId,
+        )?.reachability;
+        connect(selectedIp, reachability);
       }
     };
 

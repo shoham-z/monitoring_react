@@ -15,6 +15,9 @@ import AlertDialog from './AlertDialog';
 import PopupEditItem from './PopupEditItem';
 import ConfirmationDialog from './ConfirmationDialog';
 
+const SWITCH_IP_START = 239;
+const SWITCH_IP_END = 251;
+
 function SwitchItem(props: {
   index: any;
   name: string;
@@ -43,7 +46,7 @@ function SwitchItem(props: {
 
   let image;
   const lastOctet = parseInt(ip.split('.').pop(), 10);
-  if (lastOctet > 245 && lastOctet < 251) {
+  if (lastOctet > SWITCH_IP_START && lastOctet < SWITCH_IP_END) {
     image = switchImg;
   } else if (lastOctet > 0 && lastOctet < 151) {
     image = encryptorImg;
@@ -90,12 +93,11 @@ function SwitchItem(props: {
     onPing(ip, true);
   };
 
-  const openShow = () =>
-  {
+  const openShow = () => {
     setAlertTitle('Switch info');
     setAlertMessage(`IP Address: ${ip}\nName: ${name}`);
     setAlertOpen(true);
-  }
+  };
 
   const handleItemClick = (event: ItemParams<any, any>) => {
     switch (event.id) {
@@ -131,10 +133,9 @@ function SwitchItem(props: {
     return e.ctrlKey && e.key === 'h';
   };
 
-  const doubleClicked = () =>
-  {
+  const doubleClicked = () => {
     openShow();
-  }
+  };
 
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
