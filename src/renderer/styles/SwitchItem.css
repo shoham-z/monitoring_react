@@ -1,81 +1,94 @@
- /* Style the image inside the centered container, if needed */
- .switch-item img {
-  width: 50px;
-  height: 50px;
+/* Image styling */
+.switch-item img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  margin-bottom: 6px;
 }
 
+/* Container for each switch/computer/encryptor */
 .switch-item {
-  display: flex;         /* Set each item to be a flex container */
-  flex-direction: column; /* Stack the image and text vertically */
-  align-items: center;    /* Center them horizontally */
-  visibility: visible;
-  width: 100px; /* Fixed size for each item */
-  height: 100px; /* Optional: Fixed height for each item */
-  margin: 5px; /* Optional: spacing between items */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+
+  width: 120px;
+  height: 120px;
+  margin: 6px;
+  padding: 6px;
+
   background-color: lightblue;
+  border: 1px solid black;
+  border-radius: 6px;
+
   text-align: center;
-  line-height: 50px; /* Vertically center the text */
-  border: 1px black solid; /* Style the image inside the centered container, if needed */
+  font-family: "Roboto", sans-serif;
+
+  box-sizing: border-box;
+  transition: transform 0.2s, box-shadow 0.2s, border 0.2s;
 }
 
-
-.item-text {
-  text-align: flex-end;  /* Center the text horizontally */
-
-  flex-grow: 1;  /* Allow text to take remaining space */
-  line-height: 30px;  /* Vertically center the text next to the image */
+.switch-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
-
+/* Reachability states */
 .reachable {
   background-color: rgb(43, 187, 62);
-
 }
 
 .unreachable {
   background-color: rgb(207, 21, 15);
 }
 
+/* Selected item highlight */
 .switch-item.selected {
-  border-radius: 5px;
-  border-width: 2px;
-  width: 120px;
-  height: 120px;
+  border: 2px solid #000;
   color: white;
 }
 
+/* Text under icons */
 .switch-item-text {
-  visibility: visible;
   max-width: 100%;
   padding: 0 4px;
-  font-size: 14px;
+  margin-top: 4px;
+
+  font-size: clamp(11px, 1.1vw, 14px); /* responsive but always readable */
   line-height: 1.2;
-  word-wrap: break-word;
-  overflow-wrap: break-word;
+  font-weight: 500;
+  color: #333;
+
   text-align: center;
-  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #333;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 2;     /* limit to 2 lines */
+  -webkit-box-orient: vertical;
+  white-space: normal;
+  word-break: break-word;
 }
 
+/* Context menu overrides */
 .contexify {
-  --react-contexify-item-padding: 4px 8px; /* Adjusts vertical and horizontal padding */
+  --react-contexify-item-padding: 4px 8px;
+  --contexify-menu-minWidth: 140px;
+  font-size: 0.9rem;
 
-  --contexify-menu-minWidth: 120px;
-  font-size: small;
   &_item {
-      min-height: 24px !important;
-      &:focus{
-        outline: 0;
-      }
-      &Content {
-        padding: 2px;
-        display: flex;
-        align-items: center;
-        white-space: nowrap;
-        color: #333;
-        position: relative;
-      }
+    min-height: 28px !important;
+    &:focus {
+      outline: 0;
+    }
+    &Content {
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      white-space: nowrap;
+      color: #333;
+      position: relative;
+    }
   }
 }
