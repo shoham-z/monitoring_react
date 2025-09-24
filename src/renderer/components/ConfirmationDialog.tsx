@@ -1,4 +1,3 @@
-/* eslint-disable react/button-has-type */
 import '../styles/ConfirmationDialog.css';
 
 function ConfirmationDialog(props: {

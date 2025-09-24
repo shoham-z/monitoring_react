@@ -1,5 +1,3 @@
-/* eslint-disable react/no-array-index-key */
-/* eslint-disable react/button-has-type */
 import '../styles/AlertDialog.css';
 
 function AlertDialog(props: {

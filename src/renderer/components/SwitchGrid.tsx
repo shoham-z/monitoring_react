@@ -1,5 +1,3 @@
-/* eslint-disable react-hooks/exhaustive-deps */
-/* eslint-disable no-console */
 import { SetStateAction, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import '../styles/SwitchGrid.css';
@@ -272,7 +270,13 @@ function SwitchGrid(props: {
   };
 
   const handleSelect = (ip: string | SetStateAction<string>) => {
-    setSelectedIp(ip);
+    setSelectedIp((prev) => {
+      if (typeof ip === 'function') {
+        // preserve ability to pass updater functions
+        return (ip as any)(prev);
+      }
+      return prev === ip ? '' : ip;
+    });
   };
 
   const updateFilter = (data: SetStateAction<string>) => setFilter(data);
@@ -280,8 +284,13 @@ function SwitchGrid(props: {
   return (
     <>
       <TopPanel addSwitch={addSwitch} updateFilter={updateFilter} />
-      <div className="switch_div">
-        <div className="container_flex" id="container_flex">
+      <div className="switch_div"
+        onClick={() => {handleSelect(''); console.log("banana")}}
+      >
+        <div
+          className="container_flex"
+          id="container_flex"
+        >
           {switchList
             .filter((el) => {
               if (filter === '') return el;

@@ -40,20 +40,6 @@ function SwitchItem(props: {
     onDelete,
   } = props;
   const MENU_ID = `switch-menu-${ip}`;
-  const [APP_MODE, SetAppMode] = useState('');
-
-  useEffect(() => {
-    const readServers = async () => {
-      const result = await window.electron.ipcRenderer.getVars();
-      if (result.success) {
-        SetAppMode(result.content.MODE);
-      } else {
-        // console.log(result.error || 'Unknown error');
-      }
-    };
-
-    readServers();
-  }, []);
 
   const chooseImg = () => {
     if (APP_MODE === 'SWITCH') return switchImg;
@@ -68,10 +54,6 @@ function SwitchItem(props: {
     return computerImg;
   };
 
-  const image = chooseImg();
-
-  const reachabilityClass = reachability ? 'reachable' : 'unreachable';
-
   const { show } = useContextMenu({ id: MENU_ID });
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
@@ -79,6 +61,22 @@ function SwitchItem(props: {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [APP_MODE, SetAppMode] = useState('');
+  const image = chooseImg();
+  const reachabilityClass = reachability ? 'reachable' : 'unreachable';
+
+  useEffect(() => {
+    const readServers = async () => {
+      const result = await window.electron.ipcRenderer.getVars();
+      if (result.success) {
+        SetAppMode(result.content.MODE);
+      } else {
+        // console.log(result.error || 'Unknown error');
+      }
+    };
+
+    readServers();
+  }, []);
 
   const handleDelete = () => {
     setConfirmationOpen(true);
@@ -154,10 +152,12 @@ function SwitchItem(props: {
   };
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       className={`switch-item ${reachabilityClass} ${isSelected ? 'selected' : ''}`}
-      onClick={() => setSelected(ip)}
+      onClick={(e: MouseEvent) => {
+        e.stopPropagation();
+        setSelected(ip);
+      }}
       onContextMenu={displayMenu}
       onDoubleClick={doubleClicked}
     >

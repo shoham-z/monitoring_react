@@ -1,6 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading */
-/* eslint-disable jsx-a11y/label-has-associated-control */
-/* eslint-disable react/button-has-type */
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Popup from 'reactjs-popup';

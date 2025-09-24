@@ -1,5 +1,3 @@
-/* eslint-disable react/jsx-props-no-spreading */
-/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useForm } from 'react-hook-form';
 import '../styles/ButtonAddItem.css';
 import { Dispatch, SetStateAction } from 'react';
