@@ -33,6 +33,7 @@ function SwitchGrid(props: {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
+  const [itemScale, setItemScale] = useState(1);
 
   useEffect(() => {
     const readServers = async () => {
@@ -279,13 +280,19 @@ function SwitchGrid(props: {
     });
   };
 
+  const handleWheel = (event) => {
+    console.log(itemScale);
+    setItemScale(prev => prev - event.deltaY / 10000);
+	};
+
   const updateFilter = (data: SetStateAction<string>) => setFilter(data);
 
   return (
     <>
       <TopPanel addSwitch={addSwitch} updateFilter={updateFilter} />
       <div className="switch_div"
-        onClick={() => {handleSelect(''); console.log("banana")}}
+        onClick={() => handleSelect('')}
+        onWheel={handleWheel}
       >
         <div
           className="container_flex"
@@ -307,6 +314,7 @@ function SwitchGrid(props: {
                   reachabilityList.find((el) => el.id === x.id)?.reachability
                 }
                 ip={x.ip}
+                scale={itemScale}
                 isSelected={selectedIp.toString() === x.ip}
                 setSelected={() => handleSelect(x.ip)}
                 onPing={doPing}

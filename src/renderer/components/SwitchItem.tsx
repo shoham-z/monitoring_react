@@ -20,6 +20,7 @@ function SwitchItem(props: {
   name: string;
   reachability: any;
   ip: any;
+  scale: any;
   setSelected: any;
   isSelected: any;
   onPing: any;
@@ -32,6 +33,7 @@ function SwitchItem(props: {
     name,
     reachability,
     ip,
+    scale,
     setSelected,
     isSelected,
     onPing,
@@ -160,6 +162,7 @@ function SwitchItem(props: {
       }}
       onContextMenu={displayMenu}
       onDoubleClick={doubleClicked}
+      style={{ "--scale": scale }}
     >
       <img src={image} alt="Switch" />
       <p className="switch-item-text">{name}</p>

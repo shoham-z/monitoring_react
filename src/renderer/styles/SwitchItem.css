@@ -1,7 +1,7 @@
 /* Image styling */
 .switch-item img {
-  width: 48px;
-  height: 48px;
+  width: calc(48px * var(--scale));
+  height: calc(48px * var(--scale));
   object-fit: contain;
   margin-bottom: 6px;
 }
@@ -13,8 +13,8 @@
   align-items: center;
   justify-content: flex-start;
 
-  width: 120px;
-  height: 120px;
+  width: calc(120px * var(--scale));
+  height: calc(120px * var(--scale));
   margin: 6px;
   padding: 6px;
 
