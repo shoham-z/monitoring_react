@@ -48,12 +48,11 @@ function SwitchItem(props: {
       if (result.success) {
         SetAppMode(result.content.MODE);
       } else {
-        console.log(result.error || 'Unknown error');
+        // console.log(result.error || 'Unknown error');
       }
     };
 
     readServers();
-    setInterval(() => readServers(), 60 * 1000);
   }, []);
 
   const chooseImg = () => {
@@ -134,7 +133,7 @@ function SwitchItem(props: {
         handleDelete();
         break;
       default:
-        console.log(`default ${ip}`);
+      // console.log(`default ${ip}`);
     }
   };
 

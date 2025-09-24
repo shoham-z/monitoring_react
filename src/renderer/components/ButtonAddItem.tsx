@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable jsx-a11y/label-has-associated-control */
 import { useForm } from 'react-hook-form';
 import '../styles/ButtonAddItem.css';
 import { Dispatch, SetStateAction } from 'react';
@@ -27,7 +29,7 @@ function ButtonAddItem(props: {
       setOpen(false);
       reset();
     } catch (err) {
-      alert(`Error while adding switch: ${err}`);
+      // alert(`Error while adding switch: ${err}`);
       // Optionally: show error message to user
     }
   };

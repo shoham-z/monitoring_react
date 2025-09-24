@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable no-console */
 import { SetStateAction, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
@@ -64,7 +65,7 @@ function SwitchGrid(props: {
         return;
       }
 
-      const lastOctet = parseInt(ip.split('.').pop(), 10);
+      const lastOctet = parseInt(ip.split('.').pop() || '', 10);
 
       if (lastOctet > 240 && lastOctet < 255) {
         // if address between 240 and 250
@@ -73,7 +74,9 @@ function SwitchGrid(props: {
         window.electron.ipcRenderer.connectRemotely(ip);
       } else {
         setAlertTitle('Cant connect to this device');
-        // setAlertMessage('This device is not remotely connectable');
+        setAlertMessage(
+          'This device seems to be a computer and is not remotely connectable',
+        );
         setAlertOpen(true);
       }
     } else {
@@ -186,7 +189,7 @@ function SwitchGrid(props: {
         const reachability = reachabilityList.find(
           (r) => r.id === selectedId,
         )?.reachability;
-        connect(selectedIp, reachability);
+        connect(selectedIp, reachability || false);
       }
     };
 
