@@ -280,8 +280,7 @@ function SwitchGrid(props: {
     });
   };
 
-  const handleWheel = (event) => {
-    console.log(itemScale);
+  const handleWheel = (event: { deltaY: number; }) => {
     setItemScale(prev => prev - event.deltaY / 10000);
 	};
 
