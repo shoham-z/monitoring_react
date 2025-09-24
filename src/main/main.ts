@@ -247,7 +247,7 @@ ipcMain.on('connect-remotely', (event, ip) => {
 
 ipcMain.handle('get-vars', async (_event) => {
   try {
-    const filePath = path.join(basePath, 'assets/vars.txt');
+    const filePath = path.join(basePath, 'assets/vars.json');
     const json = fs.readFileSync(filePath, 'utf-8');
     const content = JSON.parse(json);
     return { success: true, content };
