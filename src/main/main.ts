@@ -245,16 +245,6 @@ ipcMain.on('connect-remotely', (event, ip) => {
 
 /// ========= END OF SECTION CONNECT REMOTELY =========
 
-ipcMain.handle('read-text-file', async (_event, filename) => {
-  try {
-    const filePath = path.join(basePath, 'assets/text_files/', filename);
-    const content = fs.readFileSync(filePath, 'utf-8');
-    return { success: true, content };
-  } catch (error) {
-    return { success: false, error: error.message };
-  }
-});
-
 ipcMain.handle('get-vars', async (_event) => {
   try {
     const filePath = path.join(basePath, 'assets/vars.txt');
