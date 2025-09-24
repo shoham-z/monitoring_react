@@ -254,3 +254,15 @@ ipcMain.handle('read-text-file', async (_event, filename) => {
     return { success: false, error: error.message };
   }
 });
+
+ipcMain.handle('get-vars', async (_event) => {
+  try {
+    const filePath = path.join(basePath, 'assets/vars.txt');
+    const json = fs.readFileSync(filePath, 'utf-8');
+    const content = JSON.parse(json);
+    return { success: true, content };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+

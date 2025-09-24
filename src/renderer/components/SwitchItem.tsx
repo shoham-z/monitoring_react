@@ -1,4 +1,4 @@
-import { MouseEvent, useState } from 'react';
+import { MouseEvent, useEffect, useState } from 'react';
 import {
   Item,
   ItemParams,
@@ -8,6 +8,7 @@ import {
 } from 'react-contexify';
 import switchImg from '../../img/switch.png';
 import computerImg from '../../img/computer.png';
+import encryptorImg from '../../img/encryptor.png';
 import '../styles/SwitchItem.css';
 import 'react-contexify/ReactContexify.css';
 import AlertDialog from './AlertDialog';
@@ -39,8 +40,36 @@ function SwitchItem(props: {
     onDelete,
   } = props;
   const MENU_ID = `switch-menu-${ip}`;
+  const [APP_MODE, SetAppMode] = useState('');
 
-  const image = switchImg;
+  useEffect(() => {
+    const readServers = async () => {
+      const result = await window.electron.ipcRenderer.getVars();
+      if (result.success) {
+        SetAppMode(result.content.MODE);
+      } else {
+        console.log(result.error || 'Unknown error');
+      }
+    };
+
+    readServers();
+    setInterval(() => readServers(), 60 * 1000);
+  }, []);
+
+  const chooseImg = () => {
+    if (APP_MODE === 'SWITCH') return switchImg;
+
+    const lastOctet = parseInt(ip.split('.').pop(), 10);
+    if (lastOctet > 240 && lastOctet < 255) {
+      return switchImg;
+    }
+    if (lastOctet > 0 && lastOctet < 151) {
+      return encryptorImg;
+    }
+    return computerImg;
+  };
+
+  const image = chooseImg();
 
   const reachabilityClass = reachability ? 'reachable' : 'unreachable';
 

@@ -22,6 +22,7 @@ function SwitchGrid(props: {
 }) {
   const { addNotification } = props;
   const [SERVER_IP, SetServerIp] = useState('');
+  const [APP_MODE, SetAppMode] = useState('');
   const [isReady, setIsReady] = useState(false);
   const [selectedIp, setSelectedIp] = useState('');
   const [switchList, setSwitchList] = useState<Array<SwitchEntry>>([]);
@@ -36,10 +37,10 @@ function SwitchGrid(props: {
 
   useEffect(() => {
     const readServers = async () => {
-      const result =
-        await window.electron.ipcRenderer.readTextFile('server_ip.txt');
+      const result = await window.electron.ipcRenderer.getVars();
       if (result.success) {
-        let ip = result.content || '';
+        let ip = result.content.SERVER_IP || '';
+        SetAppMode(result.content.MODE);
         if (!ip.startsWith('http')) {
           ip = `http://${ip}`;
         }
@@ -58,7 +59,23 @@ function SwitchGrid(props: {
     console.log(ip);
     console.log(reachable);
     if (reachable) {
-      window.electron.ipcRenderer.connectSSH(ip);
+      if (APP_MODE === 'SWITCH') {
+        window.electron.ipcRenderer.connectSSH(ip);
+        return;
+      }
+
+      const lastOctet = parseInt(ip.split('.').pop(), 10);
+
+      if (lastOctet > 240 && lastOctet < 255) {
+        // if address between 240 and 250
+        window.electron.ipcRenderer.connectSSH(ip);
+      } else if (lastOctet > 0 && lastOctet < 151) {
+        window.electron.ipcRenderer.connectRemotely(ip);
+      } else {
+        setAlertTitle('Cant connect to this device');
+        // setAlertMessage('This device is not remotely connectable');
+        setAlertOpen(true);
+      }
     } else {
       setAlertTitle('Device Unreachable');
       // setAlertMessage('This device is not reachable');

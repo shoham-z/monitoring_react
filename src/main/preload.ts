@@ -37,6 +37,9 @@ const electronHandler = {
     readTextFile: async (filename: string) =>
       ipcRenderer.invoke('read-text-file', filename),
 
+    getVars: async () =>
+      ipcRenderer.invoke('get-vars'),
+
     // alertDown: (ip: any, name: any) => ipcRenderer.send('alert-down', ip, name),
 
     // onNotif: (callback: (arg0: any) => void) =>
