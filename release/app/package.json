@@ -1,12 +1,12 @@
 {
   "name": "golden-apple",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A Monitoring Client App Based on Electron",
   "license": "MIT",
   "author": {
     "name": "Shoham Zeharya",
     "email": "shozeh123@gmail.com",
-    "url": "https://github.com/electron-react-boilerplate"
+    "url": "https://github.com/shoham-z"
   },
   "main": "./dist/main/main.js",
   "scripts": {

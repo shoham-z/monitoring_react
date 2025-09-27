@@ -52,7 +52,8 @@
     "test": "jest"
   },
   "browserslist": [
-    "extends browserslist-config-erb"
+    "defaults and fully supports es6-module",
+    "maintained node versions"
   ],
   "prettier": {
     "singleQuote": true,
@@ -104,8 +105,8 @@
     "@electron/notarize": "^2.3.2",
     "are-we-there-yet": "^4.0.2",
     "axios": "^1.9.0",
+    "browserslist-config-erb": "^0.0.3",
     "caniuse-lite": "^1.0.30001720",
-    "electron": "^38.1.2",
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.8",
     "electron-updater": "^6.1.4",
@@ -134,7 +135,6 @@
     "@types/webpack-bundle-analyzer": "^4.6.0",
     "@typescript-eslint/eslint-plugin": "^6.7.0",
     "@typescript-eslint/parser": "^6.7.0",
-    "browserslist-config-erb": "^0.0.3",
     "chalk": "^4.1.2",
     "concurrently": "^8.2.1",
     "core-js": "^3.32.2",
@@ -142,6 +142,7 @@
     "css-loader": "^6.8.1",
     "css-minimizer-webpack-plugin": "^5.0.1",
     "detect-port": "^1.5.1",
+    "electron": "^38.1.2",
     "electron-builder": "^24.13.3",
     "electron-devtools-installer": "^3.2.0",
     "electronmon": "^2.0.2",
