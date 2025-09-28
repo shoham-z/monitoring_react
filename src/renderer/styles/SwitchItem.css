@@ -31,7 +31,7 @@
 
 /* Reachability states */
 .reachable {
-  background-color: rgb(43, 187, 62);
+  background-color: rgb(83, 219, 53);
 }
 
 .unreachable {
@@ -60,7 +60,7 @@
   text-overflow: ellipsis;
 
   display: -webkit-box;
-  -webkit-line-clamp: 2;     /* limit to 2 lines */
+  -webkit-line-clamp: 3;     /* limit to 2 lines */
   -webkit-box-orient: vertical;
   white-space: normal;
   word-break: break-word;
