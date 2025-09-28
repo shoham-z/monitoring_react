@@ -60,7 +60,7 @@
   text-overflow: ellipsis;
 
   display: -webkit-box;
-  -webkit-line-clamp: 3;     /* limit to 2 lines */
+  -webkit-line-clamp: 3;     /* limit to 3 lines */
   -webkit-box-orient: vertical;
   white-space: normal;
   word-break: break-word;
