@@ -15,12 +15,12 @@
 
   width: calc(120px * var(--scale));
   height: calc(120px * var(--scale));
-  margin: 6px;
-  padding: 6px;
+  margin: 5px;
+  padding: 3px;
 
   background-color: lightblue;
   border: 1px solid black;
-  border-radius: 6px;
+  border-radius: 5px;
 
   text-align: center;
   font-family: "Roboto", sans-serif;
@@ -35,13 +35,12 @@
 }
 
 .unreachable {
-  background-color: rgb(207, 21, 15);
+  background-color: rgb(222, 47, 41);
 }
 
 /* Selected item highlight */
 .switch-item.selected {
   border: 3px solid #000;
-  color: white;
 }
 
 /* Text under icons */
@@ -58,6 +57,17 @@
   text-align: center;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: bold;
+
+    text-shadow:
+     1px 1px 0 white,
+    -1px 1px 0 white,
+     1px -1px 0 white,
+    -1px -1px 0 white,
+     1px 0 0 white,
+    -1px 0 0 white,
+     0 1px 0 white,
+     0 -1px 0 white;
 
   display: -webkit-box;
   -webkit-line-clamp: 3;     /* limit to 3 lines */
