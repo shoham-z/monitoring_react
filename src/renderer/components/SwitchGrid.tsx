@@ -281,7 +281,7 @@ function SwitchGrid(props: {
   };
 
   const handleWheel = (event: { deltaY: number; }) => {
-    setItemScale(prev => prev - event.deltaY / 10000);
+    if (event.ctrlKey) setItemScale(prev => prev - event.deltaY / 10000);
 	};
 
   const updateFilter = (data: SetStateAction<string>) => setFilter(data);
