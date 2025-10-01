@@ -3,7 +3,6 @@
   width: calc(48px * var(--scale));
   height: calc(48px * var(--scale));
   object-fit: contain;
-  margin-bottom: 6px;
 }
 
 /* Container for each switch/computer/encryptor */
@@ -47,9 +46,9 @@
 .switch-item-text {
   max-width: 100%;
   padding: 0 4px;
-  margin-top: 4px;
+  margin-top: 0px;
 
-  font-size: clamp(11px, 1.1vw, 14px); /* responsive but always readable */
+  font-size: calc(18px * var(--scale));
   line-height: 1.2;
   font-weight: 500;
   color: #333;

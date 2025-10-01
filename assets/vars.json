@@ -1,4 +1,4 @@
 {
-  "SERVER_IP": "10.0.0.17:3001",
+  "SERVER_IP": "IP_ADDRESS:3001",
   "MODE": "SWITCH"
 }
