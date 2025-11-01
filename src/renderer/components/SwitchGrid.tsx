@@ -251,7 +251,9 @@ function SwitchGrid(props: {
 
     axios
       .put(`${SERVER_IP}/api/edit`, {
-        data: { id: index, ip, name: hostname },
+        id: index,
+        ip,
+        name: hostname,
       })
       .then((data) => console.log(data))
       .catch((error) => console.log(`Error: ${error}`));
