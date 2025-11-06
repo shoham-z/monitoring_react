@@ -7,6 +7,24 @@ type Inputs = {
   ipAddress: string;
 };
 
+// Validation functions
+const isNotEmptyOrWhitespace = (value: string): boolean => {
+  return value.trim().length > 0;
+};
+
+const isValidIPv4 = (ip: string): boolean => {
+  const ipv4Regex =
+    /^(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}$/;
+  if (!ipv4Regex.test(ip)) {
+    return false;
+  }
+  const parts = ip.split('.');
+  return parts.every((part) => {
+    const num = parseInt(part, 10);
+    return num >= 0 && num <= 255;
+  });
+};
+
 function ButtonAddItem(props: {
   callback: any;
   isOpen: boolean;
@@ -23,7 +41,10 @@ function ButtonAddItem(props: {
 
   const onSubmit = (data: { hostname: any; ipAddress: any }) => {
     try {
-      callback(data.ipAddress, data.hostname);
+      // Trim values before submitting
+      const trimmedIp = data.ipAddress.trim();
+      const trimmedHostname = data.hostname.trim();
+      callback(trimmedIp, trimmedHostname);
       setOpen(false);
       reset();
     } catch (err) {
@@ -51,10 +72,20 @@ function ButtonAddItem(props: {
             <input
               className="mui-input"
               defaultValue="192.168."
-              {...register('ipAddress', { required: true })}
+              {...register('ipAddress', {
+                required: 'IP address is required',
+                validate: {
+                  notEmpty: (value) =>
+                    isNotEmptyOrWhitespace(value) ||
+                    'IP address cannot be empty or just spaces',
+                  validIPv4: (value) =>
+                    isValidIPv4(value.trim()) ||
+                    'Please enter a valid IPv4 address (e.g., 192.168.1.1)',
+                },
+              })}
             />
             {errors.ipAddress && (
-              <span className="mui-error">This field is required</span>
+              <span className="mui-error">{errors.ipAddress.message}</span>
             )}
           </div>
 
@@ -62,10 +93,16 @@ function ButtonAddItem(props: {
             <label className="mui-label">Hostname</label>
             <input
               className="mui-input"
-              {...register('hostname', { required: true })}
+              {...register('hostname', {
+                required: 'Hostname is required',
+                validate: {
+                  notEmpty: (value) =>
+                    isNotEmptyOrWhitespace(value) || 'Hostname is required',
+                },
+              })}
             />
             {errors.hostname && (
-              <span className="mui-error">This field is required</span>
+              <span className="mui-error">{errors.hostname.message}</span>
             )}
           </div>
 

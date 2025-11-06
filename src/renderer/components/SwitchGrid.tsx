@@ -242,17 +242,24 @@ function SwitchGrid(props: {
       .catch((error) => console.log(`Error: ${error}`));
   };
 
-  const editSwitch = (index: string, ip: string, hostname: string) => {
+  const editSwitch = (index: string, newIp: string, hostname: string) => {
+    const numericId = Number(index);
+    const previousIp = switchList.find((item) => item.id === numericId)?.ip;
+
     setSwitchList((prevList) =>
       prevList.map((item) =>
-        item.ip === ip ? { ...item, name: hostname } : item,
+        item.id === numericId ? { ...item, name: hostname, ip: newIp } : item,
       ),
     );
+
+    if (previousIp && selectedIp === previousIp) {
+      setSelectedIp(newIp);
+    }
 
     axios
       .put(`${SERVER_IP}/api/edit`, {
         id: index,
-        ip,
+        ip: newIp,
         name: hostname,
       })
       .then((data) => console.log(data))
