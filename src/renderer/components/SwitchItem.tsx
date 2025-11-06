@@ -43,6 +43,14 @@ function SwitchItem(props: {
   } = props;
   const MENU_ID = `switch-menu-${ip}`;
 
+  const { show } = useContextMenu({ id: MENU_ID });
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [deleteItem, setDeleteItem] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [APP_MODE, SetAppMode] = useState('');
   const chooseImg = () => {
     if (APP_MODE === 'SWITCH') return switchImg;
 
@@ -55,15 +63,6 @@ function SwitchItem(props: {
     }
     return computerImg;
   };
-
-  const { show } = useContextMenu({ id: MENU_ID });
-  const [confirmationOpen, setConfirmationOpen] = useState(false);
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [deleteItem, setDeleteItem] = useState(false);
-  const [alertTitle, setAlertTitle] = useState('');
-  const [alertMessage, setAlertMessage] = useState('');
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [APP_MODE, SetAppMode] = useState('');
   const image = chooseImg();
   const reachabilityClass = reachability ? 'reachable' : 'unreachable';
 
@@ -138,6 +137,7 @@ function SwitchItem(props: {
   };
 
   function displayMenu(e: MouseEvent) {
+    if (isEditOpen || confirmationOpen || alertOpen) return;
     show({ event: e });
   }
 
@@ -149,20 +149,25 @@ function SwitchItem(props: {
     return e.ctrlKey && e.key === 'h';
   };
 
-  const doubleClicked = () => {
+  const doubleClicked = (e: MouseEvent) => {
+    // Prevent double-clicks inside the edit popup from bubbling and opening the show dialog
+    e.stopPropagation();
+    if (isEditOpen || confirmationOpen || alertOpen) return;
     openShow();
   };
 
   return (
+    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       className={`switch-item ${reachabilityClass} ${isSelected ? 'selected' : ''}`}
       onClick={(e: MouseEvent) => {
         e.stopPropagation();
+        if (isEditOpen || confirmationOpen || alertOpen) return;
         setSelected(ip);
       }}
       onContextMenu={displayMenu}
       onDoubleClick={doubleClicked}
-      style={{ "--scale": scale }}
+      style={{ ['--scale' as any]: scale }}
     >
       <img src={image} alt="Switch" />
       <p className="switch-item-text">{name}</p>
