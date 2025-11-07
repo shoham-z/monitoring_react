@@ -153,6 +153,10 @@ function SwitchItem(props: {
   function displayMenu(e: MouseEvent) {
     if (isEditOpen || confirmationOpen || alertOpen) return;
     show({ event: e });
+    e.preventDefault(); // prevent default browser context menu
+    e.stopPropagation();
+    if (isEditOpen || confirmationOpen || alertOpen) return;
+    setSelected(ip); // Right click
   }
 
   const matchShortcutPing = (e: { ctrlKey: any; key: string }): boolean => {
