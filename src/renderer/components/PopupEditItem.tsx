@@ -90,12 +90,13 @@ function PopupEditItem({
           <label className="mui-label">IP Address</label>
           <input
             className="mui-input"
+            placeholder={initialIpAddress}
             {...register('ipAddress', {
               required: 'IP address is required',
               validate: {
                 notEmpty: (value) =>
                   isNotEmptyOrWhitespace(value) ||
-                  'IP address cannot be empty or just spaces',
+                  'IP address is required',
                 validIPv4: (value) =>
                   isValidIPv4(value.trim()) ||
                   'Please enter a valid IPv4 address (e.g., 192.168.1.1)',
@@ -109,6 +110,7 @@ function PopupEditItem({
           <label className="mui-label">Hostname</label>
           <input
             className="mui-input"
+            placeholder={initialHostname}
             {...register('hostname', {
               required: 'Hostname is required',
               validate: {
