@@ -46,7 +46,6 @@ function SwitchItem(props: {
   const { show } = useContextMenu({ id: MENU_ID });
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
-  const [deleteItem, setDeleteItem] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -91,17 +90,32 @@ function SwitchItem(props: {
     setIsEditOpen(true);
   };
 
-  const handleChoice = (choice: boolean) => {
+  const handleChoice = async (choice: boolean) => {
     setConfirmationOpen(false);
 
-    setAlertTitle(choice ? 'The switch was deleted' : 'Cancelled');
-    setAlertMessage(
-      choice
-        ? `The switch with the following IP address was deleted: ${ip}`
-        : 'No switch was deleted',
-    );
-    setAlertOpen(true);
-    setDeleteItem(choice);
+    if (!choice) {
+      // User cancelled
+      setAlertTitle('Cancelled');
+      setAlertMessage('No switch was deleted');
+      setAlertOpen(true);
+      return;
+    }
+
+    // User confirmed deletion - wait for server response before showing success message
+    try {
+      const success = await onDelete(ip);
+      if (success) {
+        // Only show success message if deletion actually succeeded
+        setAlertTitle('The switch was deleted');
+        setAlertMessage(
+          `The switch with the following IP address was deleted: ${ip}`,
+        );
+        setAlertOpen(true);
+      }
+      // If deletion failed, error message is already shown by SwitchGrid
+    } catch (error) {
+      // Error handling is done in SwitchGrid, just don't show success message
+    }
   };
 
   const handlePing = () => {
@@ -216,9 +230,7 @@ function SwitchItem(props: {
         setIsOpen={setAlertOpen}
         title={alertTitle}
         message={alertMessage}
-        onDelete={() => {
-          if (deleteItem) onDelete(ip);
-        }}
+        onDelete={() => {}}
       />
     </div>
   );

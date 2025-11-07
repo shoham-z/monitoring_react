@@ -35,6 +35,47 @@ function SwitchGrid(props: {
   const [alertMessage, setAlertMessage] = useState('');
   const [itemScale, setItemScale] = useState(1);
 
+  // Helper function to convert server error responses to human-readable messages
+  const getHumanReadableError = (
+    status: number,
+    errorMessage?: string,
+  ): string => {
+    switch (status) {
+      case 400:
+        if (errorMessage?.includes('Missing required fields')) {
+          return 'Some required information is missing.\n Please check that all fields are filled correctly.';
+        }
+        if (errorMessage?.includes('Invalid IPv4 address')) {
+          return 'The IP address you entered is not valid.\n Please enter a valid IP address (e.g., 192.168.1.1).';
+        }
+        if (errorMessage?.includes('Name cannot be empty')) {
+          return 'The name cannot be empty.\n Please enter a name for this device.';
+        }
+        return 'The information you provided is not valid.\n Please check your input and try again.';
+      case 404:
+        return 'The device you are trying to modify was not found.\n It may have been deleted by another user.';
+      case 409:
+        if (errorMessage?.includes('UNIQUE constraint')) {
+          return 'A device with this IP address already exists.\n Please use a different IP address.';
+        }
+        return 'This action conflicts with existing data.\n The device may already exist';
+      case 500:
+        return 'The server encountered an unexpected error.\n Please try again later or contact support if the problem persists.';
+      default:
+        if (errorMessage) {
+          return errorMessage;
+        }
+        return 'An unexpected error occurred.\n Please try again.';
+    }
+  };
+
+  // Helper function to show error alert
+  const showErrorAlert = (title: string, message: string) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
+    setAlertOpen(true);
+  };
+
   useEffect(() => {
     const readServers = async () => {
       const result = await window.electron.ipcRenderer.getVars();
@@ -90,24 +131,40 @@ function SwitchGrid(props: {
       .get(`${SERVER_IP}/api/getAll`)
       // eslint-disable-next-line promise/always-return
       .then((response) => {
-        const { data } = response;
-        console.log(data);
+        if (response.status === 200) {
+          const { data } = response;
+          console.log(data);
 
-        // Set switch list
-        setSwitchList(data);
+          // Set switch list
+          setSwitchList(data);
 
-        setReachabilityList((prev) => {
-          if (prev.length === 0) {
-            return data.map((item: SwitchEntry) => ({
-              id: item.id,
-              reachability: true, // or false based on your logic
-            }));
-          }
-          return prev;
-        });
+          setReachabilityList((prev) => {
+            if (prev.length === 0) {
+              return data.map((item: SwitchEntry) => ({
+                id: item.id,
+                reachability: true, // or false based on your logic
+              }));
+            }
+            return prev;
+          });
+        }
+        return null;
       })
       // Update state with fetched data
-      .catch((error) => console.error('Error fetching data:', error));
+      .catch((error) => {
+        console.error('Error fetching data:', error);
+        if (error.response) {
+          const { status } = error.response;
+          const errorMsg = error.response.data?.error || '';
+          const humanReadable = getHumanReadableError(status, errorMsg);
+          showErrorAlert('Failed to Load Devices', humanReadable);
+        } else {
+          showErrorAlert(
+            'Connection Error',
+            'Unable to connect to the server. Please check your connection and try again.',
+          );
+        }
+      });
   };
 
   // get new switch list
@@ -116,6 +173,7 @@ function SwitchGrid(props: {
 
     fetchFromServer();
     setInterval(() => fetchFromServer(), 30000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady]); // Empty dependency array = runs once on mount
 
   const updateReachability = (
@@ -194,6 +252,7 @@ function SwitchGrid(props: {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedIp]);
 
   useEffect(() => {
@@ -204,57 +263,52 @@ function SwitchGrid(props: {
     }, 5 * 1000); // Ping every 10 seconds
 
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [switchList]);
 
   const addSwitch = (ip: any, hostname: any) => {
-    // FOR THE NEW ID, NEED TO FETCH FROM SERVER AND GET THE MAX ID + 1
-
-    const getMaxId = (list: any[]) => {
-      return Math.max(...list.map((item) => item.id));
-    };
-    axios
-      .get(`${SERVER_IP}/api/getAll`)
-      .then((response) => response.data) // Parse JSON response
-      .then((data) => {
-        console.log(data);
-        return data;
-      })
-      .then((data) => {
-        const newId = getMaxId(data) + 1;
-        const newSwitch = {
-          id: newId,
-          name: hostname,
-          reachability: false,
-          ip,
-        };
-        setSwitchList([...switchList, newSwitch]);
-        return null;
-      })
-      .catch((error) => console.error('Error fetching data:', error));
-
     axios
       .post(
         `${SERVER_IP}/api/add`,
         { ip, name: hostname },
         { headers: { 'Content-Type': 'application/json' } },
       )
-      .then((data) => console.log(data))
-      .catch((error) => console.log(`Error: ${error}`));
+      .then((response) => {
+        if (response.status === 201) {
+          // Only update UI if server successfully added the device
+          const getMaxId = (list: any[]) => {
+            return Math.max(...list.map((item) => item.id), 0);
+          };
+          const newId = getMaxId(switchList) + 1;
+          const newSwitch = {
+            id: newId,
+            name: hostname,
+            reachability: false,
+            ip,
+          };
+          setSwitchList([...switchList, newSwitch]);
+        }
+        return null;
+      })
+      .catch((error) => {
+        console.error('Error adding device:', error);
+        if (error.response) {
+          const { status } = error.response;
+          const errorMsg = error.response.data?.error || '';
+          const humanReadable = getHumanReadableError(status, errorMsg);
+          showErrorAlert('Failed to Add Device', humanReadable);
+        } else {
+          showErrorAlert(
+            'Connection Error',
+            'Unable to connect to the server. Please check your connection and try again.',
+          );
+        }
+      });
   };
 
   const editSwitch = (index: string, newIp: string, hostname: string) => {
     const numericId = Number(index);
     const previousIp = switchList.find((item) => item.id === numericId)?.ip;
-
-    setSwitchList((prevList) =>
-      prevList.map((item) =>
-        item.id === numericId ? { ...item, name: hostname, ip: newIp } : item,
-      ),
-    );
-
-    if (previousIp && selectedIp === previousIp) {
-      setSelectedIp(newIp);
-    }
 
     axios
       .put(`${SERVER_IP}/api/edit`, {
@@ -262,21 +316,69 @@ function SwitchGrid(props: {
         ip: newIp,
         name: hostname,
       })
-      .then((data) => console.log(data))
-      .catch((error) => console.log(`Error: ${error}`));
+      .then((response) => {
+        if (response.status === 200) {
+          // Only update UI if server successfully edited the device
+          setSwitchList((prevList) =>
+            prevList.map((item) =>
+              item.id === numericId
+                ? { ...item, name: hostname, ip: newIp }
+                : item,
+            ),
+          );
+
+          if (previousIp && selectedIp === previousIp) {
+            setSelectedIp(newIp);
+          }
+        }
+        return null;
+      })
+      .catch((error) => {
+        console.error('Error editing device:', error);
+        if (error.response) {
+          const { status } = error.response;
+          const errorMsg = error.response.data?.error || '';
+          const humanReadable = getHumanReadableError(status, errorMsg);
+          showErrorAlert('Failed to Edit Device', humanReadable);
+        } else {
+          showErrorAlert(
+            'Connection Error',
+            'Unable to connect to the server. Please check your connection and try again.',
+          );
+        }
+      });
   };
 
-  const deleteSwitch = (ip: string) => {
-    setSwitchList(
-      switchList.filter((el) => {
-        return el.ip !== ip ? el : null;
-      }),
-    );
-
-    axios
+  const deleteSwitch = (ip: string): Promise<boolean> => {
+    return axios
       .delete(`${SERVER_IP}/api/delete`, { data: { ip } })
-      .then((data) => console.log(data))
-      .catch((error) => console.log(`Error: ${error}`));
+      .then((response) => {
+        if (response.status === 200) {
+          // Only update UI if server successfully deleted the device
+          setSwitchList(
+            switchList.filter((el) => {
+              return el.ip !== ip ? el : null;
+            }),
+          );
+          return true;
+        }
+        return false;
+      })
+      .catch((error) => {
+        console.error('Error deleting device:', error);
+        if (error.response) {
+          const { status } = error.response;
+          const errorMsg = error.response.data?.error || '';
+          const humanReadable = getHumanReadableError(status, errorMsg);
+          showErrorAlert('Failed to Delete Device', humanReadable);
+        } else {
+          showErrorAlert(
+            'Connection Error',
+            'Unable to connect to the server. Please check your connection and try again.',
+          );
+        }
+        return false;
+      });
   };
 
   const handleSelect = (ip: string | SetStateAction<string>) => {
@@ -289,23 +391,26 @@ function SwitchGrid(props: {
     });
   };
 
-  const handleWheel = (event: { deltaY: number; }) => {
-    if (event.ctrlKey) setItemScale(prev => prev - event.deltaY / 10000);
-	};
+  const handleWheel = (event: { deltaY: number; ctrlKey?: boolean }) => {
+    if (event.ctrlKey) setItemScale((prev) => prev - event.deltaY / 10000);
+  };
 
   const updateFilter = (data: SetStateAction<string>) => setFilter(data);
 
   return (
     <>
       <TopPanel addSwitch={addSwitch} updateFilter={updateFilter} />
-      <div className="switch_div"
+      <div
+        className="switch_div"
         onClick={() => handleSelect('')}
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') handleSelect('');
+        }}
         onWheel={handleWheel}
+        role="button"
+        tabIndex={0}
       >
-        <div
-          className="container_flex"
-          id="container_flex"
-        >
+        <div className="container_flex" id="container_flex">
           {switchList
             .filter((el) => {
               if (filter === '') return el;
