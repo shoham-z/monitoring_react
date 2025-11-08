@@ -7,7 +7,22 @@
   overflow: auto;
 }
 
-.container_flex{
+.container_flex {
   display: flex;
   flex-wrap: wrap;
 }
+
+.div_header {
+  width: 100%;
+  text-align: start;
+  border-bottom: 1px solid #000;
+  line-height: 0.1em;
+  margin: 10px 0 10px;
+}
+
+.div_header span {
+  background:#e0e0e0;
+  padding:0 10px;
+  color: black;
+}
+

@@ -5,17 +5,18 @@ import { useState } from 'react';
 import SwitchGrid from './components/SwitchGrid';
 import NotificationPanel from './components/NotificationPanel';
 
-interface Notification {
+export interface Notification {
   id: string;
   message: string;
   timestamp: string;
   color: string;
+  swId: number;
 }
 
 function Window() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
-  const addNotification = (message: string, color?: string) => {
+  const addNotification = (message: string, swId: number, color?: string) => {
     setNotifications((prev) => [
       ...prev,
       {
@@ -23,6 +24,7 @@ function Window() {
         message,
         timestamp: new Date().toLocaleString('en-GB'),
         color: color || 'white',
+        swId,
       },
     ]);
   };
@@ -37,7 +39,9 @@ function Window() {
 
   return (
     <div className="main-window">
-      <SwitchGrid addNotification={addNotification} />
+      <SwitchGrid
+        addNotification={addNotification}
+        notifications={notifications} />
       <NotificationPanel
         notifications={notifications}
         deleteNotification={deleteNotification}
