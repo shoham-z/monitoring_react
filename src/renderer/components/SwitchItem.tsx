@@ -45,7 +45,7 @@ function SwitchItem(props: {
   } = props;
   const MENU_ID = `switch-menu-${ip}`;
 
-  const { show } = useContextMenu({ id: MENU_ID });
+  const { show, hideAll } = useContextMenu({ id: MENU_ID });
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
@@ -210,7 +210,7 @@ function SwitchItem(props: {
     handleItemClick(event);
   };
 
-  function displayMenu(e: MouseEvent) {
+  const  displayMenu = (e: MouseEvent) =>{
     if (isEditOpen || confirmationOpen || alertOpen) return;
     setIsContextMenuOpen(true);
     show({ event: e });
@@ -229,14 +229,18 @@ function SwitchItem(props: {
     openShow();
   };
 
+  const displaySwitch = (e: MouseEvent) => {
+    e.stopPropagation();
+    setIsContextMenuOpen(false);
+    hideAll();
+    setSelected(ip);
+  };
+
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
       className={`switch-item ${reachabilityClass} ${isSelected ? 'selected' : ''}`}
-      onClick={(e: MouseEvent) => {
-        e.stopPropagation();
-        setSelected(ip);
-      }}
+      onClick={displaySwitch}
       onContextMenu={displayMenu}
       onDoubleClick={doubleClicked}
       style={{ ['--scale' as any]: scale }}

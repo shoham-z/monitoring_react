@@ -16,6 +16,11 @@ interface ReachableEntry {
   reachability: boolean;
 }
 
+interface newEventEntry {
+  id: number;
+  newEvent: boolean;
+}
+
 function SwitchGrid(props: {
   addNotification: (message: string, color: string) => void;
 }) {
@@ -28,6 +33,7 @@ function SwitchGrid(props: {
   const [reachabilityList, setReachabilityList] = useState<
     Array<ReachableEntry>
   >([]);
+  const [newEventList, setNewEventList] = useState<Array<newEventEntry>>([]);
   const [filter, setFilter] = useState('');
   const lastNotifiedStatus = useRef<Record<string, boolean | undefined>>({});
   const [alertOpen, setAlertOpen] = useState(false);
@@ -138,6 +144,15 @@ function SwitchGrid(props: {
             return result.content.map((item: SwitchEntry) => ({
               id: item.id,
               reachability: true,
+            }));
+          }
+          return prev;
+        });
+        setNewEventList((prev) => {
+          if (prev.length === 0) {
+            return result.content.map((item: SwitchEntry) => ({
+              id: item.id,
+              newEvent: false,
             }));
           }
           return prev;
@@ -282,6 +297,43 @@ function SwitchGrid(props: {
     return notifyMessage;
   };
 
+  const updateEvents = (
+    ip: string,
+    newEvent: boolean,
+  ): string | null => {
+    const matchedSwitch = switchList.find((sw) => sw.ip === ip);
+    if (!matchedSwitch) return null;
+
+    const currentStatus = newEventList.find(
+      (r) => r.id === matchedSwitch.id,
+    );
+    const lastStatus = lastNotifiedStatus.current[matchedSwitch.id];
+
+    let notifyMessage: string | null = null;
+
+    if (!currentStatus || currentStatus.newEvent !== newEvent) {
+      // Update UI state
+      setNewEventList((prevList) => {
+        const updated = prevList.map((r) =>
+          r.id === matchedSwitch.id
+            ? { ...r, newEvent: newEvent }
+            : r,
+        );
+
+        if (!currentStatus) {
+          return [
+            ...prevList,
+            { id: matchedSwitch.id, newEvent: newEvent },
+          ];
+        }
+
+        return updated;
+      });
+    }
+
+    return notifyMessage;
+  };
+
   const doPing = async (ip: string, visible?: boolean) => {
     if (visible) {
       await window.electron.ipcRenderer.sendPingVisible(ip);
@@ -289,8 +341,10 @@ function SwitchGrid(props: {
     }
     const result = await window.electron.ipcRenderer.sendPing(ip);
     const message = updateReachability(result.ip, result.success);
+
     if (message) {
       // console.log(`[NOTIFY] ${message}`);
+      updateEvents(result.ip, message !== null);
       addNotification(message, result.success === true ? 'green' : 'red');
     } else {
       // console.log(`[SKIP] No change for ${result.ip}`);
@@ -319,12 +373,16 @@ function SwitchGrid(props: {
   }, [selectedIp]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
+    const sendPings = () => {
       switchList.forEach((element) => {
         doPing(element.ip);
       });
+    }
+    const interval = setInterval(() => {
+      sendPings();
     }, 5 * 1000); // Ping every 5 seconds
 
+    sendPings(); // Initial ping on setup
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [switchList]);
@@ -508,6 +566,59 @@ function SwitchGrid(props: {
 
   const updateFilter = (data: SetStateAction<string>) => setFilter(data);
 
+  const getNewEventSwitches = () => {
+    const l = newEventList
+      .filter((el) => el.newEvent === true)
+      .map((el) => {
+        const sw = switchList.find((sw) => sw.id === el.id);
+        return sw;
+      })
+      .filter((el) => el !== undefined) as SwitchEntry[];
+    console.log('New event switches:', l);
+    return l;
+  }
+
+  const getNoEventSwitchId = () => {
+    const l = newEventList
+      .filter((el) => el.newEvent === false)
+      .map(el => el.id);
+    return l;
+  }
+
+  const getUpSwitches = () => {
+    const idList = getNoEventSwitchId();
+    const l = reachabilityList
+      .filter((el) => idList.includes(el.id))
+      .filter((el) => el.reachability === true)
+      .map((el) => {
+        const sw = switchList.find((sw) => sw.id === el.id);
+        return sw;
+      })
+      .filter((el) => el !== undefined) as SwitchEntry[];
+    console.log('Up switches:', l);
+    return l;
+  }
+
+  const getDownSwitches = () => {
+    const idList = getNoEventSwitchId();
+    const l = reachabilityList
+      .filter((el) => idList.includes(el.id))
+      .filter((el) => el.reachability === false)
+      .map((el) => {
+        const sw = switchList.find((sw) => sw.id === el.id);
+        return sw;
+      })
+      .filter((el) => el !== undefined) as SwitchEntry[];
+    console.log('Down switches:', l);
+    return l;
+  }
+
+  useEffect(() => {
+    getNewEventSwitches();
+    getUpSwitches();
+    getDownSwitches();
+  }, [newEventList]);
+
   return (
     <>
       <TopPanel
@@ -526,7 +637,63 @@ function SwitchGrid(props: {
         tabIndex={0}
       >
         <div className="container_flex" id="container_flex">
-          {switchList
+          {getNewEventSwitches()
+            .filter((el) => {
+              if (filter === '') return el;
+              if (filter.includes('.') && el.ip.includes(filter)) return el;
+              if (el.name.includes(filter)) return el;
+              return null;
+            })
+            .map((x) => (
+              <SwitchItem
+                key={x.id}
+                index={x.id}
+                name={x.name}
+                reachability={
+                  reachabilityList.find((el) => el.id === x.id)?.reachability
+                }
+                ip={x.ip}
+                scale={itemScale}
+                isSelected={selectedIp.toString() === x.ip}
+                setSelected={() => handleSelect(x.ip)}
+                onPing={doPing}
+                onConnect={connect}
+                onEdit={editSwitch}
+                onDelete={deleteSwitch}
+                isServerOnline={isServerOnline}
+              />
+            ))}
+        </div>
+        <div className="container_flex" id="container_flex">
+          {getUpSwitches()
+            .filter((el) => {
+              if (filter === '') return el;
+              if (filter.includes('.') && el.ip.includes(filter)) return el;
+              if (el.name.includes(filter)) return el;
+              return null;
+            })
+            .map((x) => (
+              <SwitchItem
+                key={x.id}
+                index={x.id}
+                name={x.name}
+                reachability={
+                  reachabilityList.find((el) => el.id === x.id)?.reachability
+                }
+                ip={x.ip}
+                scale={itemScale}
+                isSelected={selectedIp.toString() === x.ip}
+                setSelected={() => handleSelect(x.ip)}
+                onPing={doPing}
+                onConnect={connect}
+                onEdit={editSwitch}
+                onDelete={deleteSwitch}
+                isServerOnline={isServerOnline}
+              />
+            ))}
+        </div>
+        <div className="container_flex" id="container_flex">
+          {getDownSwitches()
             .filter((el) => {
               if (filter === '') return el;
               if (filter.includes('.') && el.ip.includes(filter)) return el;
