@@ -12,6 +12,24 @@
   box-sizing: border-box;
 }
 
+.top-panel__button-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.server-status {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+  text-transform: uppercase;
+}
+
+.server-status.offline {
+  color: #d32f2f;
+}
+
 
 /* Input */
 input[type="text"] {

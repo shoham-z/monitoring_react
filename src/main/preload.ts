@@ -37,6 +37,12 @@ const electronHandler = {
     getVars: async () =>
       ipcRenderer.invoke('get-vars'),
 
+    saveSwitchList: async (switchList: any[]) =>
+      ipcRenderer.invoke('save-switch-list', switchList),
+
+    loadSwitchList: async () =>
+      ipcRenderer.invoke('load-switch-list'),
+
     // alertDown: (ip: any, name: any) => ipcRenderer.send('alert-down', ip, name),
 
     // onNotif: (callback: (arg0: any) => void) =>

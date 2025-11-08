@@ -97,3 +97,28 @@
     }
   }
 }
+
+.context-menu-offline {
+  pointer-events: none;
+}
+
+.context-menu-offline .react-contexify__item__content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #777 !important;
+}
+
+.context-menu-label {
+  pointer-events: none;
+}
+
+.context-menu-offline-tag {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #d32f2f;
+  text-transform: uppercase;
+  pointer-events: none;
+  user-select: none;
+}

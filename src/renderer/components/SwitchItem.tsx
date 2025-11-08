@@ -27,12 +27,14 @@ function SwitchItem(props: {
   onConnect: any;
   onEdit: any;
   onDelete: any;
+  isServerOnline: boolean;
 }) {
   const {
     index,
     name,
     reachability,
     ip,
+    isServerOnline,
     scale,
     setSelected,
     isSelected,
@@ -49,6 +51,7 @@ function SwitchItem(props: {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [APP_MODE, SetAppMode] = useState('');
   const chooseImg = () => {
     if (APP_MODE === 'SWITCH') return switchImg;
@@ -77,6 +80,48 @@ function SwitchItem(props: {
 
     readServers();
   }, []);
+
+  // Monitor menu visibility to update state and handle clicks outside
+  useEffect(() => {
+    if (!isContextMenuOpen) return undefined;
+
+    const checkMenuVisibility = () => {
+      const menuElement = document.querySelector(
+        `.react-contexify[data-id="${MENU_ID}"]`,
+      );
+      if (
+        !menuElement ||
+        (menuElement as HTMLElement).style.display === 'none'
+      ) {
+        setIsContextMenuOpen(false);
+      }
+    };
+
+    const handleDocumentClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      // Check if click is on the menu itself
+      const clickedOnMenu = target.closest('.react-contexify');
+
+      // If clicking on the menu, don't close it
+      if (clickedOnMenu) return;
+
+      // If clicking anywhere else (including this switch item or other switches), close the menu
+      const menus = document.querySelectorAll('.react-contexify');
+      menus.forEach((menu) => {
+        (menu as HTMLElement).style.display = 'none';
+      });
+      setIsContextMenuOpen(false);
+    };
+
+    const interval = setInterval(checkMenuVisibility, 100);
+    // Use capture phase to catch clicks before they bubble
+    document.addEventListener('click', handleDocumentClick, true);
+
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener('click', handleDocumentClick, true);
+    };
+  }, [isContextMenuOpen, MENU_ID]);
 
   const handleDelete = () => {
     setConfirmationOpen(true);
@@ -150,13 +195,26 @@ function SwitchItem(props: {
     }
   };
 
+  const handleMenuClick = (event: ItemParams<any, any>) => {
+    const isRestrictedAction = event.id === 'edit' || event.id === 'delete';
+
+    event.event?.stopPropagation?.();
+
+    if (!isServerOnline && isRestrictedAction) {
+      event.event?.preventDefault?.();
+      return;
+    }
+
+    setIsContextMenuOpen(false);
+    handleItemClick(event);
+  };
+
   function displayMenu(e: MouseEvent) {
     if (isEditOpen || confirmationOpen || alertOpen) return;
+    setIsContextMenuOpen(true);
     show({ event: e });
     e.preventDefault(); // prevent default browser context menu
     e.stopPropagation();
-    if (isEditOpen || confirmationOpen || alertOpen) return;
-    setSelected(ip); // Right click
   }
 
   const matchShortcutPing = (e: { ctrlKey: any; key: string }): boolean => {
@@ -170,7 +228,8 @@ function SwitchItem(props: {
   const doubleClicked = (e: MouseEvent) => {
     // Prevent double-clicks inside the edit popup from bubbling and opening the show dialog
     e.stopPropagation();
-    if (isEditOpen || confirmationOpen || alertOpen) return;
+    if (isEditOpen || confirmationOpen || alertOpen || isContextMenuOpen)
+      return;
     openShow();
   };
 
@@ -179,11 +238,48 @@ function SwitchItem(props: {
     <div
       className={`switch-item ${reachabilityClass} ${isSelected ? 'selected' : ''}`}
       onClick={(e: MouseEvent) => {
-        e.stopPropagation();
+        // Check if context menu is currently open first, before any other checks
+        if (isContextMenuOpen) {
+          // Find and hide all context menus (this forces the menu to close)
+          const menus = document.querySelectorAll('.react-contexify');
+          menus.forEach((menu) => {
+            (menu as HTMLElement).style.display = 'none';
+          });
+          // Reset local state
+          setIsContextMenuOpen(false);
+          // Stop propagation and prevent default to ensure menu closes
+          e.stopPropagation();
+          e.preventDefault();
+          // Don't select when closing menu
+          return;
+        }
+
+        e.stopPropagation(); // Always stop propagation to prevent grid selection logic from running immediately
+
         if (isEditOpen || confirmationOpen || alertOpen) return;
+
+        // If the menu was not open, proceed with selecting the item (standard left click behavior)
         setSelected(ip);
       }}
-      onContextMenu={displayMenu}
+      onContextMenu={(e: MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (isEditOpen || confirmationOpen || alertOpen) return;
+
+        // If this switch's menu is already open, just keep it open and don't change selection
+        if (isContextMenuOpen) {
+          return;
+        }
+
+        // Close any other open menus first
+        const menus = document.querySelectorAll('.react-contexify');
+        menus.forEach((menu) => {
+          (menu as HTMLElement).style.display = 'none';
+        });
+
+        setSelected(ip); // select on right-click
+        displayMenu(e); // open context menu for this switch
+      }}
       onDoubleClick={doubleClicked}
       style={{ ['--scale' as any]: scale }}
     >
@@ -191,28 +287,44 @@ function SwitchItem(props: {
       <p className="switch-item-text">{name}</p>
 
       <Menu id={MENU_ID} className="context-menu">
-        <Item id="show" onClick={handleItemClick}>
+        <Item id="show" onClick={handleMenuClick}>
           Show
         </Item>
         <Item
           id="ping"
-          onClick={handleItemClick}
+          onClick={handleMenuClick}
           keyMatcher={matchShortcutPing}
         >
           Ping <RightSlot>Ctrl G</RightSlot>
         </Item>
         <Item
           id="connect"
-          onClick={handleItemClick}
+          onClick={handleMenuClick}
           keyMatcher={matchShortcutConnect}
         >
           Connect <RightSlot>Ctrl H</RightSlot>
         </Item>
-        <Item id="edit" onClick={handleItemClick}>
-          Edit
+        <Item
+          id="edit"
+          onClick={handleMenuClick}
+          disabled={!isServerOnline}
+          className={!isServerOnline ? 'context-menu-offline' : undefined}
+        >
+          <span className="context-menu-label">Edit</span>
+          {!isServerOnline && (
+            <span className="context-menu-offline-tag">&nbsp;Offline</span>
+          )}
         </Item>
-        <Item id="delete" onClick={handleItemClick}>
-          Delete
+        <Item
+          id="delete"
+          onClick={handleMenuClick}
+          disabled={!isServerOnline}
+          className={!isServerOnline ? 'context-menu-offline' : undefined}
+        >
+          <span className="context-menu-label">Delete</span>
+          {!isServerOnline && (
+            <span className="context-menu-offline-tag">&nbsp;Offline</span>
+          )}
         </Item>
       </Menu>
       <PopupEditItem

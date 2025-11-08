@@ -34,6 +34,7 @@ function SwitchGrid(props: {
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
   const [itemScale, setItemScale] = useState(1);
+  const [isServerOnline, setIsServerOnline] = useState(false);
 
   // Helper function to convert server error responses to human-readable messages
   const getHumanReadableError = (
@@ -126,6 +127,43 @@ function SwitchGrid(props: {
     }
   };
 
+  const loadFromLocalStorage = async () => {
+    try {
+      const result = await window.electron.ipcRenderer.loadSwitchList();
+      if (result.success && result.content && result.content.length > 0) {
+        console.log('Loaded switch list from local storage:', result.content);
+        setSwitchList(result.content);
+        setReachabilityList((prev) => {
+          if (prev.length === 0) {
+            return result.content.map((item: SwitchEntry) => ({
+              id: item.id,
+              reachability: true,
+            }));
+          }
+          return prev;
+        });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error loading from local storage:', error);
+      return false;
+    }
+  };
+
+  const saveToLocalStorage = async (switches: Array<SwitchEntry>) => {
+    try {
+      const result = await window.electron.ipcRenderer.saveSwitchList(switches);
+      if (result.success) {
+        console.log('Saved switch list to local storage');
+      } else {
+        console.error('Failed to save switch list:', result.error);
+      }
+    } catch (error) {
+      console.error('Error saving to local storage:', error);
+    }
+  };
+
   const fetchFromServer = () => {
     axios
       .get(`${SERVER_IP}/api/getAll`)
@@ -137,6 +175,12 @@ function SwitchGrid(props: {
 
           // Set switch list
           setSwitchList(data);
+
+          // Save to local storage for offline use
+          saveToLocalStorage(data);
+
+          // Mark server as online
+          setIsServerOnline(true);
 
           setReachabilityList((prev) => {
             if (prev.length === 0) {
@@ -151,8 +195,18 @@ function SwitchGrid(props: {
         return null;
       })
       // Update state with fetched data
-      .catch((error) => {
+      .catch(async (error) => {
         console.error('Error fetching data:', error);
+        // Mark server as offline
+        setIsServerOnline(false);
+        // Try to load from local storage as fallback
+        const loaded = await loadFromLocalStorage();
+        if (loaded) {
+          console.log('Using cached switch list from local storage');
+          // Don't show error if we successfully loaded from cache
+          return;
+        }
+        // Only show error if we couldn't load from cache either
         if (error.response) {
           const { status } = error.response;
           const errorMsg = error.response.data?.error || '';
@@ -161,18 +215,27 @@ function SwitchGrid(props: {
         } else {
           showErrorAlert(
             'Connection Error',
-            'Unable to connect to the server. Please check your connection and try again.',
+            'Unable to connect to the server. Using cached data if available.',
           );
         }
       });
   };
 
-  // get new switch list
+  // Load from local storage on startup
   useEffect(() => {
     if (!isReady) return;
 
+    // Try to load from local storage first for immediate display
+    loadFromLocalStorage();
+
+    // Then try to fetch from server (will update if successful)
     fetchFromServer();
-    setInterval(() => fetchFromServer(), 30000);
+    const interval = setInterval(() => fetchFromServer(), 30000);
+
+    // eslint-disable-next-line consistent-return
+    return () => {
+      clearInterval(interval);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady]); // Empty dependency array = runs once on mount
 
@@ -260,13 +323,21 @@ function SwitchGrid(props: {
       switchList.forEach((element) => {
         doPing(element.ip);
       });
-    }, 5 * 1000); // Ping every 10 seconds
+    }, 5 * 1000); // Ping every 5 seconds
 
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [switchList]);
 
   const addSwitch = (ip: any, hostname: any) => {
+    if (!isServerOnline) {
+      showErrorAlert(
+        'Server Offline',
+        'Cannot add devices while the server is offline. Please wait for the server to come back online.',
+      );
+      return;
+    }
+
     axios
       .post(
         `${SERVER_IP}/api/add`,
@@ -275,6 +346,8 @@ function SwitchGrid(props: {
       )
       .then((response) => {
         if (response.status === 201) {
+          // Mark server as online
+          setIsServerOnline(true);
           // Only update UI if server successfully added the device
           const getMaxId = (list: any[]) => {
             return Math.max(...list.map((item) => item.id), 0);
@@ -283,15 +356,21 @@ function SwitchGrid(props: {
           const newSwitch = {
             id: newId,
             name: hostname,
-            reachability: false,
             ip,
           };
-          setSwitchList([...switchList, newSwitch]);
+          const updatedList = [...switchList, newSwitch];
+          setSwitchList(updatedList);
+          // Save to local storage
+          saveToLocalStorage(updatedList);
         }
         return null;
       })
       .catch((error) => {
         console.error('Error adding device:', error);
+        // Mark server as offline on connection error
+        if (!error.response) {
+          setIsServerOnline(false);
+        }
         if (error.response) {
           const { status } = error.response;
           const errorMsg = error.response.data?.error || '';
@@ -307,6 +386,14 @@ function SwitchGrid(props: {
   };
 
   const editSwitch = (index: string, newIp: string, hostname: string) => {
+    if (!isServerOnline) {
+      showErrorAlert(
+        'Server Offline',
+        'Cannot edit devices while the server is offline. Please wait for the server to come back online.',
+      );
+      return;
+    }
+
     const numericId = Number(index);
     const previousIp = switchList.find((item) => item.id === numericId)?.ip;
 
@@ -318,14 +405,19 @@ function SwitchGrid(props: {
       })
       .then((response) => {
         if (response.status === 200) {
+          // Mark server as online
+          setIsServerOnline(true);
           // Only update UI if server successfully edited the device
-          setSwitchList((prevList) =>
-            prevList.map((item) =>
+          setSwitchList((prevList) => {
+            const updatedList = prevList.map((item) =>
               item.id === numericId
                 ? { ...item, name: hostname, ip: newIp }
                 : item,
-            ),
-          );
+            );
+            // Save to local storage
+            saveToLocalStorage(updatedList);
+            return updatedList;
+          });
 
           if (previousIp && selectedIp === previousIp) {
             setSelectedIp(newIp);
@@ -335,6 +427,10 @@ function SwitchGrid(props: {
       })
       .catch((error) => {
         console.error('Error editing device:', error);
+        // Mark server as offline on connection error
+        if (!error.response) {
+          setIsServerOnline(false);
+        }
         if (error.response) {
           const { status } = error.response;
           const errorMsg = error.response.data?.error || '';
@@ -350,22 +446,37 @@ function SwitchGrid(props: {
   };
 
   const deleteSwitch = (ip: string): Promise<boolean> => {
+    if (!isServerOnline) {
+      showErrorAlert(
+        'Server Offline',
+        'Cannot delete devices while the server is offline. Please wait for the server to come back online.',
+      );
+      return Promise.resolve(false);
+    }
+
     return axios
       .delete(`${SERVER_IP}/api/delete`, { data: { ip } })
       .then((response) => {
         if (response.status === 200) {
+          // Mark server as online
+          setIsServerOnline(true);
           // Only update UI if server successfully deleted the device
-          setSwitchList(
-            switchList.filter((el) => {
-              return el.ip !== ip ? el : null;
-            }),
-          );
+          const updatedList = switchList.filter((el) => {
+            return el.ip !== ip ? el : null;
+          });
+          setSwitchList(updatedList);
+          // Save to local storage
+          saveToLocalStorage(updatedList);
           return true;
         }
         return false;
       })
       .catch((error) => {
         console.error('Error deleting device:', error);
+        // Mark server as offline on connection error
+        if (!error.response) {
+          setIsServerOnline(false);
+        }
         if (error.response) {
           const { status } = error.response;
           const errorMsg = error.response.data?.error || '';
@@ -399,7 +510,11 @@ function SwitchGrid(props: {
 
   return (
     <>
-      <TopPanel addSwitch={addSwitch} updateFilter={updateFilter} />
+      <TopPanel
+        addSwitch={addSwitch}
+        updateFilter={updateFilter}
+        isServerOnline={isServerOnline}
+      />
       <div
         className="switch_div"
         onClick={() => handleSelect('')}
@@ -434,6 +549,7 @@ function SwitchGrid(props: {
                 onConnect={connect}
                 onEdit={editSwitch}
                 onDelete={deleteSwitch}
+                isServerOnline={isServerOnline}
               />
             ))}
         </div>

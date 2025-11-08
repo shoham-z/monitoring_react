@@ -256,3 +256,28 @@ ipcMain.handle('get-vars', async (_event) => {
   }
 });
 
+ipcMain.handle('save-switch-list', async (_event, switchList) => {
+  try {
+    const filePath = path.join(basePath, 'assets/switches.json');
+    const json = JSON.stringify(switchList, null, 2);
+    fs.writeFileSync(filePath, json, 'utf-8');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('load-switch-list', async (_event) => {
+  try {
+    const filePath = path.join(basePath, 'assets/switches.json');
+    if (!fs.existsSync(filePath)) {
+      return { success: true, content: [] };
+    }
+    const json = fs.readFileSync(filePath, 'utf-8');
+    const content = JSON.parse(json);
+    return { success: true, content };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+});
+

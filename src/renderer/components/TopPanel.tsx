@@ -1,11 +1,21 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import '../styles/TopPanel.css';
 import ButtonAddItem from './ButtonAddItem';
 
-function TopPanel(props: { addSwitch: any; updateFilter: any }) {
-  const { addSwitch, updateFilter } = props;
+function TopPanel(props: {
+  addSwitch: any;
+  updateFilter: any;
+  isServerOnline: boolean;
+}) {
+  const { addSwitch, updateFilter, isServerOnline } = props;
 
   const [formOpen, setFormOpen] = useState(false);
+
+  useEffect(() => {
+    if (!isServerOnline) {
+      setFormOpen(false);
+    }
+  }, [isServerOnline]);
 
   const inputHandler = (e: { target: { value: any } }) => {
     updateFilter(e.target.value);
@@ -13,21 +23,34 @@ function TopPanel(props: { addSwitch: any; updateFilter: any }) {
 
   return (
     <div className="top-panel">
-      <button
-        type="button"
-        className="mui-button trigger"
-        onClick={() => {
-          setFormOpen(true);
-        }}
-      >
-        Add Switch
-      </button>
+      <div className="top-panel__button-group">
+        {!isServerOnline && (
+          <span className="server-status offline">Server Offline</span>
+        )}
+        <button
+          type="button"
+          className="mui-button trigger"
+          onClick={() => {
+            if (isServerOnline) {
+              setFormOpen(true);
+            }
+          }}
+          disabled={!isServerOnline}
+          title={
+            !isServerOnline
+              ? 'Server is offline. Cannot add devices.'
+              : 'Add a new switch'
+          }
+        >
+          Add Switch
+        </button>
 
-      <ButtonAddItem
-        callback={addSwitch}
-        isOpen={formOpen}
-        setOpen={setFormOpen}
-      />
+        <ButtonAddItem
+          callback={addSwitch}
+          isOpen={formOpen}
+          setOpen={setFormOpen}
+        />
+      </div>
 
       <input type="text" onChange={inputHandler} />
     </div>
