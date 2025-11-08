@@ -53,6 +53,7 @@ function SwitchItem(props: {
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
   const [APP_MODE, SetAppMode] = useState('');
+
   const chooseImg = () => {
     if (APP_MODE === 'SWITCH') return switchImg;
 
@@ -213,8 +214,7 @@ function SwitchItem(props: {
     if (isEditOpen || confirmationOpen || alertOpen) return;
     setIsContextMenuOpen(true);
     show({ event: e });
-    e.preventDefault(); // prevent default browser context menu
-    e.stopPropagation();
+
   }
 
   const matchShortcutPing = (e: { ctrlKey: any; key: string }): boolean => {
@@ -226,10 +226,6 @@ function SwitchItem(props: {
   };
 
   const doubleClicked = (e: MouseEvent) => {
-    // Prevent double-clicks inside the edit popup from bubbling and opening the show dialog
-    e.stopPropagation();
-    if (isEditOpen || confirmationOpen || alertOpen || isContextMenuOpen)
-      return;
     openShow();
   };
 
@@ -238,48 +234,10 @@ function SwitchItem(props: {
     <div
       className={`switch-item ${reachabilityClass} ${isSelected ? 'selected' : ''}`}
       onClick={(e: MouseEvent) => {
-        // Check if context menu is currently open first, before any other checks
-        if (isContextMenuOpen) {
-          // Find and hide all context menus (this forces the menu to close)
-          const menus = document.querySelectorAll('.react-contexify');
-          menus.forEach((menu) => {
-            (menu as HTMLElement).style.display = 'none';
-          });
-          // Reset local state
-          setIsContextMenuOpen(false);
-          // Stop propagation and prevent default to ensure menu closes
-          e.stopPropagation();
-          e.preventDefault();
-          // Don't select when closing menu
-          return;
-        }
-
-        e.stopPropagation(); // Always stop propagation to prevent grid selection logic from running immediately
-
-        if (isEditOpen || confirmationOpen || alertOpen) return;
-
-        // If the menu was not open, proceed with selecting the item (standard left click behavior)
+        e.stopPropagation();
         setSelected(ip);
       }}
-      onContextMenu={(e: MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-        if (isEditOpen || confirmationOpen || alertOpen) return;
-
-        // If this switch's menu is already open, just keep it open and don't change selection
-        if (isContextMenuOpen) {
-          return;
-        }
-
-        // Close any other open menus first
-        const menus = document.querySelectorAll('.react-contexify');
-        menus.forEach((menu) => {
-          (menu as HTMLElement).style.display = 'none';
-        });
-
-        setSelected(ip); // select on right-click
-        displayMenu(e); // open context menu for this switch
-      }}
+      onContextMenu={displayMenu}
       onDoubleClick={doubleClicked}
       style={{ ['--scale' as any]: scale }}
     >

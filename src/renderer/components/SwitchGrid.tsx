@@ -186,7 +186,7 @@ function SwitchGrid(props: {
             if (prev.length === 0) {
               return data.map((item: SwitchEntry) => ({
                 id: item.id,
-                reachability: true, // or false based on your logic
+                reachability: true,
               }));
             }
             return prev;
