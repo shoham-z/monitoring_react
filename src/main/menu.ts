@@ -5,6 +5,7 @@ import {
   BrowserWindow,
   MenuItemConstructorOptions,
 } from 'electron';
+import path from 'path';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
   selector?: string;
@@ -192,17 +193,28 @@ export default class MenuBuilder {
     return [subMenuAbout, subMenuEdit, subMenuView, subMenuWindow, subMenuHelp];
   }
 
+  openVarsFile() {
+    const varsFilePath = app.isPackaged
+      ? path.join(process.resourcesPath, '/assets/vars.json')
+      : path.join(__dirname, '../../assets/vars.json');
+
+    shell.openPath(varsFilePath);
+  }
+
   buildDefaultTemplate() {
     const templateDefault = [
       {
         label: '&File',
         submenu: [
           {
-            label: '&Open',
+            label: '&Open Vars File',
             accelerator: 'Ctrl+O',
+            click: () => {
+              this.openVarsFile();
+            }
           },
           {
-            label: '&Close',
+            label: '&Close App',
             accelerator: 'Ctrl+W',
             click: () => {
               this.mainWindow.close();
