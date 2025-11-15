@@ -38,6 +38,8 @@ function SwitchGrid(props: {
   const [alertMessage, setAlertMessage] = useState('');
   const [itemScale, setItemScale] = useState(1);
   const [isServerOnline, setIsServerOnline] = useState(false);
+  const missedPingsRef = useRef<Record<string, number>>({});
+
 
   // Helper function to convert server error responses to human-readable messages
   const getHumanReadableError = (
@@ -243,86 +245,40 @@ function SwitchGrid(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady]); // Empty dependency array = runs once on mount
 
-  const updateReachability = (
-    ip: string,
-    pingSuccess: boolean,
-  ) => {
-    //console.log(`Ping result for ${ip}: ${pingSuccess}`);
+const updateReachability = (ip: string, pingSuccess: boolean): string | null => {
+  const matchedSwitch = switchList.find((sw) => sw.ip === ip);
+  if (!matchedSwitch) return null;
 
-    const matchedSwitch = switchList.find((sw) => sw.ip === ip);
-    if (!matchedSwitch) return null;
+  const id = matchedSwitch.id;
+  const prev = missedPingsRef.current[id] ?? 0;
+  const newMissedPings = pingSuccess ? 0 : prev + 1;
+  missedPingsRef.current[id] = newMissedPings;
 
-    const currentStatus = reachabilityList.find(
-      (r) => r.id === matchedSwitch.id
-    );
+  // keep UI state in sync (optional) — update once for display
+  setReachabilityList((prevList) => {
+    const found = prevList.some(r => r.id === id);
+    const mapped = prevList.map(r => r.id === id ? { ...r, missedPings: newMissedPings } : r);
+    if (!found) return [...mapped, { id, missedPings: newMissedPings }];
+    return mapped;
+  });
 
-    let notifyMessage: string | null = null;
+  const lastStatus = lastNotifiedStatus.current[id];
+  let notifyMessage: string | null = null;
 
-    // Update UI state
-    setReachabilityList((prevList) => {
-      const updated = prevList.map((r) => {
-          return r.id === matchedSwitch.id
-            ? { ...r, missedPings: (pingSuccess ? 0 : r.missedPings + 1) }
-            : r
-        }
-      );
-
-      if( ip === '2.2.2.2') console.log(`Updated reachability for ${ip}:`, updated.find(r => r.id === matchedSwitch.id));
-
-      return updated;
-    });
-
-    const missedPings = reachabilityList.find(r => r.id === matchedSwitch.id)?.missedPings || 0;
-
-    if (pingSuccess){
-      if (!currentStatus) {
-        // First time pinging this switch, always notify
-        notifyMessage = `${matchedSwitch.name} is ${pingSuccess ? 'up' : 'down'}. IP is ${ip}`;
-        lastNotifiedStatus.current[matchedSwitch.id] = pingSuccess;
-        return notifyMessage;
-      }
-
-      const lastStatus = lastNotifiedStatus.current[matchedSwitch.id];
-
-      if (lastStatus === undefined) {
-        // No previous notification, always notify
-        notifyMessage = `${matchedSwitch.name} is ${pingSuccess ? 'up' : 'down'}. IP is ${ip}`;
-        lastNotifiedStatus.current[matchedSwitch.id] = pingSuccess;
-        return notifyMessage;
-      }
-
-      if (lastStatus) {
-        // No change in status since last notification, skip
-        return null;
-      }
-      if (currentStatus.missedPings + (pingSuccess ? 0 : 1) < MAX_MISSED_PINGS ) {
-      // Status changed since last notification, notify
-        notifyMessage = `${matchedSwitch.name} is ${pingSuccess ? 'up' : 'down'}. IP is ${ip}`;
-        lastNotifiedStatus.current[matchedSwitch.id] = pingSuccess;
-      }
-    } else {
-      const currentMissedPings = currentStatus ? missedPings + 1 : 1;
-      if(ip === '2.2.2.2') {
-        console.log(currentStatus.missedPings)
-        console.log(`num of missed pings for ${ip}: ${currentMissedPings}`);
-        console.log(`max missed pings: ${MAX_MISSED_PINGS}`);
-        console.log(`should send notif ${currentMissedPings >= MAX_MISSED_PINGS}`)
+  if (pingSuccess) {
+    if (lastStatus !== true) {
+      notifyMessage = `${matchedSwitch.name} is up. IP is ${ip}`;
+      lastNotifiedStatus.current[id] = true;
     }
-
-      if (currentMissedPings < MAX_MISSED_PINGS) {
-        // Not yet reached threshold, skip notification
-        return null;
-      }
-      // If ping failed, only notify if we crossed the threshold
-      if(ip==='2.2.2.2') console.log(currentMissedPings >= MAX_MISSED_PINGS);
-      if (currentMissedPings >= MAX_MISSED_PINGS) {
-        notifyMessage = `${matchedSwitch.name} is down. IP is ${ip}`;
-        lastNotifiedStatus.current[matchedSwitch.id] = false;
-      }
+  } else {
+    if (newMissedPings >= MAX_MISSED_PINGS && lastStatus !== false) {
+      notifyMessage = `${matchedSwitch.name} is down. IP is ${ip}`;
+      lastNotifiedStatus.current[id] = false;
     }
+  }
 
-    return notifyMessage;
-  };
+  return notifyMessage;
+};
 
   const doPing = async (ip: string, visible?: boolean) => {
     if (visible) {
