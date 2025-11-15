@@ -14,12 +14,7 @@ interface SwitchEntry {
 
 interface ReachableEntry {
   id: number;
-  reachability: boolean;
-}
-
-interface newEventEntry {
-  id: number;
-  newEvent: boolean;
+  missedPings: number;
 }
 
 function SwitchGrid(props: {
@@ -29,6 +24,7 @@ function SwitchGrid(props: {
   const { addNotification, notifications } = props;
   const [SERVER_IP, SetServerIp] = useState('');
   const [APP_MODE, SetAppMode] = useState('');
+  const [MAX_MISSED_PINGS, setMaxMissedPings] = useState(3);
   const [isReady, setIsReady] = useState(false);
   const [selectedIp, setSelectedIp] = useState('');
   const [switchList, setSwitchList] = useState<Array<SwitchEntry>>([]);
@@ -90,6 +86,7 @@ function SwitchGrid(props: {
       if (result.success) {
         let ip = result.content.SERVER_IP || '';
         SetAppMode(result.content.MODE);
+        setMaxMissedPings(result.content.MAX_MISSED_PINGS || 3);
         if (!ip.startsWith('http')) {
           ip = `http://${ip}`;
         }
@@ -144,7 +141,7 @@ function SwitchGrid(props: {
           if (prev.length === 0) {
             return result.content.map((item: SwitchEntry) => ({
               id: item.id,
-              reachability: true,
+              missedPings: 0,
             }));
           }
           return prev;
@@ -193,7 +190,7 @@ function SwitchGrid(props: {
             if (prev.length === 0) {
               return data.map((item: SwitchEntry) => ({
                 id: item.id,
-                reachability: true,
+                missedPings: 0,
               }));
             }
             return prev;
@@ -248,41 +245,79 @@ function SwitchGrid(props: {
 
   const updateReachability = (
     ip: string,
-    newReachability: boolean,
-  ): string | null => {
+    pingSuccess: boolean,
+  ) => {
+    //console.log(`Ping result for ${ip}: ${pingSuccess}`);
+
     const matchedSwitch = switchList.find((sw) => sw.ip === ip);
     if (!matchedSwitch) return null;
 
     const currentStatus = reachabilityList.find(
-      (r) => r.id === matchedSwitch.id,
+      (r) => r.id === matchedSwitch.id
     );
-    const lastStatus = lastNotifiedStatus.current[matchedSwitch.id];
 
     let notifyMessage: string | null = null;
 
-    if (!currentStatus || currentStatus.reachability !== newReachability) {
-      // Update UI state
-      setReachabilityList((prevList) => {
-        const updated = prevList.map((r) =>
-          r.id === matchedSwitch.id
-            ? { ...r, reachability: newReachability }
-            : r,
-        );
-
-        if (!currentStatus) {
-          return [
-            ...prevList,
-            { id: matchedSwitch.id, reachability: newReachability },
-          ];
+    // Update UI state
+    setReachabilityList((prevList) => {
+      const updated = prevList.map((r) => {
+          return r.id === matchedSwitch.id
+            ? { ...r, missedPings: (pingSuccess ? 0 : r.missedPings + 1) }
+            : r
         }
+      );
 
-        return updated;
-      });
+      if( ip === '2.2.2.2') console.log(`Updated reachability for ${ip}:`, updated.find(r => r.id === matchedSwitch.id));
 
-      // Only notify if the state actually changed since last notification
-      if (lastStatus !== newReachability) {
-        notifyMessage = `${matchedSwitch.name} is ${newReachability ? 'up' : 'down'}. IP is ${ip}`;
-        lastNotifiedStatus.current[matchedSwitch.id] = newReachability;
+      return updated;
+    });
+
+    const missedPings = reachabilityList.find(r => r.id === matchedSwitch.id)?.missedPings || 0;
+
+    if (pingSuccess){
+      if (!currentStatus) {
+        // First time pinging this switch, always notify
+        notifyMessage = `${matchedSwitch.name} is ${pingSuccess ? 'up' : 'down'}. IP is ${ip}`;
+        lastNotifiedStatus.current[matchedSwitch.id] = pingSuccess;
+        return notifyMessage;
+      }
+
+      const lastStatus = lastNotifiedStatus.current[matchedSwitch.id];
+
+      if (lastStatus === undefined) {
+        // No previous notification, always notify
+        notifyMessage = `${matchedSwitch.name} is ${pingSuccess ? 'up' : 'down'}. IP is ${ip}`;
+        lastNotifiedStatus.current[matchedSwitch.id] = pingSuccess;
+        return notifyMessage;
+      }
+
+      if (lastStatus) {
+        // No change in status since last notification, skip
+        return null;
+      }
+      if (currentStatus.missedPings + (pingSuccess ? 0 : 1) < MAX_MISSED_PINGS ) {
+      // Status changed since last notification, notify
+        notifyMessage = `${matchedSwitch.name} is ${pingSuccess ? 'up' : 'down'}. IP is ${ip}`;
+        lastNotifiedStatus.current[matchedSwitch.id] = pingSuccess;
+      }
+    } else {
+      const currentMissedPings = currentStatus ? missedPings + 1 : 1;
+      if(ip === '2.2.2.2') {
+        console.log(currentStatus.missedPings)
+        console.log(`num of missed pings for ${ip}: ${currentMissedPings}`);
+        console.log(`max missed pings: ${MAX_MISSED_PINGS}`);
+        console.log(`should send notif ${currentMissedPings >= MAX_MISSED_PINGS}`)
+    }
+
+      if (currentMissedPings < MAX_MISSED_PINGS) {
+        // Not yet reached threshold, skip notification
+        return null;
+      }
+      // If ping failed, only notify if we crossed the threshold
+      if(ip==='2.2.2.2') console.log(currentMissedPings >= MAX_MISSED_PINGS);
+      if (currentMissedPings >= MAX_MISSED_PINGS) {
+        notifyMessage = `${matchedSwitch.name} is down. IP is ${ip}`;
+        lastNotifiedStatus.current[matchedSwitch.id] = false;
       }
     }
 
@@ -316,10 +351,10 @@ function SwitchGrid(props: {
         doPing(selectedIp);
       } else if (event.ctrlKey && event.key === 'h') {
         const selectedId = switchList.find((r) => r.ip === selectedIp)?.id;
-        const reachability = reachabilityList.find(
+        const missedPings = reachabilityList.find(
           (r) => r.id === selectedId,
-        )?.reachability;
-        connect(selectedIp, reachability || false);
+        )?.missedPings;
+        connect(selectedIp, missedPings === 0 || false);
       }
     };
 
@@ -524,10 +559,8 @@ function SwitchGrid(props: {
 
   const getNewEventSwitches = () => {
     const ids = notifications.map((n) => n.swId);
-    const l = switchList
+    return switchList
       .filter((sw) => ids.includes(sw.id));
-    console.log('New event switches:', l);
-    return l;
   }
 
   const getNoEventSwitchId = () => {
@@ -540,30 +573,26 @@ function SwitchGrid(props: {
 
   const getUpSwitches = () => {
     const idList = getNoEventSwitchId();
-    const l = reachabilityList
+    return reachabilityList
       .filter((el) => idList.includes(el.id))
-      .filter((el) => el.reachability === true)
+      .filter((el) => el.missedPings < MAX_MISSED_PINGS)
       .map((el) => {
         const sw = switchList.find((sw) => sw.id === el.id);
         return sw;
       })
       .filter((el) => el !== undefined) as SwitchEntry[];
-    console.log('Up switches:', l);
-    return l;
   }
 
   const getDownSwitches = () => {
     const idList = getNoEventSwitchId();
-    const l = reachabilityList
+    return reachabilityList
       .filter((el) => idList.includes(el.id))
-      .filter((el) => el.reachability === false)
+      .filter((el) => el.missedPings >= MAX_MISSED_PINGS)
       .map((el) => {
         const sw = switchList.find((sw) => sw.id === el.id);
         return sw;
       })
       .filter((el) => el !== undefined) as SwitchEntry[];
-    console.log('Down switches:', l);
-    return l;
   }
 
   return (
@@ -598,7 +627,7 @@ function SwitchGrid(props: {
                 index={x.id}
                 name={x.name}
                 reachability={
-                  reachabilityList.find((el) => el.id === x.id)?.reachability
+                  (reachabilityList.find((el) => el.id === x.id)?.missedPings || 0) < MAX_MISSED_PINGS
                 }
                 ip={x.ip}
                 scale={itemScale}
@@ -627,7 +656,7 @@ function SwitchGrid(props: {
                 index={x.id}
                 name={x.name}
                 reachability={
-                  reachabilityList.find((el) => el.id === x.id)?.reachability
+                  (reachabilityList.find((el) => el.id === x.id)?.missedPings || 0) < MAX_MISSED_PINGS
                 }
                 ip={x.ip}
                 scale={itemScale}
@@ -656,7 +685,7 @@ function SwitchGrid(props: {
                 index={x.id}
                 name={x.name}
                 reachability={
-                  reachabilityList.find((el) => el.id === x.id)?.reachability
+                  (reachabilityList.find((el) => el.id === x.id)?.missedPings || 0) < MAX_MISSED_PINGS
                 }
                 ip={x.ip}
                 scale={itemScale}
