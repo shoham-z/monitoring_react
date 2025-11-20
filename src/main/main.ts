@@ -22,7 +22,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { spawn, execFile } from 'child_process';
 import ping from 'ping';
-import fs from 'fs';
+import fs, { read } from 'fs';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -245,6 +245,7 @@ ipcMain.on('connect-remotely', (event, ip) => {
 
 /// ========= END OF SECTION CONNECT REMOTELY =========
 
+/// ========= START OF SECTION LOAD/SAVE LOCAL DATA =========
 ipcMain.handle('get-vars', async (_event) => {
   try {
     const filePath = path.join(basePath, 'assets/vars.json');
@@ -281,3 +282,36 @@ ipcMain.handle('load-switch-list', async (_event) => {
   }
 });
 
+function readNotificationsFromFile(): Notification[] {
+  const filePath = path.join(basePath, 'assets/notifications.json');
+    if (!fs.existsSync(filePath)) {
+      return [] ;
+    }
+    const json = fs.readFileSync(filePath, 'utf-8');
+    const content = JSON.parse(json) as Notification[];
+    return content;
+}
+
+ipcMain.handle('append-notification', async (_event, notification) => {
+  try {
+    const notifications = readNotificationsFromFile();
+    notifications.push(notification);
+    const filePath = path.join(basePath, 'assets/notifications.json');
+    const json = JSON.stringify(notifications, null, 2);
+    fs.writeFileSync(filePath, json, 'utf-8');
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('read-notifications', async (_event) => {
+  try {
+    const content = readNotificationsFromFile();
+    return { success: true, content };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+});
+
+/// ========= END OF SECTION LOAD/SAVE LOCAL DATA =========

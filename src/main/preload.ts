@@ -1,6 +1,7 @@
 // Disable no-unused-vars, broken for spread args
 /* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { Notification } from '../main/util';
 
 export type Channels = 'ipc-example';
 
@@ -43,10 +44,9 @@ const electronHandler = {
     loadSwitchList: async () =>
       ipcRenderer.invoke('load-switch-list'),
 
-    // alertDown: (ip: any, name: any) => ipcRenderer.send('alert-down', ip, name),
+    appendNotification: async (notification: Notification) => ipcRenderer.invoke('append-notification', notification),
 
-    // onNotif: (callback: (arg0: any) => void) =>
-    //   ipcRenderer.on('send-notif', (_event, data) => callback(data)),
+    readNotifications: async () => ipcRenderer.invoke('read-notifications'),
   },
 };
 

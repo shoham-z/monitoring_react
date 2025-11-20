@@ -1,0 +1,863 @@
+[
+  {
+    "id": "e9a7ac0e-d267-4a41-bd41-b6b4b8aa240a",
+    "message": "Test1 is up. IP is 1.1.1.1",
+    "timestamp": "20/11/2025, 22:57:49",
+    "color": "green",
+    "swId": 1
+  },
+  {
+    "id": "75df4f37-3218-4814-aa30-20b649403b80",
+    "message": "Test9 is up. IP is 9.9.9.9",
+    "timestamp": "20/11/2025, 22:57:49",
+    "color": "green",
+    "swId": 9
+  },
+  {
+    "id": "d3841b4c-f075-4fa8-a762-11b0c68eb78d",
+    "message": "מפקדת אלון מניפה רחבה is up. IP is 8.8.8.8",
+    "timestamp": "20/11/2025, 22:57:49",
+    "color": "green",
+    "swId": 8
+  },
+  {
+    "id": "4d175c7e-5052-4e48-9483-2718fc45333f",
+    "message": "Test1 is up. IP is 1.1.1.1",
+    "timestamp": "20/11/2025, 22:57:52",
+    "color": "green",
+    "swId": 1
+  },
+  {
+    "id": "419c8ecd-9acd-4fd8-8cf8-8890deb60bbd",
+    "message": "Test9 is up. IP is 9.9.9.9",
+    "timestamp": "20/11/2025, 22:57:52",
+    "color": "green",
+    "swId": 9
+  },
+  {
+    "id": "dfc66182-ea4e-4ea5-8629-c81ddaf2b627",
+    "message": "מפקדת אלון מניפה רחבה is up. IP is 8.8.8.8",
+    "timestamp": "20/11/2025, 22:57:52",
+    "color": "green",
+    "swId": 8
+  },
+  {
+    "id": "f78fe31d-eb45-4946-a51d-9941f439bacd",
+    "message": "Test18 is down. IP is 18.18.18.18",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 18
+  },
+  {
+    "id": "acf249f9-3f9a-4873-ba2f-7c16f61e86f3",
+    "message": "Test16 is down. IP is 16.16.16.16",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 16
+  },
+  {
+    "id": "0cb1962a-07e9-4837-b11d-610d5337e8a7",
+    "message": "Test12 is down. IP is 12.12.12.12",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 12
+  },
+  {
+    "id": "468bc318-5e4f-4132-b8a7-727d0ec3b609",
+    "message": "Test3 is down. IP is 3.3.3.3",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 3
+  },
+  {
+    "id": "2fa7bceb-0769-4474-95d3-203234b0f14b",
+    "message": "Test20 is down. IP is 20.20.20.20",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 21
+  },
+  {
+    "id": "3e28a0ca-e352-4e0f-b101-f82d5c95c8a5",
+    "message": "Test2 is down. IP is 2.2.2.2",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 2
+  },
+  {
+    "id": "d4f1d1fe-3137-43e2-a180-d2625dbc670a",
+    "message": "Test11 is down. IP is 11.11.11.11",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 11
+  },
+  {
+    "id": "e3b978ca-2418-41d5-afd3-5b76022510d3",
+    "message": "Test7 is down. IP is 7.7.7.7",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 7
+  },
+  {
+    "id": "bb664939-24d5-46cb-a14b-2fca2188ae8e",
+    "message": "Test6 is down. IP is 6.6.6.6",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 6
+  },
+  {
+    "id": "020247bd-df8e-4890-9e99-74d2f1f8f837",
+    "message": "Test19 is down. IP is 19.19.19.19",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 19
+  },
+  {
+    "id": "8bc4f3bb-c56c-4260-8ac9-1770f18463d0",
+    "message": "Test10 is down. IP is 10.10.10.10",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 10
+  },
+  {
+    "id": "7b4d96a7-d340-4aca-bb27-60efc3233188",
+    "message": "Test13 is down. IP is 13.13.13.13",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 13
+  },
+  {
+    "id": "f92963b3-410d-4d0f-92dc-1d8dc01aa29b",
+    "message": "Test4 is down. IP is 4.4.4.4",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 4
+  },
+  {
+    "id": "abf50952-44f2-4d28-b0ef-403054544381",
+    "message": "Test17 is down. IP is 17.17.17.17",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 17
+  },
+  {
+    "id": "ae0bd4a3-d224-4cb8-aa5b-c2ec54a7435f",
+    "message": "Test5 is down. IP is 5.5.5.5",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 5
+  },
+  {
+    "id": "93037860-6c19-475b-9e47-0ea611c836ab",
+    "message": "Test14 is down. IP is 14.14.14.14",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 14
+  },
+  {
+    "id": "867be430-bb56-448f-991d-ef657e162280",
+    "message": "Test15 is down. IP is 15.15.15.15",
+    "timestamp": "20/11/2025, 22:58:03",
+    "color": "red",
+    "swId": 15
+  },
+  {
+    "id": "d9c7c574-7111-4992-874e-6a0175ac6694",
+    "message": "Test1 is up. IP is 1.1.1.1",
+    "timestamp": "20/11/2025, 22:58:43",
+    "color": "green",
+    "swId": 1
+  },
+  {
+    "id": "ba7cbfd8-3663-4d1d-84b2-38a9d29cb001",
+    "message": "מפקדת אלון מניפה רחבה is up. IP is 8.8.8.8",
+    "timestamp": "20/11/2025, 22:58:43",
+    "color": "green",
+    "swId": 8
+  },
+  {
+    "id": "2b7af521-bbee-4961-a50b-0aed1a53c235",
+    "message": "Test9 is up. IP is 9.9.9.9",
+    "timestamp": "20/11/2025, 22:58:44",
+    "color": "green",
+    "swId": 9
+  },
+  {
+    "id": "68a051b7-e916-4d4d-9446-0cbb30a24572",
+    "message": "Test4 is down. IP is 4.4.4.4",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 4
+  },
+  {
+    "id": "b589d50d-9699-4c75-980f-a596815f2745",
+    "message": "Test3 is down. IP is 3.3.3.3",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 3
+  },
+  {
+    "id": "cfbd22b8-581d-4f36-91d0-4a1f79d5c10d",
+    "message": "Test2 is down. IP is 2.2.2.2",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 2
+  },
+  {
+    "id": "a1a17914-eff6-4f48-b2f0-4f9570ca88c5",
+    "message": "Test6 is down. IP is 6.6.6.6",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 6
+  },
+  {
+    "id": "a98fc66b-9975-4983-99e0-16ed0b5bca61",
+    "message": "Test19 is down. IP is 19.19.19.19",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 19
+  },
+  {
+    "id": "eb3bcdb3-691f-42fc-b48c-8e0a1a4957d8",
+    "message": "Test13 is down. IP is 13.13.13.13",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 13
+  },
+  {
+    "id": "e4946b72-e0b7-4959-a190-ee91b36f4a2e",
+    "message": "Test15 is down. IP is 15.15.15.15",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 15
+  },
+  {
+    "id": "0781afc1-b89f-4680-9499-3a94b94e59dd",
+    "message": "Test12 is down. IP is 12.12.12.12",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 12
+  },
+  {
+    "id": "de7b15be-8c32-4dfa-b264-69bbf3703873",
+    "message": "Test16 is down. IP is 16.16.16.16",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 16
+  },
+  {
+    "id": "0df4c237-c8b6-4490-ba89-a6bffe7333bf",
+    "message": "Test11 is down. IP is 11.11.11.11",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 11
+  },
+  {
+    "id": "04dd56c1-423c-409b-89e9-a001f517884b",
+    "message": "Test17 is down. IP is 17.17.17.17",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 17
+  },
+  {
+    "id": "060f2476-f1f0-49b2-b25d-573af884ef2f",
+    "message": "Test7 is down. IP is 7.7.7.7",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 7
+  },
+  {
+    "id": "0ac76675-1369-4342-861b-2a352935ffea",
+    "message": "Test18 is down. IP is 18.18.18.18",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 18
+  },
+  {
+    "id": "0fcfe79d-0e03-48d6-92ef-2d625519ee2e",
+    "message": "Test14 is down. IP is 14.14.14.14",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 14
+  },
+  {
+    "id": "9ff51d29-46b6-46d1-a74d-8ce028706e1a",
+    "message": "Test5 is down. IP is 5.5.5.5",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 5
+  },
+  {
+    "id": "7f526c93-a117-46a3-9650-2068ea7e138a",
+    "message": "Test10 is down. IP is 10.10.10.10",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 10
+  },
+  {
+    "id": "796752b4-da27-40f9-ab76-f973a86e14d4",
+    "message": "Test20 is down. IP is 20.20.20.20",
+    "timestamp": "20/11/2025, 22:58:53",
+    "color": "red",
+    "swId": 21
+  },
+  {
+    "id": "8cb70d38-c09c-441f-928a-73ff50139a4e",
+    "message": "Test1 is up. IP is 1.1.1.1",
+    "timestamp": "20/11/2025, 22:59:00",
+    "color": "green",
+    "swId": 1
+  },
+  {
+    "id": "366803a2-0d52-4f0c-96f2-d7c3397dc152",
+    "message": "מפקדת אלון מניפה רחבה is up. IP is 8.8.8.8",
+    "timestamp": "20/11/2025, 22:59:00",
+    "color": "green",
+    "swId": 8
+  },
+  {
+    "id": "1f341391-77f9-40e3-8871-3169c56c1402",
+    "message": "Test9 is up. IP is 9.9.9.9",
+    "timestamp": "20/11/2025, 22:59:00",
+    "color": "green",
+    "swId": 9
+  },
+  {
+    "id": "1aaaf43b-f1d9-4865-99c0-cf5c892023bf",
+    "message": "Test2 is down. IP is 2.2.2.2",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 2
+  },
+  {
+    "id": "076228b0-a08b-4968-a9ad-8cabd33b8b23",
+    "message": "Test6 is down. IP is 6.6.6.6",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 6
+  },
+  {
+    "id": "bb04f6c2-938a-495d-a8bc-4b39476ba0ee",
+    "message": "Test3 is down. IP is 3.3.3.3",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 3
+  },
+  {
+    "id": "7f780720-7598-45ae-9546-c0a4013061df",
+    "message": "Test14 is down. IP is 14.14.14.14",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 14
+  },
+  {
+    "id": "6e595c72-f23a-4404-b9f0-7ee34704e603",
+    "message": "Test4 is down. IP is 4.4.4.4",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 4
+  },
+  {
+    "id": "a1a04510-0a20-4392-8b89-36b2bd665440",
+    "message": "Test19 is down. IP is 19.19.19.19",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 19
+  },
+  {
+    "id": "7c6ab7bb-4e1e-4595-9630-5d5eaf07f892",
+    "message": "Test7 is down. IP is 7.7.7.7",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 7
+  },
+  {
+    "id": "7d264f7b-891b-4402-901c-b138e51839be",
+    "message": "Test15 is down. IP is 15.15.15.15",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 15
+  },
+  {
+    "id": "51e00823-b154-41d9-9072-e599deef2955",
+    "message": "Test10 is down. IP is 10.10.10.10",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 10
+  },
+  {
+    "id": "fcb5a5b5-5e16-4f76-92e1-7dd35b883222",
+    "message": "Test20 is down. IP is 20.20.20.20",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 21
+  },
+  {
+    "id": "9bc92d93-fd98-40cb-a66f-a40334983af2",
+    "message": "Test18 is down. IP is 18.18.18.18",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 18
+  },
+  {
+    "id": "3c883b2a-1339-4727-b07e-ec73fc86c260",
+    "message": "Test17 is down. IP is 17.17.17.17",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 17
+  },
+  {
+    "id": "d438ebbb-0219-4c95-86c8-09acd3194164",
+    "message": "Test12 is down. IP is 12.12.12.12",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 12
+  },
+  {
+    "id": "26ec270a-8508-4f86-9264-2d4804e00e86",
+    "message": "Test11 is down. IP is 11.11.11.11",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 11
+  },
+  {
+    "id": "f1828339-974b-47d9-bf47-08391d2dac78",
+    "message": "Test5 is down. IP is 5.5.5.5",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 5
+  },
+  {
+    "id": "3454998b-20b5-44c7-bf4b-6bd9583ec004",
+    "message": "Test16 is down. IP is 16.16.16.16",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 16
+  },
+  {
+    "id": "97aab502-8075-433e-9886-c055912b855e",
+    "message": "Test13 is down. IP is 13.13.13.13",
+    "timestamp": "20/11/2025, 22:59:10",
+    "color": "red",
+    "swId": 13
+  },
+  {
+    "id": "729b57b4-a19d-4ba4-a9f0-acd3ea7d80b3",
+    "message": "Test1 is up. IP is 1.1.1.1",
+    "timestamp": "20/11/2025, 23:03:07",
+    "color": "green",
+    "swId": 1
+  },
+  {
+    "id": "9f45ec64-41c1-4b7b-a0c3-bf85f2b785c1",
+    "message": "מפקדת אלון מניפה רחבה is up. IP is 8.8.8.8",
+    "timestamp": "20/11/2025, 23:03:07",
+    "color": "green",
+    "swId": 8
+  },
+  {
+    "id": "e3405c46-677f-4dbd-b98b-1e73c83f8b16",
+    "message": "Test9 is up. IP is 9.9.9.9",
+    "timestamp": "20/11/2025, 23:03:07",
+    "color": "green",
+    "swId": 9
+  },
+  {
+    "id": "9195cc2f-8098-4a79-b3d2-0b8461e95e2a",
+    "message": "Test2 is down. IP is 2.2.2.2",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 2
+  },
+  {
+    "id": "bb203485-4f07-48af-bf05-356b6e680bb3",
+    "message": "Test5 is down. IP is 5.5.5.5",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 5
+  },
+  {
+    "id": "347b99c0-9617-45e2-896f-c857e199befe",
+    "message": "Test4 is down. IP is 4.4.4.4",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 4
+  },
+  {
+    "id": "6efa0ed7-f204-40ce-bef5-f10e3c3718af",
+    "message": "Test11 is down. IP is 11.11.11.11",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 11
+  },
+  {
+    "id": "2379f993-b86e-46ff-9f3e-12aaf98b656b",
+    "message": "Test7 is down. IP is 7.7.7.7",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 7
+  },
+  {
+    "id": "81e81ac9-dc8d-4771-88e6-1efbc121b3a1",
+    "message": "Test12 is down. IP is 12.12.12.12",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 12
+  },
+  {
+    "id": "98a684e3-cc29-4d51-b5b9-92d5b29d17c6",
+    "message": "Test13 is down. IP is 13.13.13.13",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 13
+  },
+  {
+    "id": "ac0070d1-6568-483d-a584-7a773941f899",
+    "message": "Test6 is down. IP is 6.6.6.6",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 6
+  },
+  {
+    "id": "efa48643-ae55-4bde-937d-85e8dd6c01c0",
+    "message": "Test3 is down. IP is 3.3.3.3",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 3
+  },
+  {
+    "id": "4aa80a37-e7a6-4b44-81b5-46c9cf206726",
+    "message": "Test19 is down. IP is 19.19.19.19",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 19
+  },
+  {
+    "id": "57ae0dde-f127-41a9-bb39-5b8d9a629981",
+    "message": "Test16 is down. IP is 16.16.16.16",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 16
+  },
+  {
+    "id": "40527953-17ca-4e52-a89f-644c8086b5d6",
+    "message": "Test17 is down. IP is 17.17.17.17",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 17
+  },
+  {
+    "id": "b51ad7cc-38e4-45d6-bc46-fc3d061b30f5",
+    "message": "Test10 is down. IP is 10.10.10.10",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 10
+  },
+  {
+    "id": "2b6f9a47-8777-42ae-b441-34bd3816c9de",
+    "message": "Test18 is down. IP is 18.18.18.18",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 18
+  },
+  {
+    "id": "5c830f68-617d-4e2c-b0d0-8e53445f65a7",
+    "message": "Test20 is down. IP is 20.20.20.20",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 21
+  },
+  {
+    "id": "e914076f-50ce-4ffa-9bca-25ca184103c2",
+    "message": "Test14 is down. IP is 14.14.14.14",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 14
+  },
+  {
+    "id": "48bfef50-9363-46c3-9525-06f8d7c3b8ea",
+    "message": "Test15 is down. IP is 15.15.15.15",
+    "timestamp": "20/11/2025, 23:03:17",
+    "color": "red",
+    "swId": 15
+  },
+  {
+    "id": "5a875656-f49a-4938-a394-a15bb5402561",
+    "message": "Test1 is up. IP is 1.1.1.1",
+    "timestamp": "20/11/2025, 23:09:35",
+    "color": "green",
+    "swId": 1
+  },
+  {
+    "id": "ec25ee32-4de5-4128-b84e-7469afceb9ac",
+    "message": "מפקדת אלון מניפה רחבה is up. IP is 8.8.8.8",
+    "timestamp": "20/11/2025, 23:09:35",
+    "color": "green",
+    "swId": 8
+  },
+  {
+    "id": "0102b9ac-f703-49ee-adf1-0acc79276e59",
+    "message": "Test9 is up. IP is 9.9.9.9",
+    "timestamp": "20/11/2025, 23:09:35",
+    "color": "green",
+    "swId": 9
+  },
+  {
+    "id": "d7a0baa0-5a31-4b08-9771-55d9d8e5c319",
+    "message": "Test4 is down. IP is 4.4.4.4",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 4
+  },
+  {
+    "id": "4d55f907-94dd-4349-a1be-67c9c3792df3",
+    "message": "Test2 is down. IP is 2.2.2.2",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 2
+  },
+  {
+    "id": "db0f4273-6f49-4d9a-8da8-f6d6f2cd7c80",
+    "message": "Test3 is down. IP is 3.3.3.3",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 3
+  },
+  {
+    "id": "2ade4278-9d66-4aec-b824-19f6258f3edc",
+    "message": "Test13 is down. IP is 13.13.13.13",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 13
+  },
+  {
+    "id": "27449084-daa2-41d9-bf26-7c506cbbbef9",
+    "message": "Test5 is down. IP is 5.5.5.5",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 5
+  },
+  {
+    "id": "30406497-4662-483d-ab4b-d6edc5510346",
+    "message": "Test6 is down. IP is 6.6.6.6",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 6
+  },
+  {
+    "id": "5252d512-716f-45c4-840e-59efeda1ab6d",
+    "message": "Test7 is down. IP is 7.7.7.7",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 7
+  },
+  {
+    "id": "6357c774-6193-4b5b-b45a-27d7d298de2e",
+    "message": "Test11 is down. IP is 11.11.11.11",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 11
+  },
+  {
+    "id": "9a16edf9-4312-4e26-ba6b-cc87120880f2",
+    "message": "Test10 is down. IP is 10.10.10.10",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 10
+  },
+  {
+    "id": "b35ccbad-b8a9-486f-8c79-61bb443212c7",
+    "message": "Test15 is down. IP is 15.15.15.15",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 15
+  },
+  {
+    "id": "1a006b23-93ca-4dec-ab66-db86ff0d8320",
+    "message": "Test17 is down. IP is 17.17.17.17",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 17
+  },
+  {
+    "id": "66ab0b95-57cd-4ab9-ba91-2ea0e4bd76e8",
+    "message": "Test16 is down. IP is 16.16.16.16",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 16
+  },
+  {
+    "id": "3236a3a5-3ca2-40e1-b9b7-8e374f3ceba1",
+    "message": "Test14 is down. IP is 14.14.14.14",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 14
+  },
+  {
+    "id": "db8881bb-9647-419a-86b6-f611e09bd7e1",
+    "message": "Test12 is down. IP is 12.12.12.12",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 12
+  },
+  {
+    "id": "12cb6f7b-c5a5-442c-b023-40296a062c33",
+    "message": "Test20 is down. IP is 20.20.20.20",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 21
+  },
+  {
+    "id": "4ad14597-8f3f-4848-ae99-3c6827b6d0ef",
+    "message": "Test19 is down. IP is 19.19.19.19",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 19
+  },
+  {
+    "id": "bfbbff15-da5e-4abb-b1e4-cf45097a7415",
+    "message": "Test18 is down. IP is 18.18.18.18",
+    "timestamp": "20/11/2025, 23:09:45",
+    "color": "red",
+    "swId": 18
+  },
+  {
+    "id": "103e4330-b8b3-4d86-8165-e7761a786755",
+    "message": "Test1 is up. IP is 1.1.1.1",
+    "timestamp": "20/11/2025, 23:52:26",
+    "color": "green",
+    "swId": 1
+  },
+  {
+    "id": "c3d2f37f-a24f-4e92-9357-64e446aa93e5",
+    "message": "Test9 is up. IP is 9.9.9.9",
+    "timestamp": "20/11/2025, 23:52:26",
+    "color": "green",
+    "swId": 9
+  },
+  {
+    "id": "e2a0dd6e-ad5d-4149-a624-8f8811dbd4a2",
+    "message": "מפקדת אלון מניפה רחבה is up. IP is 8.8.8.8",
+    "timestamp": "20/11/2025, 23:52:26",
+    "color": "green",
+    "swId": 8
+  },
+  {
+    "id": "4714879f-c789-4b59-8eb1-ef9fc5d1f107",
+    "message": "Test20 is down. IP is 20.20.20.20",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 21
+  },
+  {
+    "id": "bb14235a-8238-4363-ba4a-12e06ba59128",
+    "message": "Test13 is down. IP is 13.13.13.13",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 13
+  },
+  {
+    "id": "585ef7a1-a587-4535-9fe4-6c5ea8d7372a",
+    "message": "Test7 is down. IP is 7.7.7.7",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 7
+  },
+  {
+    "id": "4a069534-792c-424e-880b-42c7b53d4fcc",
+    "message": "Test10 is down. IP is 10.10.10.10",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 10
+  },
+  {
+    "id": "427b572e-764a-42dd-8f3b-c10cbe90199b",
+    "message": "Test4 is down. IP is 4.4.4.4",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 4
+  },
+  {
+    "id": "d12ce28a-1ed0-42d2-a61e-9fd651b22469",
+    "message": "Test17 is down. IP is 17.17.17.17",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 17
+  },
+  {
+    "id": "3b7564d5-9c1b-44b3-86a7-9e170fcb10b9",
+    "message": "Test19 is down. IP is 19.19.19.19",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 19
+  },
+  {
+    "id": "b188c7d2-dc13-463e-bf84-5d068396f069",
+    "message": "Test16 is down. IP is 16.16.16.16",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 16
+  },
+  {
+    "id": "92ba69e0-f151-463f-b52c-675cb4feffa9",
+    "message": "Test15 is down. IP is 15.15.15.15",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 15
+  },
+  {
+    "id": "19e7e4a4-995a-4407-86cb-5f21dde8cf50",
+    "message": "Test14 is down. IP is 14.14.14.14",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 14
+  },
+  {
+    "id": "b43caf8b-e9a9-4ae2-9e09-b01d026b86d1",
+    "message": "Test18 is down. IP is 18.18.18.18",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 18
+  },
+  {
+    "id": "f077e6aa-32eb-43d5-a16b-e6d4230f6f2c",
+    "message": "Test12 is down. IP is 12.12.12.12",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 12
+  },
+  {
+    "id": "4a6142a8-8dcf-45c8-8803-9f4530e29798",
+    "message": "Test5 is down. IP is 5.5.5.5",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 5
+  },
+  {
+    "id": "1a61464b-872d-458a-b098-38a4c3bfef8f",
+    "message": "Test3 is down. IP is 3.3.3.3",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 3
+  },
+  {
+    "id": "e67fa332-4657-418a-8670-e3078faf5bd1",
+    "message": "Test2 is down. IP is 2.2.2.2",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 2
+  },
+  {
+    "id": "8a43db50-79ca-423f-a2a5-86dc65089c0c",
+    "message": "Test11 is down. IP is 11.11.11.11",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 11
+  },
+  {
+    "id": "7d0c7306-812e-40f0-8389-c6e67fbdf3ca",
+    "message": "Test6 is down. IP is 6.6.6.6",
+    "timestamp": "20/11/2025, 23:52:36",
+    "color": "red",
+    "swId": 6
+  }
+]

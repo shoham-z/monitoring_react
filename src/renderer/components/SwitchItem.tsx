@@ -308,7 +308,8 @@ function SwitchItem(props: {
         setIsOpen={setAlertOpen}
         title={alertTitle}
         message={alertMessage}
-        onDelete={() => {}}
+        onDelete={() => { } }
+        switchId={index}
       />
     </div>
   );

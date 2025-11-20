@@ -4,29 +4,26 @@ import { v4 as uuidv4 } from 'uuid';
 import { useState } from 'react';
 import SwitchGrid from './components/SwitchGrid';
 import NotificationPanel from './components/NotificationPanel';
-
-export interface Notification {
-  id: string;
-  message: string;
-  timestamp: string;
-  color: string;
-  swId: number;
-}
+import { Notification } from '../main/util';
 
 function Window() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
+  const appendNewNotification = (notification: Notification) => {
+    window.electron.ipcRenderer.appendNotification(notification);
+};
+
   const addNotification = (message: string, swId: number, color?: string) => {
-    setNotifications((prev) => [
-      ...prev,
-      {
-        id: uuidv4(), // simple unique ID
+    const id = uuidv4();
+    const notification = {
+        id, // simple unique ID
         message,
         timestamp: new Date().toLocaleString('en-GB'),
         color: color || 'white',
         swId,
-      },
-    ]);
+      }
+    appendNewNotification(notification);
+    setNotifications((prev) => [...prev, notification]);
   };
 
   const deleteNotification = (id: string) => {

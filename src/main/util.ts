@@ -11,3 +11,11 @@ export function resolveHtmlPath(htmlFileName: string) {
   }
   return `file://${path.resolve(__dirname, '../renderer/', htmlFileName)}`;
 }
+
+export interface Notification {
+  id: string;
+  message: string;
+  timestamp: string;
+  color: string;
+  swId: number;
+}
