@@ -157,7 +157,7 @@ app
       {
         label: 'Ping All Switches',
         click: () => {
-          console.log('Pinging');
+          mainWindow?.webContents.send('ping-all-devices');
         },
       },
       {

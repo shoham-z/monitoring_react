@@ -47,6 +47,8 @@ const electronHandler = {
     appendNotification: async (notification: Notification) => ipcRenderer.invoke('append-notification', notification),
 
     readNotifications: async () => ipcRenderer.invoke('read-notifications'),
+
+    pingAllDevices: (callback: () => void) => ipcRenderer.on('ping-all-devices', (_event) => callback())
   },
 };
 

@@ -40,7 +40,6 @@ function SwitchGrid(props: {
   const [isServerOnline, setIsServerOnline] = useState(false);
   const missedPingsRef = useRef<Record<string, number>>({});
 
-
   // Helper function to convert server error responses to human-readable messages
   const getHumanReadableError = (
     status: number,
@@ -177,7 +176,6 @@ function SwitchGrid(props: {
       .then((response) => {
         if (response.status === 200) {
           const { data } = response;
-          console.log(data);
 
           // Set switch list
           setSwitchList(data);
@@ -298,6 +296,19 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
     }
   };
 
+    // used for the global event to ping all devices
+  useEffect(() => {
+      window.electron.ipcRenderer.pingAllDevices(() => {
+      console.log("pinging all devices from menu");
+      const sendPings = () => {
+        switchList.forEach((element) => {
+          doPing(element.ip, true);
+        });
+      }
+      sendPings();
+    })
+  }, []);
+
   // used for the event listener for clicked item
   useEffect(() => {
     const handleKeyDown = (event: { ctrlKey: any; key: string }) => {
@@ -327,7 +338,7 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
     }
     const interval = setInterval(() => {
       sendPings();
-    }, 5 * 1000); // Ping every 5 seconds
+    }, 15 * 1000); // Ping every 15 seconds
 
     sendPings(); // Initial ping on setup
     return () => clearInterval(interval);
