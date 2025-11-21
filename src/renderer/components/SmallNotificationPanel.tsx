@@ -1,4 +1,4 @@
-import '../styles/NotificationPanel.css';
+import '../styles/SmallNotificationPanel.css';
 import { Notification } from '../../main/util';
 
 function SmallNotificationPanel(props: {
@@ -7,11 +7,11 @@ function SmallNotificationPanel(props: {
   const { notifications } = props;
 
   return (
-    <div className="notification-panel">
-      <div className="panel-header">
+    <div className="small-notification-panel">
+      <div className="small-panel-header">
         <h2>Notifications</h2>
       </div>
-      <table className="notification-table">
+      <table className="small-notification-table">
         <thead>
           <tr>
             <th>Message</th>
@@ -27,7 +27,7 @@ function SmallNotificationPanel(props: {
           ))}
           {notifications.length === 0 && (
             <tr>
-              <td colSpan={2} className="no-notifications">
+              <td colSpan={2} className="small-no-notifications">
                 No notifications
               </td>
             </tr>
