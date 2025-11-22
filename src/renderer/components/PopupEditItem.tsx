@@ -66,6 +66,26 @@ function PopupEditItem({
     reset();
   };
 
+  const ipAddressRegister = register('ipAddress', {
+    required: 'IP address is required',
+    validate: {
+      notEmpty: (value) =>
+        isNotEmptyOrWhitespace(value) ||
+        'IP address cannot be empty or just spaces',
+      validIPv4: (value) =>
+        isValidIPv4(value.trim()) ||
+        'Please enter a valid IPv4 address (e.g., 192.168.1.1)',
+    },
+  });
+
+  const hostnameRegister = register('hostname', {
+    required: 'Hostname is required',
+    validate: {
+      notEmpty: (value) =>
+        isNotEmptyOrWhitespace(value) || 'Hostname is required',
+    },
+  });
+
   return (
     <Popup
       open={isOpen}
@@ -74,7 +94,11 @@ function PopupEditItem({
       onClose={() => setIsOpen(false)}
     >
       <div className="mui-dialog">
-        <button className="mui-dialog-close" onClick={() => setIsOpen(false)}>
+        <button
+          className="mui-dialog-close"
+          type="button"
+          onClick={() => setIsOpen(false)}
+        >
           &times;
         </button>
 
@@ -87,37 +111,27 @@ function PopupEditItem({
             handleSubmit(onSubmit)(e);
           }}
         >
-          <label className="mui-label">IP Address</label>
+          <p className="mui-label">IP Address</p>
           <input
             className="mui-input"
             placeholder={initialIpAddress}
-            {...register('ipAddress', {
-              required: 'IP address is required',
-              validate: {
-                notEmpty: (value) =>
-                  isNotEmptyOrWhitespace(value) ||
-                  'IP address is required',
-                validIPv4: (value) =>
-                  isValidIPv4(value.trim()) ||
-                  'Please enter a valid IPv4 address (e.g., 192.168.1.1)',
-              },
-            })}
+            name={ipAddressRegister.name}
+            onChange={ipAddressRegister.onChange}
+            onBlur={ipAddressRegister.onBlur}
+            ref={ipAddressRegister.ref}
           />
           {errors.ipAddress && (
             <span className="mui-error">{errors.ipAddress.message}</span>
           )}
 
-          <label className="mui-label">Hostname</label>
+          <p className="mui-label">Hostname</p>
           <input
             className="mui-input"
             placeholder={initialHostname}
-            {...register('hostname', {
-              required: 'Hostname is required',
-              validate: {
-                notEmpty: (value) =>
-                  isNotEmptyOrWhitespace(value) || 'Hostname is required',
-              },
-            })}
+            name={hostnameRegister.name}
+            onChange={hostnameRegister.onChange}
+            onBlur={hostnameRegister.onBlur}
+            ref={hostnameRegister.ref}
           />
           {errors.hostname && (
             <span className="mui-error">{errors.hostname.message}</span>

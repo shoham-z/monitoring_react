@@ -1,5 +1,3 @@
-// Disable no-unused-vars, broken for spread args
-/* eslint no-unused-vars: off */
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 import { Notification } from '../main/util';
 
@@ -48,7 +46,9 @@ const electronHandler = {
 
     readNotifications: async () => ipcRenderer.invoke('read-notifications'),
 
-    pingAllDevices: (callback: () => void) => ipcRenderer.on('ping-all-devices', (_event) => callback())
+    pingAllDevices: (callback: () => void) => ipcRenderer.on('ping-all-devices', (_event) => callback()),
+
+    syncToServer: (callback: () => void) => ipcRenderer.on('sync-to-server', (_event) => callback())
   },
 };
 

@@ -1,9 +1,7 @@
 import '../styles/SmallNotificationPanel.css';
 import { Notification } from '../../main/util';
 
-function SmallNotificationPanel(props: {
-  notifications: Notification[];
-}) {
+function SmallNotificationPanel(props: { notifications: Notification[] }) {
   const { notifications } = props;
 
   return (

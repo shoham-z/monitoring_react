@@ -4,7 +4,7 @@ import '../styles/SwitchGrid.css';
 import SwitchItem from './SwitchItem';
 import TopPanel from './TopPanel';
 import AlertDialog from './AlertDialog';
-import { Notification } from '../App';
+import { Notification } from '../../main/util';
 
 interface SwitchEntry {
   id: number;
@@ -81,6 +81,7 @@ function SwitchGrid(props: {
     setAlertOpen(true);
   };
 
+  // Initial setup to get server IP and app mode
   useEffect(() => {
     const readServers = async () => {
       const result = await window.electron.ipcRenderer.getVars();
@@ -103,8 +104,6 @@ function SwitchGrid(props: {
   }, []);
 
   const connect = (ip: string, reachable: boolean) => {
-    console.log(ip);
-    console.log(reachable);
     if (reachable) {
       if (APP_MODE === 'SWITCH') {
         window.electron.ipcRenderer.connectSSH(ip);
@@ -136,7 +135,6 @@ function SwitchGrid(props: {
     try {
       const result = await window.electron.ipcRenderer.loadSwitchList();
       if (result.success && result.content && result.content.length > 0) {
-        console.log('Loaded switch list from local storage:', result.content);
         setSwitchList(result.content);
         setReachabilityList((prev) => {
           if (prev.length === 0) {
@@ -157,6 +155,7 @@ function SwitchGrid(props: {
   };
 
   const saveToLocalStorage = async (switches: Array<SwitchEntry>) => {
+    // TODO: handle errors here
     try {
       const result = await window.electron.ipcRenderer.saveSwitchList(switches);
       if (result.success) {
@@ -243,40 +242,43 @@ function SwitchGrid(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady]); // Empty dependency array = runs once on mount
 
-const updateReachability = (ip: string, pingSuccess: boolean): string | null => {
-  const matchedSwitch = switchList.find((sw) => sw.ip === ip);
-  if (!matchedSwitch) return null;
+  const updateReachability = (
+    ip: string,
+    pingSuccess: boolean,
+  ): string | null => {
+    const matchedSwitch = switchList.find((sw) => sw.ip === ip);
+    if (!matchedSwitch) return null;
 
-  const id = matchedSwitch.id;
-  const prev = missedPingsRef.current[id] ?? 0;
-  const newMissedPings = pingSuccess ? 0 : prev + 1;
-  missedPingsRef.current[id] = newMissedPings;
+    const { id } = matchedSwitch;
+    const prev = missedPingsRef.current[id] ?? 0;
+    const newMissedPings = pingSuccess ? 0 : prev + 1;
+    missedPingsRef.current[id] = newMissedPings;
 
-  // keep UI state in sync (optional) — update once for display
-  setReachabilityList((prevList) => {
-    const found = prevList.some(r => r.id === id);
-    const mapped = prevList.map(r => r.id === id ? { ...r, missedPings: newMissedPings } : r);
-    if (!found) return [...mapped, { id, missedPings: newMissedPings }];
-    return mapped;
-  });
+    // keep UI state in sync (optional) — update once for display
+    setReachabilityList((prevList) => {
+      const found = prevList.some((r) => r.id === id);
+      const mapped = prevList.map((r) =>
+        r.id === id ? { ...r, missedPings: newMissedPings } : r,
+      );
+      if (!found) return [...mapped, { id, missedPings: newMissedPings }];
+      return mapped;
+    });
 
-  const lastStatus = lastNotifiedStatus.current[id];
-  let notifyMessage: string | null = null;
+    const lastStatus = lastNotifiedStatus.current[id];
+    let notifyMessage: string | null = null;
 
-  if (pingSuccess) {
-    if (lastStatus !== true) {
-      notifyMessage = `${matchedSwitch.name} is up. IP is ${ip}`;
-      lastNotifiedStatus.current[id] = true;
-    }
-  } else {
-    if (newMissedPings >= MAX_MISSED_PINGS && lastStatus !== false) {
+    if (pingSuccess) {
+      if (lastStatus !== true) {
+        notifyMessage = `${matchedSwitch.name} is up. IP is ${ip}`;
+        lastNotifiedStatus.current[id] = true;
+      }
+    } else if (newMissedPings >= MAX_MISSED_PINGS && lastStatus !== false) {
       notifyMessage = `${matchedSwitch.name} is down. IP is ${ip}`;
       lastNotifiedStatus.current[id] = false;
     }
-  }
 
-  return notifyMessage;
-};
+    return notifyMessage;
+  };
 
   const doPing = async (ip: string, visible?: boolean) => {
     if (visible) {
@@ -288,26 +290,30 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
 
     if (message) {
       // console.log(`[NOTIFY] ${message}`);
-      addNotification(message,
+      addNotification(
+        message,
         switchList.find((r) => r.ip === result.ip)?.id || 0,
-        result.success === true ? 'green' : 'red',);
+        result.success === true ? 'green' : 'red',
+      );
     } else {
       // console.log(`[SKIP] No change for ${result.ip}`);
     }
   };
 
-    // used for the global event to ping all devices
+  // used for the global event to ping all devices
   useEffect(() => {
-      window.electron.ipcRenderer.pingAllDevices(() => {
-      console.log("pinging all devices from menu");
+    window.electron.ipcRenderer.pingAllDevices(() => {
       const sendPings = () => {
         switchList.forEach((element) => {
           doPing(element.ip, true);
         });
-      }
+      };
       sendPings();
-    })
-  }, []);
+    });
+    return () => {
+      window.electron.ipcRenderer.pingAllDevices(() => {});
+    };
+  }, [switchList]);
 
   // used for the event listener for clicked item
   useEffect(() => {
@@ -335,7 +341,7 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
       switchList.forEach((element) => {
         doPing(element.ip);
       });
-    }
+    };
     const interval = setInterval(() => {
       sendPings();
     }, 15 * 1000); // Ping every 15 seconds
@@ -382,17 +388,14 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
         return null;
       })
       .catch((error) => {
-        console.error('Error adding device:', error);
         // Mark server as offline on connection error
-        if (!error.response) {
-          setIsServerOnline(false);
-        }
         if (error.response) {
           const { status } = error.response;
           const errorMsg = error.response.data?.error || '';
           const humanReadable = getHumanReadableError(status, errorMsg);
           showErrorAlert('Failed to Add Device', humanReadable);
         } else {
+          setIsServerOnline(false);
           showErrorAlert(
             'Connection Error',
             'Unable to connect to the server. Please check your connection and try again.',
@@ -442,17 +445,14 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
         return null;
       })
       .catch((error) => {
-        console.error('Error editing device:', error);
         // Mark server as offline on connection error
-        if (!error.response) {
-          setIsServerOnline(false);
-        }
         if (error.response) {
           const { status } = error.response;
           const errorMsg = error.response.data?.error || '';
           const humanReadable = getHumanReadableError(status, errorMsg);
           showErrorAlert('Failed to Edit Device', humanReadable);
         } else {
+          setIsServerOnline(false);
           showErrorAlert(
             'Connection Error',
             'Unable to connect to the server. Please check your connection and try again.',
@@ -488,17 +488,14 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
         return false;
       })
       .catch((error) => {
-        console.error('Error deleting device:', error);
         // Mark server as offline on connection error
-        if (!error.response) {
-          setIsServerOnline(false);
-        }
         if (error.response) {
           const { status } = error.response;
           const errorMsg = error.response.data?.error || '';
           const humanReadable = getHumanReadableError(status, errorMsg);
           showErrorAlert('Failed to Delete Device', humanReadable);
         } else {
+          setIsServerOnline(false);
           showErrorAlert(
             'Connection Error',
             'Unable to connect to the server. Please check your connection and try again.',
@@ -526,17 +523,16 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
 
   const getNewEventSwitches = () => {
     const ids = notifications.map((n) => n.swId);
-    return switchList
-      .filter((sw) => ids.includes(sw.id));
-  }
+    return switchList.filter((sw) => ids.includes(sw.id));
+  };
 
   const getNoEventSwitchId = () => {
     const ids = notifications.map((n) => n.swId);
     const l = switchList
       .filter((sw) => !ids.includes(sw.id))
-      .map(el => el.id);
+      .map((el) => el.id);
     return l;
-  }
+  };
 
   const getUpSwitches = () => {
     const idList = getNoEventSwitchId();
@@ -544,11 +540,11 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
       .filter((el) => idList.includes(el.id))
       .filter((el) => el.missedPings < MAX_MISSED_PINGS)
       .map((el) => {
-        const sw = switchList.find((sw) => sw.id === el.id);
-        return sw;
+        const chosenElement = switchList.find((sw) => sw.id === el.id);
+        return chosenElement;
       })
       .filter((el) => el !== undefined) as SwitchEntry[];
-  }
+  };
 
   const getDownSwitches = () => {
     const idList = getNoEventSwitchId();
@@ -556,11 +552,11 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
       .filter((el) => idList.includes(el.id))
       .filter((el) => el.missedPings >= MAX_MISSED_PINGS)
       .map((el) => {
-        const sw = switchList.find((sw) => sw.id === el.id);
-        return sw;
+        const chosenElement = switchList.find((sw) => sw.id === el.id);
+        return chosenElement;
       })
       .filter((el) => el !== undefined) as SwitchEntry[];
-  }
+  };
 
   return (
     <>
@@ -580,7 +576,9 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
         tabIndex={0}
       >
         <div className="container_flex" id="container_flex">
-          <p className="div_header"><span>Devices With New Events</span></p>
+          <p className="div_header">
+            <span>Devices With New Events</span>
+          </p>
           {getNewEventSwitches()
             .filter((el) => {
               if (filter === '') return el;
@@ -594,7 +592,8 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
                 index={x.id}
                 name={x.name}
                 reachability={
-                  (reachabilityList.find((el) => el.id === x.id)?.missedPings || 0) < MAX_MISSED_PINGS
+                  (reachabilityList.find((el) => el.id === x.id)?.missedPings ||
+                    0) < MAX_MISSED_PINGS
                 }
                 ip={x.ip}
                 scale={itemScale}
@@ -609,7 +608,9 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
             ))}
         </div>
         <div className="container_flex" id="container_flex">
-          <p className="div_header"><span>Unreachable Devices</span></p>
+          <p className="div_header">
+            <span>Unreachable Devices</span>
+          </p>
           {getDownSwitches()
             .filter((el) => {
               if (filter === '') return el;
@@ -623,7 +624,8 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
                 index={x.id}
                 name={x.name}
                 reachability={
-                  (reachabilityList.find((el) => el.id === x.id)?.missedPings || 0) < MAX_MISSED_PINGS
+                  (reachabilityList.find((el) => el.id === x.id)?.missedPings ||
+                    0) < MAX_MISSED_PINGS
                 }
                 ip={x.ip}
                 scale={itemScale}
@@ -638,7 +640,9 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
             ))}
         </div>
         <div className="container_flex" id="container_flex">
-          <p className="div_header"><span>Reachable Devices</span></p>
+          <p className="div_header">
+            <span>Reachable Devices</span>
+          </p>
           {getUpSwitches()
             .filter((el) => {
               if (filter === '') return el;
@@ -652,7 +656,8 @@ const updateReachability = (ip: string, pingSuccess: boolean): string | null => 
                 index={x.id}
                 name={x.name}
                 reachability={
-                  (reachabilityList.find((el) => el.id === x.id)?.missedPings || 0) < MAX_MISSED_PINGS
+                  (reachabilityList.find((el) => el.id === x.id)?.missedPings ||
+                    0) < MAX_MISSED_PINGS
                 }
                 ip={x.ip}
                 scale={itemScale}

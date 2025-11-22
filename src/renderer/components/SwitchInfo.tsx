@@ -1,14 +1,39 @@
+import { useEffect, useState } from 'react';
 import { Buffer } from 'buffer';
 import '../styles/AlertDialog.css';
+import { Notification } from '../../main/util';
+import SmallNotificationPanel from './SmallNotificationPanel';
 
-function AlertDialog(props: {
+function SwitchInfo(props: {
   isOpen: boolean;
   setIsOpen: any;
   title: string;
   message: string;
   onDelete: any;
+  switchId: number;
 }) {
-  const { isOpen, setIsOpen, title, message, onDelete } = props;
+  const { isOpen, setIsOpen, title, message, onDelete, switchId } = props;
+
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  useEffect(() => {
+    window.electron.ipcRenderer
+      .readNotifications()
+      .then((response) => {
+        if (response.success) {
+          const newNotifications = response.content as Notification[];
+          const filteredNotifications = newNotifications.filter(
+            (n) => n.swId === switchId,
+          );
+          setNotifications(filteredNotifications);
+          return true;
+        }
+        setNotifications([]);
+        return false;
+      })
+      .catch(() => {
+        setNotifications([]);
+      });
+  }, [switchId]);
 
   const handleClose = () => {
     setIsOpen(false);
@@ -57,10 +82,11 @@ function AlertDialog(props: {
               </button>
             </div>
           </div>
+          <SmallNotificationPanel notifications={notifications} />
         </div>
       </div>
     )
   );
 }
 
-export default AlertDialog;
+export default SwitchInfo;

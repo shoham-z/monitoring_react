@@ -1,5 +1,3 @@
-/* eslint global-require: off, no-console: off, promise/always-return: off */
-
 /**
  * This module executes inside of electron's main process. You can start
  * electron renderer process from here and communicate with the other processes
@@ -163,7 +161,7 @@ app
       {
         label: 'Sync to Server',
         click: () => {
-          console.log('Syncing');
+          mainWindow?.webContents.send('sync-to-server');
         },
       },
       {
@@ -252,7 +250,7 @@ ipcMain.handle('get-vars', async (_event) => {
     const json = fs.readFileSync(filePath, 'utf-8');
     const content = JSON.parse(json);
     return { success: true, content };
-  } catch (error) {
+  } catch (error: any) {
     return { success: false, error: error.message };
   }
 });

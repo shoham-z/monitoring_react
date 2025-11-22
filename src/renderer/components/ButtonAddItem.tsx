@@ -39,7 +39,7 @@ function ButtonAddItem(props: {
     reset,
   } = useForm<Inputs>();
 
-  const onSubmit = (data: { hostname: any; ipAddress: any }) => {
+  const onSubmit = (data: Inputs) => {
     try {
       // Trim values before submitting
       const trimmedIp = data.ipAddress.trim();
@@ -57,6 +57,26 @@ function ButtonAddItem(props: {
     setOpen(false);
   };
 
+  const ipAddressRegister = register('ipAddress', {
+    required: 'IP address is required',
+    validate: {
+      notEmpty: (value) =>
+        isNotEmptyOrWhitespace(value) ||
+        'IP address cannot be empty or just spaces',
+      validIPv4: (value) =>
+        isValidIPv4(value.trim()) ||
+        'Please enter a valid IPv4 address (e.g., 192.168.1.1)',
+    },
+  });
+
+  const hostnameRegister = register('hostname', {
+    required: 'Hostname is required',
+    validate: {
+      notEmpty: (value) =>
+        isNotEmptyOrWhitespace(value) || 'Hostname is required',
+    },
+  });
+
   return (
     isOpen && (
       <div className="popup-wrapper">
@@ -68,21 +88,14 @@ function ButtonAddItem(props: {
           }}
         >
           <div className="mui-form-group">
-            <label className="mui-label">IP Address</label>
+            <p className="mui-label">IP Address</p>
             <input
               className="mui-input"
               defaultValue="192.168."
-              {...register('ipAddress', {
-                required: 'IP address is required',
-                validate: {
-                  notEmpty: (value) =>
-                    isNotEmptyOrWhitespace(value) ||
-                    'IP address cannot be empty or just spaces',
-                  validIPv4: (value) =>
-                    isValidIPv4(value.trim()) ||
-                    'Please enter a valid IPv4 address (e.g., 192.168.1.1)',
-                },
-              })}
+              name={ipAddressRegister.name}
+              onChange={ipAddressRegister.onChange}
+              onBlur={ipAddressRegister.onBlur}
+              ref={ipAddressRegister.ref}
             />
             {errors.ipAddress && (
               <span className="mui-error">{errors.ipAddress.message}</span>
@@ -90,16 +103,13 @@ function ButtonAddItem(props: {
           </div>
 
           <div className="mui-form-group">
-            <label className="mui-label">Hostname</label>
+            <p className="mui-label">Hostname</p>
             <input
               className="mui-input"
-              {...register('hostname', {
-                required: 'Hostname is required',
-                validate: {
-                  notEmpty: (value) =>
-                    isNotEmptyOrWhitespace(value) || 'Hostname is required',
-                },
-              })}
+              name={hostnameRegister.name}
+              onChange={hostnameRegister.onChange}
+              onBlur={hostnameRegister.onBlur}
+              ref={hostnameRegister.ref}
             />
             {errors.hostname && (
               <span className="mui-error">{errors.hostname.message}</span>

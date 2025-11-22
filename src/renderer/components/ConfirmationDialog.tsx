@@ -23,12 +23,14 @@ function ConfirmationDialog(props: {
           <div className="custom-dialog-actions">
             <button
               className="custom-dialog-button"
+              type="button"
               onClick={() => handleClose(false)}
             >
               No
             </button>
             <button
               className="custom-dialog-button primary"
+              type="button"
               onClick={() => handleClose(true)}
             >
               Yes

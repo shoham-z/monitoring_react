@@ -11,9 +11,9 @@ import computerImg from '../../img/computer.png';
 import encryptorImg from '../../img/encryptor.png';
 import '../styles/SwitchItem.css';
 import 'react-contexify/ReactContexify.css';
-import AlertDialog from './AlertDialog';
 import PopupEditItem from './PopupEditItem';
 import ConfirmationDialog from './ConfirmationDialog';
+import SwitchInfo from './SwitchInfo';
 
 function SwitchItem(props: {
   index: any;
@@ -69,6 +69,7 @@ function SwitchItem(props: {
   const image = chooseImg();
   const reachabilityClass = reachability ? 'reachable' : 'unreachable';
 
+  // Used to get app mode on component mount
   useEffect(() => {
     const readServers = async () => {
       const result = await window.electron.ipcRenderer.getVars();
@@ -168,22 +169,26 @@ function SwitchItem(props: {
     onPing(ip, true);
   };
 
-  const openShow = () => {
+  const handleShow = () => {
     setAlertTitle('Switch info');
     setAlertMessage(`IP Address: ${ip}\nName: ${name}`);
     setAlertOpen(true);
   };
 
+  const handleConnect = () => {
+    onConnect(ip, reachability);
+  };
+
   const handleItemClick = (event: ItemParams<any, any>) => {
     switch (event.id) {
       case 'show':
-        openShow();
+        handleShow();
         break;
       case 'ping':
         handlePing();
         break;
       case 'connect':
-        onConnect(ip, reachability);
+        handleConnect();
         break;
       case 'edit':
         handleEdit();
@@ -210,12 +215,11 @@ function SwitchItem(props: {
     handleItemClick(event);
   };
 
-  const  displayMenu = (e: MouseEvent) =>{
+  const displayMenu = (e: MouseEvent) => {
     if (isEditOpen || confirmationOpen || alertOpen) return;
     setIsContextMenuOpen(true);
     show({ event: e });
-
-  }
+  };
 
   const matchShortcutPing = (e: { ctrlKey: any; key: string }): boolean => {
     return e.ctrlKey && e.key === 'g';
@@ -225,8 +229,8 @@ function SwitchItem(props: {
     return e.ctrlKey && e.key === 'h';
   };
 
-  const doubleClicked = (e: MouseEvent) => {
-    openShow();
+  const doubleClicked = () => {
+    handleShow();
   };
 
   const displaySwitch = (e: MouseEvent) => {
@@ -303,12 +307,12 @@ function SwitchItem(props: {
         returnChoice={handleChoice}
       />
 
-      <AlertDialog
+      <SwitchInfo
         isOpen={alertOpen}
         setIsOpen={setAlertOpen}
         title={alertTitle}
         message={alertMessage}
-        onDelete={() => { } }
+        onDelete={() => {}}
         switchId={index}
       />
     </div>

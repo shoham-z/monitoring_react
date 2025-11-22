@@ -11,17 +11,17 @@ function Window() {
 
   const appendNewNotification = (notification: Notification) => {
     window.electron.ipcRenderer.appendNotification(notification);
-};
+  };
 
   const addNotification = (message: string, swId: number, color?: string) => {
     const id = uuidv4();
     const notification = {
-        id, // simple unique ID
-        message,
-        timestamp: new Date().toLocaleString('en-GB'),
-        color: color || 'white',
-        swId,
-      }
+      id, // simple unique ID
+      message,
+      timestamp: new Date().toLocaleString('en-GB'),
+      color: color || 'white',
+      swId,
+    };
     appendNewNotification(notification);
     setNotifications((prev) => [...prev, notification]);
   };
@@ -38,7 +38,8 @@ function Window() {
     <div className="main-window">
       <SwitchGrid
         addNotification={addNotification}
-        notifications={notifications} />
+        notifications={notifications}
+      />
       <NotificationPanel
         notifications={notifications}
         deleteNotification={deleteNotification}
