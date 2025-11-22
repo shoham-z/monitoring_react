@@ -83,7 +83,7 @@ function SwitchGrid(props: {
 
   // Initial setup to get server IP and app mode
   useEffect(() => {
-    const readServers = async () => {
+    const initialSetup = async () => {
       const result = await window.electron.ipcRenderer.getVars();
       if (result.success) {
         let ip = result.content.SERVER_IP || '';
@@ -95,12 +95,12 @@ function SwitchGrid(props: {
         SetServerIp(ip);
         setIsReady(true);
       } else {
-        console.log(result.error || 'Unknown error');
+        // console.log(result.error || 'Unknown error');
       }
     };
 
-    readServers();
-    setInterval(() => readServers(), 60 * 1000);
+    initialSetup();
+    setInterval(() => initialSetup(), 60 * 1000);
   }, []);
 
   const connect = (ip: string, reachable: boolean) => {
@@ -149,7 +149,6 @@ function SwitchGrid(props: {
       }
       return false;
     } catch (error) {
-      console.error('Error loading from local storage:', error);
       return false;
     }
   };
@@ -199,13 +198,11 @@ function SwitchGrid(props: {
       })
       // Update state with fetched data
       .catch(async (error) => {
-        console.error('Error fetching data:', error);
         // Mark server as offline
         setIsServerOnline(false);
         // Try to load from local storage as fallback
         const loaded = await loadFromLocalStorage();
         if (loaded) {
-          console.log('Using cached switch list from local storage');
           // Don't show error if we successfully loaded from cache
           return;
         }
@@ -313,6 +310,7 @@ function SwitchGrid(props: {
     return () => {
       window.electron.ipcRenderer.pingAllDevices(() => {});
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [switchList]);
 
   // used for the event listener for clicked item
