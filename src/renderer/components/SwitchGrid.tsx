@@ -4,7 +4,7 @@ import '../styles/SwitchGrid.css';
 import SwitchItem from './SwitchItem';
 import TopPanel from './TopPanel';
 import AlertDialog from './AlertDialog';
-import { Notification } from '../../main/util';
+import { MyNotification } from '../../main/util';
 
 interface SwitchEntry {
   id: number;
@@ -19,7 +19,7 @@ interface ReachableEntry {
 
 function SwitchGrid(props: {
   addNotification: (message: string, swId: number, color: string) => void;
-  notifications: Notification[];
+  notifications: MyNotification[];
 }) {
   const { addNotification, notifications } = props;
   const [SERVER_IP, SetServerIp] = useState('');
@@ -157,10 +157,10 @@ function SwitchGrid(props: {
     // TODO: handle errors here
     try {
       const result = await window.electron.ipcRenderer.saveSwitchList(switches);
-      if (result.success) {
-        console.log('Saved switch list to local storage');
-      } else {
+      if (!result.success) {
         console.error('Failed to save switch list:', result.error);
+      } else {
+        console.log('Saved switch list to local storage');
       }
     } catch (error) {
       console.error('Error saving to local storage:', error);
@@ -193,6 +193,13 @@ function SwitchGrid(props: {
             }
             return prev;
           });
+          const NOTIFICATION_TITLE = 'Basic Notification';
+          const NOTIFICATION_BODY = 'Notification from the Main process';
+
+          window.electron.ipcRenderer.showNotification(
+            NOTIFICATION_TITLE,
+            NOTIFICATION_BODY,
+          );
         }
         return null;
       })
@@ -299,16 +306,13 @@ function SwitchGrid(props: {
 
   // used for the global event to ping all devices
   useEffect(() => {
-    window.electron.ipcRenderer.pingAllDevices(() => {
-      const sendPings = () => {
-        switchList.forEach((element) => {
-          doPing(element.ip, true);
-        });
-      };
-      sendPings();
+    const unsubscribe = window.electron.ipcRenderer.pingAllDevices(() => {
+      switchList.forEach((element) => {
+        doPing(element.ip, true);
+      });
     });
     return () => {
-      window.electron.ipcRenderer.pingAllDevices(() => {});
+      unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [switchList]);

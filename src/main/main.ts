@@ -15,6 +15,7 @@ import {
   Menu,
   Tray,
   nativeImage,
+  Notification
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -240,7 +241,6 @@ ipcMain.on('connect-remotely', (event, ip) => {
     stdio: 'ignore', // Important: don't tie input/output to Electron
   });
 });
-
 /// ========= END OF SECTION CONNECT REMOTELY =========
 
 /// ========= START OF SECTION LOAD/SAVE LOCAL DATA =========
@@ -311,5 +311,14 @@ ipcMain.handle('read-notifications', async (_event) => {
     return { success: false, error: error.message };
   }
 });
-
 /// ========= END OF SECTION LOAD/SAVE LOCAL DATA =========
+
+ipcMain.handle('show-notification', async (_event, title, body) => {
+  try {
+    const notification = new Notification({ title, body });
+    notification.show();
+    return { success: true };
+  } catch (error: any) {
+    return { success: false, error: error.message };
+  }
+});

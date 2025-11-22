@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-import { Notification } from '../main/util';
+import { MyNotification } from '../main/util';
 
 export type Channels = 'ipc-example';
 
@@ -24,10 +24,7 @@ const electronHandler = {
 
     sendPing: async (host: string) => ipcRenderer.invoke('ping-request', host),
 
-    sendPingVisible: async (host: string) => {
-      ipcRenderer.send('ping-request-visible', host);
-      ipcRenderer.invoke('ping-request', host);
-    },
+    sendPingVisible: async (host: string) => ipcRenderer.send('ping-request-visible', host),
 
     connectSSH: (ip: any) => ipcRenderer.send('connect-ssh', ip),
 
@@ -42,13 +39,24 @@ const electronHandler = {
     loadSwitchList: async () =>
       ipcRenderer.invoke('load-switch-list'),
 
-    appendNotification: async (notification: Notification) => ipcRenderer.invoke('append-notification', notification),
+    appendNotification: async (notification: MyNotification) => ipcRenderer.invoke('append-notification', notification),
 
     readNotifications: async () => ipcRenderer.invoke('read-notifications'),
 
-    pingAllDevices: (callback: () => void) => ipcRenderer.on('ping-all-devices', (_event) => callback()),
+    pingAllDevices: (callback: () => void) => {
+      const listener = (_event: Electron.IpcRendererEvent) => callback();
+      ipcRenderer.on('ping-all-devices', listener);
 
-    syncToServer: (callback: () => void) => ipcRenderer.on('sync-to-server', (_event) => callback())
+      // Return the cleanup function
+      return () => {
+        ipcRenderer.removeListener('ping-all-devices', listener);
+      };
+    },
+
+    syncToServer: (callback: () => void) => ipcRenderer.on('sync-to-server', (_event) => callback()),
+
+    showNotification: async (title: string, body: string) =>
+      ipcRenderer.invoke('show-notification', title, body),
   },
 };
 

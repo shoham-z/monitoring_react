@@ -1,10 +1,10 @@
 import '../styles/NotificationPanel.css';
 import { FaCheck } from 'react-icons/fa';
 import { MdDeleteSweep } from 'react-icons/md';
-import { Notification } from '../../main/util';
+import { MyNotification } from '../../main/util';
 
 function NotificationPanel(props: {
-  notifications: Notification[];
+  notifications: MyNotification[];
   deleteNotification: (id: string) => void;
   deleteAllNotifications: () => void;
 }) {

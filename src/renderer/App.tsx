@@ -4,12 +4,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { useState } from 'react';
 import SwitchGrid from './components/SwitchGrid';
 import NotificationPanel from './components/NotificationPanel';
-import { Notification } from '../main/util';
+import { MyNotification } from '../main/util';
 
 function Window() {
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<MyNotification[]>([]);
 
-  const appendNewNotification = (notification: Notification) => {
+  const appendNewNotification = (notification: MyNotification) => {
     window.electron.ipcRenderer.appendNotification(notification);
   };
 

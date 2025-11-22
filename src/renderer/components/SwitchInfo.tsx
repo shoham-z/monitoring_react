@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Buffer } from 'buffer';
 import '../styles/AlertDialog.css';
-import { Notification } from '../../main/util';
+import { MyNotification } from '../../main/util';
 import SmallNotificationPanel from './SmallNotificationPanel';
 
 function SwitchInfo(props: {
@@ -14,13 +14,13 @@ function SwitchInfo(props: {
 }) {
   const { isOpen, setIsOpen, title, message, onDelete, switchId } = props;
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notifications, setNotifications] = useState<MyNotification[]>([]);
   useEffect(() => {
     window.electron.ipcRenderer
       .readNotifications()
       .then((response) => {
         if (response.success) {
-          const newNotifications = response.content as Notification[];
+          const newNotifications = response.content as MyNotification[];
           const filteredNotifications = newNotifications.filter(
             (n) => n.swId === switchId,
           );
