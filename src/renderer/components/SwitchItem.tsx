@@ -243,13 +243,15 @@ function SwitchItem(props: {
   return (
     // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
     <div
-      className={`switch-item ${reachabilityClass} ${isSelected ? 'selected' : ''}`}
+      className={`switch-item-container ${isSelected ? 'selected' : ''}`}
       onClick={displaySwitch}
       onContextMenu={displayMenu}
       onDoubleClick={doubleClicked}
       style={{ ['--scale' as any]: scale }}
     >
-      <img src={image} alt="Switch" />
+      <div className={`switch-item ${reachabilityClass}`}>
+        <img src={image} alt="Switch" />
+      </div>
       <p className="switch-item-text">{name}</p>
 
       <Menu id={MENU_ID} className="context-menu">
