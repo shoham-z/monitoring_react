@@ -6,7 +6,7 @@ import TopPanel from './TopPanel';
 import AlertDialog from './AlertDialog';
 import { MyNotification } from '../../main/util';
 
-interface SwitchEntry {
+interface PingableEntry {
   id: number;
   name: string;
   ip: string;
@@ -27,7 +27,7 @@ function SwitchGrid(props: {
   const [MAX_MISSED_PINGS, setMaxMissedPings] = useState(3);
   const [isReady, setIsReady] = useState(false);
   const [selectedIp, setSelectedIp] = useState('');
-  const [switchList, setSwitchList] = useState<Array<SwitchEntry>>([]);
+  const [ItemList, setItemList] = useState<Array<PingableEntry>>([]);
   const [reachabilityList, setReachabilityList] = useState<
     Array<ReachableEntry>
   >([]);
@@ -103,6 +103,7 @@ function SwitchGrid(props: {
     setInterval(() => initialSetup(), 60 * 1000);
   }, []);
 
+  // connects to an item using ip
   const connect = (ip: string, reachable: boolean) => {
     if (reachable) {
       if (APP_MODE === 'SWITCH') {
@@ -131,14 +132,15 @@ function SwitchGrid(props: {
     }
   };
 
+  // loads item from local file
   const loadFromLocalStorage = async () => {
     try {
       const result = await window.electron.ipcRenderer.loadSwitchList();
       if (result.success && result.content && result.content.length > 0) {
-        setSwitchList(result.content);
+        setItemList(result.content);
         setReachabilityList((prev) => {
           if (prev.length === 0) {
-            return result.content.map((item: SwitchEntry) => ({
+            return result.content.map((item: PingableEntry) => ({
               id: item.id,
               missedPings: 0,
             }));
@@ -153,7 +155,8 @@ function SwitchGrid(props: {
     }
   };
 
-  const saveToLocalStorage = async (switches: Array<SwitchEntry>) => {
+  // saves item to local file
+  const saveToLocalStorage = async (switches: Array<PingableEntry>) => {
     // TODO: handle errors here
     try {
       const result = await window.electron.ipcRenderer.saveSwitchList(switches);
@@ -167,6 +170,7 @@ function SwitchGrid(props: {
     }
   };
 
+  // used to fetch new items from server
   const fetchFromServer = () => {
     axios
       .get(`${SERVER_IP}/api/getAll`)
@@ -176,7 +180,7 @@ function SwitchGrid(props: {
           const { data } = response;
 
           // Set switch list
-          setSwitchList(data);
+          setItemList(data);
 
           // Save to local storage for offline use
           saveToLocalStorage(data);
@@ -186,7 +190,7 @@ function SwitchGrid(props: {
 
           setReachabilityList((prev) => {
             if (prev.length === 0) {
-              return data.map((item: SwitchEntry) => ({
+              return data.maaddSwitchp((item: PingableEntry) => ({
                 id: item.id,
                 missedPings: 0,
               }));
@@ -196,10 +200,7 @@ function SwitchGrid(props: {
           const NOTIFICATION_TITLE = 'Basic Notification';
           const NOTIFICATION_BODY = 'Notification from the Main process';
 
-          window.electron.ipcRenderer.showNotification(
-            NOTIFICATION_TITLE,
-            NOTIFICATION_BODY,
-          );
+          //window.electron.ipcRenderer.showNotification(NOTIFICATION_TITLE, NOTIFICATION_BODY);
         }
         return null;
       })
@@ -246,11 +247,12 @@ function SwitchGrid(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isReady]); // Empty dependency array = runs once on mount
 
+  // used to update visibility in list
   const updateReachability = (
     ip: string,
     pingSuccess: boolean,
   ): string | null => {
-    const matchedSwitch = switchList.find((sw) => sw.ip === ip);
+    const matchedSwitch = ItemList.find((sw) => sw.ip === ip);
     if (!matchedSwitch) return null;
 
     const { id } = matchedSwitch;
@@ -284,6 +286,7 @@ function SwitchGrid(props: {
     return notifyMessage;
   };
 
+  // used to send pings to items
   const doPing = async (ip: string, visible?: boolean) => {
     if (visible) {
       await window.electron.ipcRenderer.sendPingVisible(ip);
@@ -296,7 +299,7 @@ function SwitchGrid(props: {
       // console.log(`[NOTIFY] ${message}`);
       addNotification(
         message,
-        switchList.find((r) => r.ip === result.ip)?.id || 0,
+        ItemList.find((r) => r.ip === result.ip)?.id || 0,
         result.success === true ? 'green' : 'red',
       );
     } else {
@@ -307,7 +310,7 @@ function SwitchGrid(props: {
   // used for the global event to ping all devices
   useEffect(() => {
     const unsubscribe = window.electron.ipcRenderer.pingAllDevices(() => {
-      switchList.forEach((element) => {
+      ItemList.forEach((element) => {
         doPing(element.ip, true);
       });
     });
@@ -315,7 +318,7 @@ function SwitchGrid(props: {
       unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [switchList]);
+  }, [ItemList]);
 
   // used for the event listener for clicked item
   useEffect(() => {
@@ -325,7 +328,7 @@ function SwitchGrid(props: {
       if (event.ctrlKey && event.key === 'g') {
         doPing(selectedIp);
       } else if (event.ctrlKey && event.key === 'h') {
-        const selectedId = switchList.find((r) => r.ip === selectedIp)?.id;
+        const selectedId = ItemList.find((r) => r.ip === selectedIp)?.id;
         const missedPings = reachabilityList.find(
           (r) => r.id === selectedId,
         )?.missedPings;
@@ -338,9 +341,10 @@ function SwitchGrid(props: {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedIp]);
 
+  // used to send pings to the devices every 15 seconds
   useEffect(() => {
     const sendPings = () => {
-      switchList.forEach((element) => {
+      ItemList.forEach((element) => {
         doPing(element.ip);
       });
     };
@@ -351,9 +355,10 @@ function SwitchGrid(props: {
     sendPings(); // Initial ping on setup
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [switchList]);
+  }, [ItemList]);
 
-  const addSwitch = (ip: any, hostname: any) => {
+  // used to add item to list and send to server
+  const addItem = (ip: any, hostname: any) => {
     if (!isServerOnline) {
       showErrorAlert(
         'Server Offline',
@@ -376,14 +381,14 @@ function SwitchGrid(props: {
           const getMaxId = (list: any[]) => {
             return Math.max(...list.map((item) => item.id), 0);
           };
-          const newId = getMaxId(switchList) + 1;
+          const newId = getMaxId(ItemList) + 1;
           const newSwitch = {
             id: newId,
             name: hostname,
             ip,
           };
-          const updatedList = [...switchList, newSwitch];
-          setSwitchList(updatedList);
+          const updatedList = [...ItemList, newSwitch];
+          setItemList(updatedList);
           // Save to local storage
           saveToLocalStorage(updatedList);
         }
@@ -406,7 +411,8 @@ function SwitchGrid(props: {
       });
   };
 
-  const editSwitch = (index: string, newIp: string, hostname: string) => {
+  // used to edit item in list and send to server
+  const editItem = (index: string, newIp: string, hostname: string) => {
     if (!isServerOnline) {
       showErrorAlert(
         'Server Offline',
@@ -416,7 +422,7 @@ function SwitchGrid(props: {
     }
 
     const numericId = Number(index);
-    const previousIp = switchList.find((item) => item.id === numericId)?.ip;
+    const previousIp = ItemList.find((item) => item.id === numericId)?.ip;
 
     axios
       .put(`${SERVER_IP}/api/edit`, {
@@ -429,7 +435,7 @@ function SwitchGrid(props: {
           // Mark server as online
           setIsServerOnline(true);
           // Only update UI if server successfully edited the device
-          setSwitchList((prevList) => {
+          setItemList((prevList) => {
             const updatedList = prevList.map((item) =>
               item.id === numericId
                 ? { ...item, name: hostname, ip: newIp }
@@ -463,7 +469,8 @@ function SwitchGrid(props: {
       });
   };
 
-  const deleteSwitch = (ip: string): Promise<boolean> => {
+  // used to delete item and update server
+  const deleteItem = (ip: string): Promise<boolean> => {
     if (!isServerOnline) {
       showErrorAlert(
         'Server Offline',
@@ -479,10 +486,10 @@ function SwitchGrid(props: {
           // Mark server as online
           setIsServerOnline(true);
           // Only update UI if server successfully deleted the device
-          const updatedList = switchList.filter((el) => {
+          const updatedList = ItemList.filter((el) => {
             return el.ip !== ip ? el : null;
           });
-          setSwitchList(updatedList);
+          setItemList(updatedList);
           // Save to local storage
           saveToLocalStorage(updatedList);
           return true;
@@ -507,6 +514,7 @@ function SwitchGrid(props: {
       });
   };
 
+  // used to handle the chosen item when pressed
   const handleSelect = (ip: string | SetStateAction<string>) => {
     setSelectedIp((prev) => {
       if (typeof ip === 'function') {
@@ -517,53 +525,59 @@ function SwitchGrid(props: {
     });
   };
 
+  // used to handle zooming in/out
   const handleWheel = (event: { deltaY: number; ctrlKey?: boolean }) => {
     if (event.ctrlKey) setItemScale((prev) => prev - event.deltaY / 10000);
   };
 
+  // used to update filter in search bar
   const updateFilter = (data: SetStateAction<string>) => setFilter(data);
 
-  const getNewEventSwitches = () => {
+  // used to get items with new events
+  const getNewEventItem = () => {
     const ids = notifications.map((n) => n.swId);
-    return switchList.filter((sw) => ids.includes(sw.id));
+    return ItemList.filter((sw) => ids.includes(sw.id));
   };
 
-  const getNoEventSwitchId = () => {
+  // used to get the id of items with no new event
+  const getNoEventItemId = () => {
     const ids = notifications.map((n) => n.swId);
-    const l = switchList
+    const l = ItemList
       .filter((sw) => !ids.includes(sw.id))
       .map((el) => el.id);
     return l;
   };
 
-  const getUpSwitches = () => {
-    const idList = getNoEventSwitchId();
+  // used to get the items with no new events that are up
+  const getUpItems = () => {
+    const idList = getNoEventItemId();
     return reachabilityList
       .filter((el) => idList.includes(el.id))
       .filter((el) => el.missedPings < MAX_MISSED_PINGS)
       .map((el) => {
-        const chosenElement = switchList.find((sw) => sw.id === el.id);
+        const chosenElement = ItemList.find((sw) => sw.id === el.id);
         return chosenElement;
       })
-      .filter((el) => el !== undefined) as SwitchEntry[];
+      .filter((el) => el !== undefined) as PingableEntry[];
   };
 
-  const getDownSwitches = () => {
-    const idList = getNoEventSwitchId();
+  // used to get the items with no new events that are down
+  const getDownItem = () => {
+    const idList = getNoEventItemId();
     return reachabilityList
       .filter((el) => idList.includes(el.id))
       .filter((el) => el.missedPings >= MAX_MISSED_PINGS)
       .map((el) => {
-        const chosenElement = switchList.find((sw) => sw.id === el.id);
+        const chosenElement = ItemList.find((sw) => sw.id === el.id);
         return chosenElement;
       })
-      .filter((el) => el !== undefined) as SwitchEntry[];
+      .filter((el) => el !== undefined) as PingableEntry[];
   };
 
   return (
     <>
       <TopPanel
-        addSwitch={addSwitch}
+        addSwitch={addItem}
         updateFilter={updateFilter}
         isServerOnline={isServerOnline}
       />
@@ -581,7 +595,7 @@ function SwitchGrid(props: {
           <p className="div_header">
             <span>Devices With New Events</span>
           </p>
-          {getNewEventSwitches()
+          {getNewEventItem()
             .filter((el) => {
               if (filter === '') return el;
               if (filter.includes('.') && el.ip.includes(filter)) return el;
@@ -603,8 +617,8 @@ function SwitchGrid(props: {
                 setSelected={() => handleSelect(x.ip)}
                 onPing={doPing}
                 onConnect={connect}
-                onEdit={editSwitch}
-                onDelete={deleteSwitch}
+                onEdit={editItem}
+                onDelete={deleteItem}
                 isServerOnline={isServerOnline}
               />
             ))}
@@ -613,7 +627,7 @@ function SwitchGrid(props: {
           <p className="div_header">
             <span>Unreachable Devices</span>
           </p>
-          {getDownSwitches()
+          {getDownItem()
             .filter((el) => {
               if (filter === '') return el;
               if (filter.includes('.') && el.ip.includes(filter)) return el;
@@ -635,8 +649,8 @@ function SwitchGrid(props: {
                 setSelected={() => handleSelect(x.ip)}
                 onPing={doPing}
                 onConnect={connect}
-                onEdit={editSwitch}
-                onDelete={deleteSwitch}
+                onEdit={editItem}
+                onDelete={deleteItem}
                 isServerOnline={isServerOnline}
               />
             ))}
@@ -645,7 +659,7 @@ function SwitchGrid(props: {
           <p className="div_header">
             <span>Reachable Devices</span>
           </p>
-          {getUpSwitches()
+          {getUpItems()
             .filter((el) => {
               if (filter === '') return el;
               if (filter.includes('.') && el.ip.includes(filter)) return el;
@@ -667,8 +681,8 @@ function SwitchGrid(props: {
                 setSelected={() => handleSelect(x.ip)}
                 onPing={doPing}
                 onConnect={connect}
-                onEdit={editSwitch}
-                onDelete={deleteSwitch}
+                onEdit={editItem}
+                onDelete={deleteItem}
                 isServerOnline={isServerOnline}
               />
             ))}
