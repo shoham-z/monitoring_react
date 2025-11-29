@@ -82,16 +82,6 @@
   font-weight: bold;
   user-select: none;
 
-  text-shadow:
-    1px 1px 0 white,
-    -1px 1px 0 white,
-    1px -1px 0 white,
-    -1px -1px 0 white,
-    1px 0 0 white,
-    -1px 0 0 white,
-    0 1px 0 white,
-    0 -1px 0 white;
-
   display: -webkit-box;
   -webkit-line-clamp: 3; /* limit to 3 lines */
   -webkit-box-orient: vertical;
