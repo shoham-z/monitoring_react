@@ -598,7 +598,7 @@ function SwitchGrid(props: {
           {getNewEventItem()
             .filter((el) => {
               if (filter === '') return el;
-              if (filter.includes('.') && el.ip.includes(filter)) return el;
+              if (el.ip.includes(filter)) return el;
               if (el.name.includes(filter)) return el;
               return null;
             })
