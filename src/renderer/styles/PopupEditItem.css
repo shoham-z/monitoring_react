@@ -1,4 +1,4 @@
-.mui-dialog {
+.edit-dialog {
   position: relative;
   background: #fff;
   border-radius: 8px;
@@ -11,7 +11,7 @@
   padding-bottom: 12px;
 }
 /* Close "X" button */
-.mui-dialog-close {
+.edit-dialog-close {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -23,32 +23,32 @@
   color: #555;
   transition: color 0.2s;
 }
-.mui-dialog-close:hover {
+.edit-dialog-close:hover {
   color: #000;
 }
 
-.mui-dialog-title {
+.edit-dialog-title {
   font-size: 1.25rem;
   font-weight: 500;
   padding: 16px 24px 0;
   color: #333;
 }
 
-.mui-dialog-content {
+.edit-dialog-content {
   padding: 24px;             /* more generous spacing inside */
   display: flex;
   flex-direction: column;
   gap: 16px;                 /* spacing between inputs and labels */
 }
 
-.mui-label {
+.edit-label {
   font-size: 0.9rem;
   font-weight: 500;
   color: #444;
   margin-bottom: 4px;
 }
 
-.mui-input {
+.edit-input {
   width: 100%;
   box-sizing: border-box;
   padding: 8px 12px;
@@ -57,29 +57,29 @@
   font-size: 0.95rem;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
-.mui-input:focus {
+.edit-input:focus {
   border-color: #1976d2;
   box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.2);
   outline: none;
 }
 
-.mui-error {
+.edit-error {
   color: #d32f2f;
   font-size: 0.8rem;
   margin-top: -6px;
 }
 
-.mui-dialog-actions {
+.edit-dialog-actions {
   padding: 16px 24px 24px;   /* ⬅ extra padding at the bottom */
   display: flex;
   justify-content: center;
   gap: 12px;
 }
-.mui-dialog-actions.center {
+.edit-dialog-actions.center {
   justify-content: center;
 }
 
-.mui-button {
+.edit-button {
   background-color: #e0e0e0;
   color: #333;
   font-size: 0.9rem;
@@ -89,15 +89,15 @@
   cursor: pointer;
   transition: background-color 0.2s;
 }
-.mui-button:hover {
+.edit-button:hover {
   background-color: #bdbdbd;
 }
 
-.mui-button.primary {
+.edit-button.primary {
   background-color: #1976d2;
   color: #fff;
 }
-.mui-button.primary:hover {
+.edit-button.primary:hover {
   background-color: #1565c0;
 }
 

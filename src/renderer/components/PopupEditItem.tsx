@@ -93,27 +93,27 @@ function PopupEditItem({
       closeOnDocumentClick
       onClose={() => setIsOpen(false)}
     >
-      <div className="mui-dialog">
+      <div onClick={()=>{}}className="edit-dialog">
         <button
-          className="mui-dialog-close"
+          className="edit-dialog-close"
           type="button"
           onClick={() => setIsOpen(false)}
         >
           &times;
         </button>
 
-        <div className="mui-dialog-title">Edit Switch</div>
+        <div className="edit-dialog-title">Edit Switch</div>
 
         <form
-          className="mui-dialog-content"
+          className="edit-dialog-content"
           onSubmit={(e) => {
             e.preventDefault();
             handleSubmit(onSubmit)(e);
           }}
         >
-          <p className="mui-label">IP Address</p>
+          <p className="edit-label">IP Address</p>
           <input
-            className="mui-input"
+            className="edit-input"
             placeholder={initialIpAddress}
             name={ipAddressRegister.name}
             onChange={ipAddressRegister.onChange}
@@ -121,12 +121,12 @@ function PopupEditItem({
             ref={ipAddressRegister.ref}
           />
           {errors.ipAddress && (
-            <span className="mui-error">{errors.ipAddress.message}</span>
+            <span className="edit-error">{errors.ipAddress.message}</span>
           )}
 
-          <p className="mui-label">Hostname</p>
+          <p className="edit-label">Hostname</p>
           <input
-            className="mui-input"
+            className="edit-input"
             placeholder={initialHostname}
             name={hostnameRegister.name}
             onChange={hostnameRegister.onChange}
@@ -134,18 +134,18 @@ function PopupEditItem({
             ref={hostnameRegister.ref}
           />
           {errors.hostname && (
-            <span className="mui-error">{errors.hostname.message}</span>
+            <span className="edit-error">{errors.hostname.message}</span>
           )}
 
-          <div className="mui-dialog-actions center">
+          <div className="edit-dialog-actions center">
             <button
               type="button"
-              className="mui-button"
+              className="edit-button"
               onClick={() => setIsOpen(false)}
             >
               Cancel
             </button>
-            <button className="mui-button primary" type="submit">
+            <button className="edit-button primary" type="submit">
               Update Switch
             </button>
           </div>

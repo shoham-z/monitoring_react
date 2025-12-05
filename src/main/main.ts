@@ -293,7 +293,7 @@ function readNotificationsFromFile(): Notification[] {
 ipcMain.handle('append-notification', async (_event, notification) => {
   try {
     const notifications = readNotificationsFromFile();
-    notifications.push(notification);
+    notifications.unshift(notification);
     const filePath = path.join(basePath, 'assets/notifications.json');
     const json = JSON.stringify(notifications, null, 2);
     fs.writeFileSync(filePath, json, 'utf-8');

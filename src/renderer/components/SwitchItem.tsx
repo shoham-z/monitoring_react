@@ -1,3 +1,5 @@
+/* eslint-disable jsx-a11y/no-static-element-interactions */
+/* eslint-disable jsx-a11y/click-events-have-key-events */
 import { MouseEvent, useEffect, useState } from 'react';
 import {
   Item,
@@ -241,60 +243,76 @@ function SwitchItem(props: {
   };
 
   return (
-    // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-    <div
-      className={`switch-item-container ${isSelected ? 'selected' : ''}`}
-      onClick={displaySwitch}
-      onContextMenu={displayMenu}
-      onDoubleClick={doubleClicked}
-      style={{ ['--scale' as any]: scale }}
-    >
-      <div className={`switch-item ${reachabilityClass}`}>
-        <img src={image} alt="Switch" />
-      </div>
-      <p className="switch-item-text">{name}</p>
+    <>
+      <div
+        className={`switch-item-container ${isSelected ? 'selected' : ''}`}
+        onClick={displaySwitch}
+        onContextMenu={displayMenu}
+        onDoubleClick={doubleClicked}
+        style={{ ['--scale' as any]: scale }}
+      >
+        <div className={`switch-item ${reachabilityClass}`}>
+          <img src={image} alt="Switch" />
+        </div>
+        <p className="switch-item-text">{name}</p>
 
-      <Menu id={MENU_ID} className="context-menu">
-        <Item id="show" onClick={handleMenuClick}>
-          Show
-        </Item>
-        <Item
-          id="ping"
-          onClick={handleMenuClick}
-          keyMatcher={matchShortcutPing}
-        >
-          Ping <RightSlot>Ctrl G</RightSlot>
-        </Item>
-        <Item
-          id="connect"
-          onClick={handleMenuClick}
-          keyMatcher={matchShortcutConnect}
-        >
-          Connect <RightSlot>Ctrl H</RightSlot>
-        </Item>
-        <Item
-          id="edit"
-          onClick={handleMenuClick}
-          disabled={!isServerOnline}
-          className={!isServerOnline ? 'context-menu-offline' : undefined}
-        >
-          <span className="context-menu-label">Edit</span>
-          {!isServerOnline && (
-            <span className="context-menu-offline-tag">&nbsp;Offline</span>
-          )}
-        </Item>
-        <Item
-          id="delete"
-          onClick={handleMenuClick}
-          disabled={!isServerOnline}
-          className={!isServerOnline ? 'context-menu-offline' : undefined}
-        >
-          <span className="context-menu-label">Delete</span>
-          {!isServerOnline && (
-            <span className="context-menu-offline-tag">&nbsp;Offline</span>
-          )}
-        </Item>
-      </Menu>
+        <Menu id={MENU_ID} className="context-menu">
+          <Item id="show" onClick={handleMenuClick}>
+            Show
+          </Item>
+          <Item
+            id="ping"
+            onClick={handleMenuClick}
+            keyMatcher={matchShortcutPing}
+          >
+            Ping <RightSlot>Ctrl G</RightSlot>
+          </Item>
+          <Item
+            id="connect"
+            onClick={handleMenuClick}
+            keyMatcher={matchShortcutConnect}
+          >
+            Connect <RightSlot>Ctrl H</RightSlot>
+          </Item>
+          <Item
+            id="edit"
+            onClick={handleMenuClick}
+            disabled={!isServerOnline}
+            className={!isServerOnline ? 'context-menu-offline' : undefined}
+          >
+            <span className="context-menu-label">Edit</span>
+            {!isServerOnline && (
+              <span className="context-menu-offline-tag">&nbsp;Offline</span>
+            )}
+          </Item>
+          <Item
+            id="delete"
+            onClick={handleMenuClick}
+            disabled={!isServerOnline}
+            className={!isServerOnline ? 'context-menu-offline' : undefined}
+          >
+            <span className="context-menu-label">Delete</span>
+            {!isServerOnline && (
+              <span className="context-menu-offline-tag">&nbsp;Offline</span>
+            )}
+          </Item>
+        </Menu>
+        <ConfirmationDialog
+          ip={ip}
+          isOpen={confirmationOpen}
+          setIsOpen={setConfirmationOpen}
+          returnChoice={handleChoice}
+        />
+
+        <SwitchInfo
+          isOpen={alertOpen}
+          setIsOpen={setAlertOpen}
+          title={alertTitle}
+          message={alertMessage}
+          onDelete={() => {}}
+          switchId={index}
+        />
+      </div>
       <PopupEditItem
         isOpen={isEditOpen}
         setIsOpen={setIsEditOpen}
@@ -302,22 +320,7 @@ function SwitchItem(props: {
         initialIpAddress={ip}
         onSubmitEdit={handlesubmitEdit}
       />
-      <ConfirmationDialog
-        ip={ip}
-        isOpen={confirmationOpen}
-        setIsOpen={setConfirmationOpen}
-        returnChoice={handleChoice}
-      />
-
-      <SwitchInfo
-        isOpen={alertOpen}
-        setIsOpen={setAlertOpen}
-        title={alertTitle}
-        message={alertMessage}
-        onDelete={() => {}}
-        switchId={index}
-      />
-    </div>
+    </>
   );
 }
 
