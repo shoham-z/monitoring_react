@@ -35,7 +35,7 @@
   align-items: center;
   justify-content: center;
 
-  width: calc(90px * var(--scale));
+  width: calc(60px * var(--scale));
   height: calc(50px * var(--scale));
   margin-bottom: 5px;
 
