@@ -1,21 +1,16 @@
+/* eslint-disable camelcase */
 import { SetStateAction, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import '../styles/SwitchGrid.css';
-import SwitchItem from './SwitchItem';
 import TopPanel from './TopPanel';
 import AlertDialog from './AlertDialog';
 import { MyNotification } from '../../main/util';
-
-interface PingableEntry {
-  id: number;
-  name: string;
-  ip: string;
-}
-
-interface ReachableEntry {
-  id: number;
-  missedPings: number;
-}
+import {
+  PingableEntry,
+  PingableList,
+  ReachableEntry,
+  itemProps,
+} from '../utils';
 
 function SwitchGrid(props: {
   addNotification: (message: string, swId: number, color: string) => void;
@@ -104,7 +99,7 @@ function SwitchGrid(props: {
   }, []);
 
   // connects to an item using ip
-  const connect = (ip: string, reachable: boolean) => {
+  const onConnect = (ip: string, reachable: boolean) => {
     if (reachable) {
       if (APP_MODE === 'SWITCH') {
         window.electron.ipcRenderer.connectSSH(ip);
@@ -200,7 +195,10 @@ function SwitchGrid(props: {
           const NOTIFICATION_TITLE = 'Basic Notification';
           const NOTIFICATION_BODY = 'Notification from the Main process';
 
-          //window.electron.ipcRenderer.showNotification(NOTIFICATION_TITLE, NOTIFICATION_BODY);
+          // window.electron.ipcRenderer.showNotification(
+          //   NOTIFICATION_TITLE,
+          //   NOTIFICATION_BODY,
+          // );
         }
         return null;
       })
@@ -287,7 +285,7 @@ function SwitchGrid(props: {
   };
 
   // used to send pings to items
-  const doPing = async (ip: string, visible?: boolean) => {
+  const onPing = async (ip: string, visible?: boolean) => {
     if (visible) {
       await window.electron.ipcRenderer.sendPingVisible(ip);
       return;
@@ -311,7 +309,7 @@ function SwitchGrid(props: {
   useEffect(() => {
     const unsubscribe = window.electron.ipcRenderer.pingAllDevices(() => {
       ItemList.forEach((element) => {
-        doPing(element.ip, true);
+        onPing(element.ip, true);
       });
     });
     return () => {
@@ -326,13 +324,13 @@ function SwitchGrid(props: {
       if (!selectedIp) return;
 
       if (event.ctrlKey && event.key === 'g') {
-        doPing(selectedIp);
+        onPing(selectedIp);
       } else if (event.ctrlKey && event.key === 'h') {
         const selectedId = ItemList.find((r) => r.ip === selectedIp)?.id;
         const missedPings = reachabilityList.find(
           (r) => r.id === selectedId,
         )?.missedPings;
-        connect(selectedIp, missedPings === 0 || false);
+        onConnect(selectedIp, missedPings === 0 || false);
       }
     };
 
@@ -345,7 +343,7 @@ function SwitchGrid(props: {
   useEffect(() => {
     const sendPings = () => {
       ItemList.forEach((element) => {
-        doPing(element.ip);
+        onPing(element.ip);
       });
     };
     const interval = setInterval(() => {
@@ -412,7 +410,7 @@ function SwitchGrid(props: {
   };
 
   // used to edit item in list and send to server
-  const editItem = (index: string, newIp: string, hostname: string) => {
+  const onEdit = (index: string, newIp: string, hostname: string) => {
     if (!isServerOnline) {
       showErrorAlert(
         'Server Offline',
@@ -470,7 +468,7 @@ function SwitchGrid(props: {
   };
 
   // used to delete item and update server
-  const deleteItem = (ip: string): Promise<boolean> => {
+  const onDelete = (ip: string): Promise<boolean> => {
     if (!isServerOnline) {
       showErrorAlert(
         'Server Offline',
@@ -534,22 +532,20 @@ function SwitchGrid(props: {
   const updateFilter = (data: SetStateAction<string>) => setFilter(data);
 
   // used to get items with new events
-  const getNewEventItem = () => {
+  const getNewEventItem: () => PingableEntry[] = () => {
     const ids = notifications.map((n) => n.swId);
     return ItemList.filter((sw) => ids.includes(sw.id));
   };
 
   // used to get the id of items with no new event
-  const getNoEventItemId = () => {
+  const getNoEventItemId: () => number[] = () => {
     const ids = notifications.map((n) => n.swId);
-    const l = ItemList
-      .filter((sw) => !ids.includes(sw.id))
-      .map((el) => el.id);
+    const l = ItemList.filter((sw) => !ids.includes(sw.id)).map((el) => el.id);
     return l;
   };
 
   // used to get the items with no new events that are up
-  const getUpItems = () => {
+  const getUpItems: () => PingableEntry[] = () => {
     const idList = getNoEventItemId();
     return reachabilityList
       .filter((el) => idList.includes(el.id))
@@ -562,7 +558,7 @@ function SwitchGrid(props: {
   };
 
   // used to get the items with no new events that are down
-  const getDownItem = () => {
+  const getDownItem: () => PingableEntry[] = () => {
     const idList = getNoEventItemId();
     return reachabilityList
       .filter((el) => idList.includes(el.id))
@@ -572,6 +568,26 @@ function SwitchGrid(props: {
         return chosenElement;
       })
       .filter((el) => el !== undefined) as PingableEntry[];
+  };
+
+  const reachability = (x: PingableEntry) =>
+    (reachabilityList.find((el) => el.id === x.id)?.missedPings || 0) <
+    MAX_MISSED_PINGS;
+
+  const isSelected = (x: PingableEntry) => selectedIp.toString() === x.ip;
+
+  const setSelected = (x: PingableEntry) => () => handleSelect(x.ip);
+
+  const customProps: itemProps = {
+    itemScale,
+    isServerOnline,
+    reachability,
+    isSelected,
+    setSelected,
+    onPing,
+    onConnect,
+    onEdit,
+    onDelete,
   };
 
   return (
@@ -595,97 +611,19 @@ function SwitchGrid(props: {
           <p className="div_header">
             <span>Devices With New Events</span>
           </p>
-          {getNewEventItem()
-            .filter((el) => {
-              if (filter === '') return el;
-              if (el.ip.includes(filter)) return el;
-              if (el.name.includes(filter)) return el;
-              return null;
-            })
-            .map((x) => (
-              <SwitchItem
-                key={x.id}
-                index={x.id}
-                name={x.name}
-                reachability={
-                  (reachabilityList.find((el) => el.id === x.id)?.missedPings ||
-                    0) < MAX_MISSED_PINGS
-                }
-                ip={x.ip}
-                scale={itemScale}
-                isSelected={selectedIp.toString() === x.ip}
-                setSelected={() => handleSelect(x.ip)}
-                onPing={doPing}
-                onConnect={connect}
-                onEdit={editItem}
-                onDelete={deleteItem}
-                isServerOnline={isServerOnline}
-              />
-            ))}
+          {new PingableList(getNewEventItem()).build(filter, customProps)}
         </div>
         <div className="container_flex" id="container_flex">
           <p className="div_header">
             <span>Unreachable Devices</span>
           </p>
-          {getDownItem()
-            .filter((el) => {
-              if (filter === '') return el;
-              if (filter.includes('.') && el.ip.includes(filter)) return el;
-              if (el.name.includes(filter)) return el;
-              return null;
-            })
-            .map((x) => (
-              <SwitchItem
-                key={x.id}
-                index={x.id}
-                name={x.name}
-                reachability={
-                  (reachabilityList.find((el) => el.id === x.id)?.missedPings ||
-                    0) < MAX_MISSED_PINGS
-                }
-                ip={x.ip}
-                scale={itemScale}
-                isSelected={selectedIp.toString() === x.ip}
-                setSelected={() => handleSelect(x.ip)}
-                onPing={doPing}
-                onConnect={connect}
-                onEdit={editItem}
-                onDelete={deleteItem}
-                isServerOnline={isServerOnline}
-              />
-            ))}
+          {new PingableList(getDownItem()).build(filter, customProps)}
         </div>
         <div className="container_flex" id="container_flex">
           <p className="div_header">
             <span>Reachable Devices</span>
           </p>
-          {getUpItems()
-            .filter((el) => {
-              if (filter === '') return el;
-              if (filter.includes('.') && el.ip.includes(filter)) return el;
-              if (el.name.includes(filter)) return el;
-              return null;
-            })
-            .map((x) => (
-              <SwitchItem
-                key={x.id}
-                index={x.id}
-                name={x.name}
-                reachability={
-                  (reachabilityList.find((el) => el.id === x.id)?.missedPings ||
-                    0) < MAX_MISSED_PINGS
-                }
-                ip={x.ip}
-                scale={itemScale}
-                isSelected={selectedIp.toString() === x.ip}
-                setSelected={() => handleSelect(x.ip)}
-                onPing={doPing}
-                onConnect={connect}
-                onEdit={editItem}
-                onDelete={deleteItem}
-                isServerOnline={isServerOnline}
-              />
-            ))}
+          {new PingableList(getUpItems()).build(filter, customProps)}
         </div>
       </div>
       <AlertDialog
