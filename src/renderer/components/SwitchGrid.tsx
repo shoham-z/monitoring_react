@@ -126,7 +126,7 @@ function SwitchGrid(props: {
     }
   };
 
-  // loads item from local file
+  // loads items from local file
   const loadFromLocalStorage = async () => {
     try {
       const result = await window.electron.ipcRenderer.loadSwitchList();
@@ -149,7 +149,7 @@ function SwitchGrid(props: {
     }
   };
 
-  // saves item to local file
+  // saves items to local file
   const saveToLocalStorage = async (switches: Array<PingableEntry>) => {
     // TODO: handle errors here
     try {
@@ -271,6 +271,8 @@ function SwitchGrid(props: {
     let notifyMessage: string | null = null;
 
     if (pingSuccess) {
+      if (notifications.filter((el) => el.swId === id).length === 0)
+        return notifyMessage;
       if (lastStatus !== true) {
         notifyMessage = `${matchedSwitch.name} is up. IP is ${ip}`;
         lastNotifiedStatus.current[id] = true;
