@@ -15,7 +15,6 @@ function AlertDialog(props: {
     onDelete();
   };
 
-  // Split the message by newlines and map each part to a <p> element
   const messageLines = message.split('\n').map((line, index) => {
     const key = `${index}-${Buffer.from(line).toString('base64')}`;
     return (
