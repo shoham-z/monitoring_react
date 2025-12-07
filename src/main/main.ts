@@ -37,6 +37,11 @@ const basePath = app.isPackaged
   ? process.resourcesPath // for production
   : path.join(__dirname, '../..'); // for development
 
+// Set Windows AppUserModelId for proper notification branding
+if (process.platform === 'win32') {
+  app.setAppUserModelId('GoldenApple');
+}  
+
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on('ipc-example', async (event, arg) => {
@@ -129,7 +134,7 @@ const createWindow = async () => {
 
   // Remove this if your app does not use auto updates
   // eslint-disable-next-line
-  new AppUpdater();
+  // new AppUpdater();
 };
 
 /**
