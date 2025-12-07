@@ -41,28 +41,24 @@ export class PingableList {
     });
   }
 
-  buildItem(x: PingableEntry, itemProps: itemProps): JSX.Element {
-    return (
-      <SwitchItem
-        key={x.id}
-        index={x.id}
-        name={x.name}
-        ip={x.ip}
-        scale={itemProps.itemScale}
-        isServerOnline={itemProps.isServerOnline}
-        reachability={itemProps.reachability(x)}
-        isSelected={itemProps.isSelected(x)}
-        setSelected={itemProps.setSelected(x)}
-        onPing={itemProps.onPing}
-        onConnect={itemProps.onConnect}
-        onEdit={itemProps.onEdit}
-        onDelete={itemProps.onDelete}
-      />
-    );
-  }
-
   build(filter: string, props: itemProps): JSX.Element[] {
-    return this.filter(filter).map((element) => this.buildItem(element, props));
+    return this.filter(filter).map((element) => (
+      <SwitchItem
+        key={element.id}
+        index={element.id}
+        name={element.name}
+        ip={element.ip}
+        scale={props.itemScale}
+        isServerOnline={props.isServerOnline}
+        reachability={props.reachability(element)}
+        isSelected={props.isSelected(element)}
+        setSelected={props.setSelected(element)}
+        onPing={props.onPing}
+        onConnect={props.onConnect}
+        onEdit={props.onEdit}
+        onDelete={props.onDelete}
+      />
+    ));
   }
 }
 
