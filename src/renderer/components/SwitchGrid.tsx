@@ -1,4 +1,3 @@
-/* eslint-disable camelcase */
 import { SetStateAction, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import '../styles/SwitchGrid.css';
@@ -185,7 +184,7 @@ function SwitchGrid(props: {
 
           setReachabilityList((prev) => {
             if (prev.length === 0) {
-              return data.maaddSwitchp((item: PingableEntry) => ({
+              return data.map((item: PingableEntry) => ({
                 id: item.id,
                 missedPings: 0,
               }));
