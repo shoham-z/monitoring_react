@@ -1,59 +1,103 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
-var _ = require('lodash');
-import { MyNotification } from '../main/util';
-import { validateIPAddress, validateNotification, validateSwitchList } from './validation';
+import _ from 'lodash';
+import { MyNotification } from './util';
+import {
+  validateIPAddress,
+  validateNotification,
+  validateNotificationParams,
+  validateNotificationsResponse,
+  validateSwitchList,
+  validateSwitchListResponse,
+  validateVarsResponse,
+} from './validation';
 import { PingableEntry } from '../renderer/utils';
+
+interface APIResponse<T> {
+  success: boolean;
+  content?: T;
+  error?: string;
+}
 
 const electronHandler = {
   ipcRenderer: {
     sendPing: async (ip: string) => {
-      if(validateIPAddress(ip) !== ip) {
+      if (validateIPAddress(ip) !== ip) {
         return;
       }
-      return ipcRenderer.invoke('ping-request', ip)
+      return ipcRenderer.invoke('ping-request', ip);
     },
 
     sendPingVisible: async (ip: string) => {
-      if(validateIPAddress(ip) !== ip) {
+      if (validateIPAddress(ip) !== ip) {
         return;
       }
-      ipcRenderer.send('ping-request-visible', ip)
+      ipcRenderer.send('ping-request-visible', ip);
     },
 
-    connectSSH: (ip: any) => {
-      if(validateIPAddress(ip) !== ip) {
+    connectSSH: (ip: string) => {
+      if (validateIPAddress(ip) !== ip) {
         return;
       }
-      ipcRenderer.send('connect-ssh', ip)
+      ipcRenderer.send('connect-ssh', ip);
     },
 
-    connectRemotely: (ip: any) => {
-      if(validateIPAddress(ip) !== ip) {
+    connectRemotely: (ip: string) => {
+      if (validateIPAddress(ip) !== ip) {
         return;
       }
-      return ipcRenderer.send('connect-remotely', ip)
+      return ipcRenderer.send('connect-remotely', ip);
     },
 
-    getVars: async () => ipcRenderer.invoke('get-vars'),
+    getVars: async (): Promise<APIResponse<any>> => {
+      try {
+        const response = await ipcRenderer.invoke('get-vars');
+        const validatedData = validateVarsResponse(response.content);
+        return {
+          success: true,
+          content: validatedData,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
+      }
+    },
 
     saveSwitchList: async (switchList: PingableEntry[]) => {
-      const val = validateSwitchList(switchList);
-      if(!_.isEqual(val, switchList)) {
+      if (!_.isEqual(validateSwitchList(switchList), switchList)) {
         return;
       }
-      return ipcRenderer.invoke('save-switch-list', switchList)
+      return ipcRenderer.invoke('save-switch-list', switchList);
     },
 
-    loadSwitchList: async () => ipcRenderer.invoke('load-switch-list'),
+    loadSwitchList: async () => {
+      const response = await ipcRenderer.invoke('load-switch-list');
+      return validateSwitchListResponse(response);
+    },
 
     appendNotification: async (notification: MyNotification) => {
-      if(validateNotification(notification) !== notification){
+      if (validateNotification(notification) !== notification) {
         return;
       }
-      return ipcRenderer.invoke('append-notification', notification)
+      return ipcRenderer.invoke('append-notification', notification);
     },
 
-    readNotifications: async () => ipcRenderer.invoke('read-notifications'),
+    readNotifications: async () => {
+      try {
+        const response = await ipcRenderer.invoke('read-notifications');
+        const validatedData = validateNotificationsResponse(response.content);
+        return {
+          success: true,
+          content: validatedData,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
+      }
+    },
 
     pingAllDevices: (callback: () => void) => {
       const listener = (_event: Electron.IpcRendererEvent) => callback();
@@ -65,10 +109,13 @@ const electronHandler = {
       };
     },
 
-    syncToServer: (callback: () => void) => ipcRenderer.on('sync-to-server', (_event) => callback()),
+    syncToServer: (callback: () => void) =>
+      ipcRenderer.on('sync-to-server', (_event) => callback()),
 
-    showNotification: async (title: string, body: string) =>
-      ipcRenderer.invoke('show-notification', title, body),
+    showNotification: async (title: string, body: string) => {
+      validateNotificationParams({ title, body });
+      return ipcRenderer.invoke('show-notification', title, body);
+    },
   },
 };
 
