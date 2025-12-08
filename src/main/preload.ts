@@ -2,6 +2,7 @@ import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
 var _ = require('lodash');
 import { MyNotification } from '../main/util';
 import { validateIPAddress, validateNotification, validateSwitchList } from './validation';
+import { PingableEntry } from '../renderer/utils';
 
 const electronHandler = {
   ipcRenderer: {
@@ -35,7 +36,7 @@ const electronHandler = {
 
     getVars: async () => ipcRenderer.invoke('get-vars'),
 
-    saveSwitchList: async (switchList: any[]) => {
+    saveSwitchList: async (switchList: PingableEntry[]) => {
       const val = validateSwitchList(switchList);
       if(!_.isEqual(val, switchList)) {
         return;

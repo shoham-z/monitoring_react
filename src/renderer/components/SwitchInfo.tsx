@@ -15,24 +15,36 @@ function SwitchInfo(props: {
   const { isOpen, setIsOpen, title, message, onDelete, switchId } = props;
 
   const [notifications, setNotifications] = useState<MyNotification[]>([]);
+
+  // reads older notifications from file
   useEffect(() => {
-    window.electron.ipcRenderer
-      .readNotifications()
-      .then((response) => {
-        if (response.success) {
-          const newNotifications = response.content as MyNotification[];
-          const filteredNotifications = newNotifications.filter(
-            (n) => n.swId === switchId,
-          );
-          setNotifications(filteredNotifications);
-          return true;
-        }
-        setNotifications([]);
-        return false;
-      })
-      .catch(() => {
-        setNotifications([]);
-      });
+    function readPastNotifications() {
+      window.electron.ipcRenderer
+        .readNotifications()
+        .then((response) => {
+          if (response.success) {
+            const newNotifications = response.content as MyNotification[];
+            const filteredNotifications = newNotifications.filter(
+              (n) => n.swId === switchId,
+            );
+            setNotifications(filteredNotifications);
+            return true;
+          }
+          setNotifications([]);
+          return false;
+        })
+        .catch((e) => {
+          console.log(e);
+          setNotifications([]);
+        });
+    };
+
+    const interval = setInterval(() => {
+      readPastNotifications();
+    }, 15 * 1000); // read notifications every 15 seconds
+
+    readPastNotifications(); // Read notifications on setup
+    return () => clearInterval(interval);
   }, [switchId]);
 
   const handleClose = () => {
