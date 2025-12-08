@@ -27,11 +27,11 @@ interface itemProps {
 export class PingableList {
   private pingables: PingableEntry[] = [];
 
-  constructor(employees: PingableEntry[]) {
-    this.pingables = employees;
+  constructor(pingables: PingableEntry[]) {
+    this.pingables = pingables;
   }
 
-  // Custom method to filter employees by name
+  // Custom method to filter pingables by name/ip
   filter(filter: string): PingableEntry[] {
     return this.pingables.filter((el) => {
       if (filter === '') return el;

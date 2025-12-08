@@ -1,23 +1,56 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+var _ = require('lodash');
 import { MyNotification } from '../main/util';
+import { validateIPAddress, validateNotification, validateSwitchList } from './validation';
 
 const electronHandler = {
   ipcRenderer: {
-    sendPing: async (host: string) => ipcRenderer.invoke('ping-request', host),
+    sendPing: async (ip: string) => {
+      if(validateIPAddress(ip) !== ip) {
+        return;
+      }
+      return ipcRenderer.invoke('ping-request', ip)
+    },
 
-    sendPingVisible: async (host: string) => ipcRenderer.send('ping-request-visible', host),
+    sendPingVisible: async (ip: string) => {
+      if(validateIPAddress(ip) !== ip) {
+        return;
+      }
+      ipcRenderer.send('ping-request-visible', ip)
+    },
 
-    connectSSH: (ip: any) => ipcRenderer.send('connect-ssh', ip),
+    connectSSH: (ip: any) => {
+      if(validateIPAddress(ip) !== ip) {
+        return;
+      }
+      ipcRenderer.send('connect-ssh', ip)
+    },
 
-    connectRemotely: (ip: any) => ipcRenderer.send('connect-remotely', ip),
+    connectRemotely: (ip: any) => {
+      if(validateIPAddress(ip) !== ip) {
+        return;
+      }
+      return ipcRenderer.send('connect-remotely', ip)
+    },
 
     getVars: async () => ipcRenderer.invoke('get-vars'),
 
-    saveSwitchList: async (switchList: any[]) => ipcRenderer.invoke('save-switch-list', switchList),
+    saveSwitchList: async (switchList: any[]) => {
+      const val = validateSwitchList(switchList);
+      if(!_.isEqual(val, switchList)) {
+        return;
+      }
+      return ipcRenderer.invoke('save-switch-list', switchList)
+    },
 
     loadSwitchList: async () => ipcRenderer.invoke('load-switch-list'),
 
-    appendNotification: async (notification: MyNotification) => ipcRenderer.invoke('append-notification', notification),
+    appendNotification: async (notification: MyNotification) => {
+      if(validateNotification(notification) !== notification){
+        return;
+      }
+      return ipcRenderer.invoke('append-notification', notification)
+    },
 
     readNotifications: async () => ipcRenderer.invoke('read-notifications'),
 

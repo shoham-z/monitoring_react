@@ -286,13 +286,23 @@ ipcMain.handle('load-switch-list', async (_event) => {
 });
 
 function readNotificationsFromFile(): Notification[] {
-  const filePath = path.join(basePath, 'assets/notifications.json');
-    if (!fs.existsSync(filePath)) {
-      return [] ;
-    }
+  try {
+    const filePath = path.join(basePath, 'assets/notifications.json');
     const json = fs.readFileSync(filePath, 'utf-8');
     const content = JSON.parse(json) as Notification[];
     return content;
+  }
+  catch(e: any) {
+    if(e.name === "SyntaxError") {
+      // handle invalid format/empty file
+    }
+    if (e.code === "ENOENT") {
+      // handle nonexistent file
+    }
+    // error #1: e.name === SyntaxError - json format invalid - either someone messed with the file/file empty
+    // error #2: e.code === ENOENT - file not found
+    return [];
+  }
 }
 
 ipcMain.handle('append-notification', async (_event, notification) => {
