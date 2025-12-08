@@ -110,6 +110,7 @@
     "electron-debug": "^3.2.0",
     "electron-log": "^4.4.8",
     "electron-updater": "^6.1.4",
+    "lodash": "^4.17.21",
     "ping": "^0.4.4",
     "react": "^18.2.0",
     "react-contexify": "^6.0.0",
@@ -118,7 +119,8 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "^6.16.0",
     "reactjs-popup": "^2.0.6",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@electron/rebuild": "^3.3.0",
