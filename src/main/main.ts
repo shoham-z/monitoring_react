@@ -21,7 +21,7 @@ import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import { spawn, execFile } from 'child_process';
 import ping from 'ping';
-import fs, { read } from 'fs';
+import fs from 'fs';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -201,9 +201,10 @@ app
 ipcMain.handle('ping-request', async (_event, host) => {
   try {
     const result = await ping.promise.probe(host);
-    return { ip: result.host, success: result.alive }; // returned directly to renderer
+    console.log(result.host)
+    return { success: result.alive, content: result.host }; // returned directly to renderer
   } catch (err: any) {
-    return { alive: false, error: err.message };
+    return { success: false, error: err.message };
   }
 });
 

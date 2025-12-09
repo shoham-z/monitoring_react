@@ -1,67 +1,63 @@
-import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 import _ from 'lodash';
 import { MyNotification } from './util';
 import {
+  PingResponse,
+  PingResponseSchema,
   validateIPAddress,
   validateNotification,
   validateNotificationParams,
   validateNotificationsResponse,
+  ValidatePingResponse,
   validateSwitchList,
   validateSwitchListResponse,
   validateVarsResponse,
+  VarsResponseSchema,
 } from './validation';
 import { PingableEntry } from '../renderer/utils';
-
-interface APIResponse<T> {
-  success: boolean;
-  content?: T;
-  error?: string;
-}
+import z from 'zod';
 
 const electronHandler = {
   ipcRenderer: {
-    sendPing: async (ip: string) => {
+    sendPing: async (ip: string): Promise<PingResponse> => {
       if (validateIPAddress(ip) !== ip) {
-        return;
+        return {
+          success: false,
+          error: 'Invalid IP address',
+        };
       }
-      return ipcRenderer.invoke('ping-request', ip);
+      const response = await ipcRenderer.invoke('ping-request', ip);
+
+      //console.log(response);
+
+      return ValidatePingResponse(response);
     },
 
-    sendPingVisible: async (ip: string) => {
+    sendPingVisible: (ip: string) : void => {
       if (validateIPAddress(ip) !== ip) {
         return;
       }
       ipcRenderer.send('ping-request-visible', ip);
     },
 
-    connectSSH: (ip: string) => {
+    connectSSH: (ip: string) : void => {
       if (validateIPAddress(ip) !== ip) {
         return;
       }
       ipcRenderer.send('connect-ssh', ip);
     },
 
-    connectRemotely: (ip: string) => {
+    connectRemotely: (ip: string) : void => {
       if (validateIPAddress(ip) !== ip) {
         return;
       }
       return ipcRenderer.send('connect-remotely', ip);
     },
 
-    getVars: async (): Promise<APIResponse<any>> => {
-      try {
-        const response = await ipcRenderer.invoke('get-vars');
-        const validatedData = validateVarsResponse(response.content);
-        return {
-          success: true,
-          content: validatedData,
-        };
-      } catch (error) {
-        return {
-          success: false,
-          error: error instanceof Error ? error.message : 'Unknown error',
-        };
-      }
+    getVars: async (): Promise<z.infer<typeof VarsResponseSchema>> => {
+      const response = await ipcRenderer.invoke('get-vars');
+
+      return validateVarsResponse(response);
     },
 
     saveSwitchList: async (switchList: PingableEntry[]) => {
@@ -72,8 +68,19 @@ const electronHandler = {
     },
 
     loadSwitchList: async () => {
+      try {
       const response = await ipcRenderer.invoke('load-switch-list');
-      return validateSwitchListResponse(response);
+      const validatedData = validateSwitchListResponse(response.content);
+      return {
+          success: true,
+          content: validatedData,
+        };
+      } catch (error) {
+        return {
+          success: false,
+          error: error instanceof Error ? error.message : 'Unknown error',
+        };
+      }
     },
 
     appendNotification: async (notification: MyNotification) => {
