@@ -28,8 +28,6 @@ const electronHandler = {
       }
       const response = await ipcRenderer.invoke('ping-request', ip);
 
-      //console.log(response);
-
       return ValidatePingResponse(response);
     },
 

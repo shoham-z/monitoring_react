@@ -67,6 +67,10 @@ export const PingResponseSchema = z.union([
   }),
   z.object({
     success: z.literal(false),
+    content: IPAddressSchema, // Enforces that 'content' is a valid IP address
+  }),
+  z.object({
+    success: z.literal(false),
     error: z.string(),
   }),
 ]);
