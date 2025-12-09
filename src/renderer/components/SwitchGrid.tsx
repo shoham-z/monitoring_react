@@ -292,13 +292,14 @@ function SwitchGrid(props: {
       return;
     }
     const result = await window.electron.ipcRenderer.sendPing(ip);
-    const message = updateReachability(result.ip, result.success);
+    if (result.success === false) return;
+    const message = updateReachability(result.content, result.success);
 
     if (message) {
       // console.log(`[NOTIFY] ${message}`);
       addNotification(
         message,
-        ItemList.find((r) => r.ip === result.ip)?.id || 0,
+        ItemList.find((r) => r.ip === result.content)?.id || 0,
         result.success === true ? 'green' : 'red',
       );
     } else {

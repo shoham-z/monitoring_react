@@ -2,6 +2,8 @@ import { z } from 'zod';
 import { MyNotification } from './util';
 import { PingableEntry } from '../renderer/utils';
 
+export type PingResponse = z.infer<typeof PingResponseSchema>;
+
 export const IPAddressSchema = z
   .string()
   .regex(/^(\d{1,3}\.){3}\d{1,3}$/, 'Invalid IP address format')
@@ -40,12 +42,34 @@ export const VarsSchema = z.object({
   MAX_MISSED_PINGS: z.number().min(1).max(10)
 });
 
+export const VarsResponseSchema = z.union([
+  z.object({
+    success: z.literal(true),
+    content: VarsSchema,
+  }),
+  z.object({
+    success: z.literal(false),
+    error: z.string(),
+  }),
+])
+
 export const NotificationParamsSchema = z.object({
   title: z.string().min(1).max(100),
   body: z.string().min(1).max(500),
 });
 
 export const NotificationsArraySchema = z.array(NotificationSchema);
+
+export const PingResponseSchema = z.union([
+  z.object({
+    success: z.literal(true),
+    content: IPAddressSchema, // Enforces that 'content' is a valid IP address
+  }),
+  z.object({
+    success: z.literal(false),
+    error: z.string(),
+  }),
+]);
 
 // Validation functions
 export const validateIPAddress = (ip: unknown): string => {
@@ -65,7 +89,7 @@ export const validateSwitchListResponse = (response: unknown) => {
 };
 
 export const validateVarsResponse = (response: unknown) => {
-  return VarsSchema.parse(response);
+  return VarsResponseSchema.parse(response);
 };
 
 export const validateNotificationParams = (params: unknown) => {
@@ -75,3 +99,7 @@ export const validateNotificationParams = (params: unknown) => {
 export const validateNotificationsResponse = (response: unknown) => {
   return NotificationsArraySchema.parse(response);
 };
+
+export const ValidatePingResponse = (response: unknown): PingResponse => {
+  return PingResponseSchema.parse(response);
+}
