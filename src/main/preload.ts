@@ -3,7 +3,6 @@ import _ from 'lodash';
 import { MyNotification } from './util';
 import {
   PingResponse,
-  PingResponseSchema,
   validateIPAddress,
   validateNotification,
   validateNotificationParams,
