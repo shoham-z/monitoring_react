@@ -33,8 +33,7 @@ function ItemInfo(props: {
           setNotifications([]);
           return false;
         })
-        .catch((e) => {
-          console.log(e);
+        .catch(() => {
           setNotifications([]);
         });
     };
