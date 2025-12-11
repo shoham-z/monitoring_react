@@ -1,5 +1,4 @@
 import { contextBridge, ipcRenderer } from 'electron';
-import _ from 'lodash';
 import { MyNotification } from './util';
 import {
   PingResponse,
@@ -13,8 +12,12 @@ import {
   validateVarsResponse,
   VarsResponseSchema,
 } from './validation';
-import { PingableEntry } from '../renderer/utils';
 import z from 'zod';
+import { PingableEntry } from '../renderer/utils';
+
+export function isArraysEqual(array1: PingableEntry[], array2: PingableEntry[]) {
+  return JSON.stringify(array1) === JSON.stringify(array2);
+}
 
 const electronHandler = {
   ipcRenderer: {
@@ -58,7 +61,7 @@ const electronHandler = {
     },
 
     saveSwitchList: async (switchList: PingableEntry[]) => {
-      if (!_.isEqual(validateSwitchList(switchList), switchList)) {
+      if (!isArraysEqual(validateSwitchList(switchList), switchList)) {
         return;
       }
       return ipcRenderer.invoke('save-switch-list', switchList);
