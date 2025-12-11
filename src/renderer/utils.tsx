@@ -1,5 +1,5 @@
 import { JSX } from 'react';
-import SwitchItem from './components/SwitchItem';
+import GridItem from './components/GridItem';
 
 interface PingableEntry {
   id: number;
@@ -43,7 +43,7 @@ export class PingableList {
 
   build(filter: string, props: itemProps): JSX.Element[] {
     return this.filter(filter).map((element) => (
-      <SwitchItem
+      <GridItem
         key={element.id}
         index={element.id}
         name={element.name}

@@ -11,7 +11,7 @@ import {
   itemProps,
 } from '../utils';
 
-function SwitchGrid(props: {
+function Grid(props: {
   addNotification: (message: string, swId: number, color: string) => void;
   notifications: MyNotification[];
 }) {
@@ -194,10 +194,10 @@ function SwitchGrid(props: {
           const NOTIFICATION_TITLE = 'Basic Notification';
           const NOTIFICATION_BODY = 'Notification from the Main process';
 
-          // window.electron.ipcRenderer.showNotification(
-          //   NOTIFICATION_TITLE,
-          //   NOTIFICATION_BODY,
-          // );
+          window.electron.ipcRenderer.showNotification(
+            NOTIFICATION_TITLE,
+            NOTIFICATION_BODY,
+          );
         }
         return null;
       })
@@ -639,4 +639,4 @@ function SwitchGrid(props: {
   );
 }
 
-export default SwitchGrid;
+export default Grid;

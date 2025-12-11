@@ -93,7 +93,7 @@ function PopupEditItem({
       closeOnDocumentClick
       onClose={() => setIsOpen(false)}
     >
-      <div onClick={() => {}} className="edit-dialog">
+      <div className="edit-dialog">
         <button
           className="edit-dialog-close"
           type="button"

@@ -15,9 +15,9 @@ import '../styles/SwitchItem.css';
 import 'react-contexify/ReactContexify.css';
 import PopupEditItem from './PopupEditItem';
 import ConfirmationDialog from './ConfirmationDialog';
-import SwitchInfo from './SwitchInfo';
+import ItemInfo from './ItemInfo';
 
-function SwitchItem(props: {
+function GridItem(props: {
   index: any;
   name: string;
   reachability: any;
@@ -304,7 +304,7 @@ function SwitchItem(props: {
           returnChoice={handleChoice}
         />
 
-        <SwitchInfo
+        <ItemInfo
           isOpen={alertOpen}
           setIsOpen={setAlertOpen}
           title={alertTitle}
@@ -324,4 +324,4 @@ function SwitchItem(props: {
   );
 }
 
-export default SwitchItem;
+export default GridItem;

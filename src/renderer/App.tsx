@@ -2,7 +2,7 @@ import { MemoryRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import { v4 as uuidv4 } from 'uuid';
 import { useState } from 'react';
-import SwitchGrid from './components/SwitchGrid';
+import Grid from './components/Grid';
 import NotificationPanel from './components/NotificationPanel';
 import { MyNotification } from '../main/util';
 
@@ -36,10 +36,7 @@ function Window() {
 
   return (
     <div className="main-window">
-      <SwitchGrid
-        addNotification={addNotification}
-        notifications={notifications}
-      />
+      <Grid addNotification={addNotification} notifications={notifications} />
       <NotificationPanel
         notifications={notifications}
         deleteNotification={deleteNotification}

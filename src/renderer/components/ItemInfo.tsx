@@ -4,7 +4,7 @@ import '../styles/AlertDialog.css';
 import { MyNotification } from '../../main/util';
 import SmallNotificationPanel from './SmallNotificationPanel';
 
-function SwitchInfo(props: {
+function ItemInfo(props: {
   isOpen: boolean;
   setIsOpen: any;
   title: string;
@@ -18,7 +18,7 @@ function SwitchInfo(props: {
 
   // reads older notifications from file
   useEffect(() => {
-    function readPastNotifications() {
+    const readPastNotifications = () => {
       window.electron.ipcRenderer
         .readNotifications()
         .then((response) => {
@@ -101,4 +101,4 @@ function SwitchInfo(props: {
   );
 }
 
-export default SwitchInfo;
+export default ItemInfo;
