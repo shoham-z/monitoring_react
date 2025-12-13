@@ -20,6 +20,7 @@ ipcMain.on('ping-request-visible', async (_event, host) => {
   // 1st cmd  : /c   → run a command and exit
   // start "" : open a *new* window; "Ping" is the window title
   // 2nd cmd  : /k   → keep that new window open after ping
+
   const child = spawn(
     'cmd.exe',
     ['/c', 'start', '"Ping"', 'cmd', '/k', `ping ${host}`],

@@ -328,9 +328,9 @@ function Grid(props: {
       if (event.ctrlKey && event.key === 'g') {
         onPing(selectedIp);
       } else if (event.ctrlKey && event.key === 'h') {
-        const selectedId = ItemList.find((r) => r.ip === selectedIp)?.id;
+        const selectedId = ItemList.find((item) => item.ip === selectedIp)?.id;
         const missedPings = reachabilityList.find(
-          (r) => r.id === selectedId,
+          (item) => item.id === selectedId,
         )?.missedPings;
         onConnect(selectedIp, missedPings === 0 || false);
       }
@@ -486,8 +486,8 @@ function Grid(props: {
           // Mark server as online
           setIsServerOnline(true);
           // Only update UI if server successfully deleted the device
-          const updatedList = ItemList.filter((el) => {
-            return el.ip !== ip ? el : null;
+          const updatedList = ItemList.filter((item) => {
+            return item.ip !== ip ? item : null;
           });
           setItemList(updatedList);
           // Save to local storage

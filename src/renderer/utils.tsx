@@ -33,10 +33,10 @@ export class PingableList {
 
   // Custom method to filter pingables by name/ip
   filter(filter: string): PingableEntry[] {
-    return this.pingables.filter((el) => {
-      if (filter === '') return el;
-      if (el.ip.includes(filter)) return el;
-      if (el.name.includes(filter)) return el;
+    return this.pingables.filter((item) => {
+      if (filter === '') return item;
+      if (item.ip.includes(filter)) return item;
+      if (item.name.includes(filter)) return item;
       return null;
     });
   }
