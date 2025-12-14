@@ -1,4 +1,4 @@
-.mui-dialog-backdrop {
+.alert-dialog-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
@@ -8,7 +8,7 @@
   z-index: 1300;
 }
 
-.mui-dialog {
+.alert-dialog {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -29,7 +29,7 @@
 }
 
 /* Close "X" button */
-.mui-dialog-close {
+.alert-dialog-close {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -42,38 +42,38 @@
   transition: color 0.2s;
 }
 
-.mui-dialog-close:hover {
+.alert-dialog-close:hover {
   color: #000;
 }
 
-.mui-dialog-title {
+.alert-dialog-title {
   font-size: 1.25rem;
   font-weight: 500;
   padding: 16px 24px 0;
   color: #333;
 }
 
-.mui-dialog-content {
+.alert-dialog-content {
   padding: 16px 24px;
 }
 
-.mui-dialog-text {
+.alert-dialog-text {
   font-size: 1rem;
   color: #555;
   margin: 0;
 }
 
-.mui-dialog-actions {
+.alert-dialog-actions {
   padding: 8px 16px 16px;
   display: flex;
   gap: 12px;
 }
 
-.mui-dialog-actions.center {
+.alert-dialog-actions.center {
   justify-content: center; /* center the action button */
 }
 
-.mui-button.primary {
+.alert-button.primary {
   background-color: #1976d2;
   color: #fff;
   font-size: 0.9rem;
@@ -84,7 +84,7 @@
   transition: background-color 0.2s;
 }
 
-.mui-button.primary:hover {
+.alert-button.primary:hover {
   background-color: #1565c0;
 }
 
@@ -99,7 +99,7 @@
   }
 }
 
-.mui-dialog-container {
+.alert-dialog-container {
   grid-area: 1 / 1 / 3 / 2; /* full left column */
   background: #e0e0e0;
   border-radius: 8px;

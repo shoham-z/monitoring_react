@@ -18,7 +18,7 @@ function AlertDialog(props: {
   const messageLines = message.split('\n').map((line, index) => {
     const key = `${index}-${Buffer.from(line).toString('base64')}`;
     return (
-      <p key={key} className="mui-dialog-text">
+      <p key={key} className="alert-dialog-text">
         {line}
       </p>
     );
@@ -26,29 +26,29 @@ function AlertDialog(props: {
 
   return (
     isOpen && (
-      <div className="mui-dialog-backdrop">
-        <div className="mui-dialog">
-          <div className="mui-dialog-container">
+      <div className="alert-dialog-backdrop">
+        <div className="alert-dialog">
+          <div className="alert-dialog-container">
             <button
-              className="mui-dialog-close"
+              className="alert-dialog-close"
               type="button"
               onClick={handleClose}
             >
               &times;
             </button>
 
-            <div className="mui-dialog-title" id="alert-dialog-title">
+            <div className="alert-dialog-title" id="alert-dialog-title">
               {title}
             </div>
 
-            <div className="mui-dialog-content">
+            <div className="alert-dialog-content">
               {/* Render each line of the message */}
               {messageLines}
             </div>
 
-            <div className="mui-dialog-actions center">
+            <div className="alert-dialog-actions center">
               <button
-                className="mui-button primary"
+                className="alert-button primary"
                 type="button"
                 onClick={handleClose}
               >
