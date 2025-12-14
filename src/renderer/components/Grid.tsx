@@ -91,7 +91,7 @@ function Grid(props: {
   // connects to an item using ip
   const onConnect = (ip: string, reachable: boolean) => {
     if (reachable) {
-      if (APP_MODE === 'SWITCH') {
+      if (appMode === 'SWITCH') {
         window.electron.ipcRenderer.connectSSH(ip);
         return;
       }
@@ -158,7 +158,7 @@ function Grid(props: {
   // used to fetch new items from server
   const fetchFromServer = () => {
     axios
-      .get(`${SERVER_IP}/api/getAll`)
+      .get(`${serverIp}/api/getAll`)
       // eslint-disable-next-line promise/always-return
       .then((response) => {
         if (response.status === 200) {
@@ -268,7 +268,7 @@ function Grid(props: {
         notifyMessage = `${matchedSwitch.name} is up. IP is ${ip}`;
         lastNotifiedStatus.current[id] = true;
       }
-    } else if (newMissedPings >= MAX_MISSED_PINGS && lastStatus !== false) {
+    } else if (newMissedPings >= maxMissedPings && lastStatus !== false) {
       notifyMessage = `${matchedSwitch.name} is down. IP is ${ip}`;
       lastNotifiedStatus.current[id] = false;
     }
