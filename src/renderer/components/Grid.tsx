@@ -1,6 +1,6 @@
 import { SetStateAction, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
-import '../styles/SwitchGrid.css';
+import '../styles/Grid.css';
 import TopPanel from './TopPanel';
 import AlertDialog from './AlertDialog';
 import { MyNotification } from '../../main/util';

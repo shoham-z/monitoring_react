@@ -11,7 +11,7 @@ import {
 import switchImg from '../../img/switch.png';
 import computerImg from '../../img/computer.png';
 import encryptorImg from '../../img/encryptor.png';
-import '../styles/SwitchItem.css';
+import '../styles/GridItem.css';
 import 'react-contexify/ReactContexify.css';
 import PopupEditItem from './PopupEditItem';
 import ConfirmationDialog from './ConfirmationDialog';
@@ -163,9 +163,9 @@ function GridItem(props: {
         );
         setAlertOpen(true);
       }
-      // If deletion failed, error message is already shown by SwitchGrid
+      // If deletion failed, error message is already shown by Grid
     } catch (error) {
-      // Error handling is done in SwitchGrid, just don't show success message
+      // Error handling is done in Grid, just don't show success message
     }
   };
 

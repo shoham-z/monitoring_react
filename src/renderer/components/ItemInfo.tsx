@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Buffer } from 'buffer';
-import '../styles/AlertDialog.css';
+import '../styles/ItemInfo.css';
 import { MyNotification } from '../../main/util';
 import SmallNotificationPanel from './SmallNotificationPanel';
 
