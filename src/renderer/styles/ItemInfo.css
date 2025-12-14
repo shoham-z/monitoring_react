@@ -1,4 +1,4 @@
-.alert-dialog-backdrop {
+.mui-dialog-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
@@ -8,13 +8,19 @@
   z-index: 1300;
 }
 
-.alert-dialog {
+.mui-dialog {
   position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 8fr;
+  grid-column-gap: 0px;
+  grid-row-gap: 0px;
   gap: 10px; /* Adds spacing */
   padding: 5px;
   background: #fff;
   border-radius: 8px;
-  min-height: 400px;  /* taller */
+  min-height: 600px;  /* taller */
+  max-height: 80vh;
   min-width: 800px;   /* wider */
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25);
   overflow: hidden;
@@ -23,7 +29,7 @@
 }
 
 /* Close "X" button */
-.alert-dialog-close {
+.mui-dialog-close {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -36,38 +42,38 @@
   transition: color 0.2s;
 }
 
-.alert-dialog-close:hover {
+.mui-dialog-close:hover {
   color: #000;
 }
 
-.alert-dialog-title {
+.mui-dialog-title {
   font-size: 1.25rem;
   font-weight: 500;
   padding: 16px 24px 0;
   color: #333;
 }
 
-.alert-dialog-content {
+.mui-dialog-content {
   padding: 16px 24px;
 }
 
-.alert-dialog-text {
+.mui-dialog-text {
   font-size: 1rem;
   color: #555;
   margin: 0;
 }
 
-.alert-dialog-actions {
+.mui-dialog-actions {
   padding: 8px 16px 16px;
   display: flex;
   gap: 12px;
 }
 
-.alert-dialog-actions.center {
+.mui-dialog-actions.center {
   justify-content: center; /* center the action button */
 }
 
-.alert-button.primary {
+.mui-button.primary {
   background-color: #1976d2;
   color: #fff;
   font-size: 0.9rem;
@@ -78,7 +84,7 @@
   transition: background-color 0.2s;
 }
 
-.alert-button.primary:hover {
+.mui-button.primary:hover {
   background-color: #1565c0;
 }
 
@@ -93,13 +99,16 @@
   }
 }
 
-.alert-dialog-container {
-  min-height: inherit;  /* taller */
-  min-width: inherit;   /* wider */
+.mui-dialog-container {
+  grid-area: 1 / 1 / 3 / 2; /* full left column */
   background: #e0e0e0;
   border-radius: 8px;
   padding: 10px;
   overflow: auto;
-  align-content: center;
+
+  display: flex;
+  flex-direction: column;   /* keep vertical layout */
+  justify-content: center;  /* vertical center */
+  align-items: center;      /* horizontal center */
   text-align: center;       /* optional → center text inside */
 }
