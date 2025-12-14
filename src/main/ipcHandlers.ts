@@ -60,13 +60,21 @@ ipcMain.on('connect-remotely', (event, ip) => {
 
 /// ========= START OF SECTION LOAD/SAVE LOCAL DATA =========
 ipcMain.handle('get-vars', async (_event) => {
+  const filePath = path.join(basePath, 'assets/vars.json');
+  if(!fs.existsSync(filePath)) {
+    return { success: false, error: "Error 404 - File does not exist."};
+  }
   try {
-    const filePath = path.join(basePath, 'assets/vars.json');
     const json = fs.readFileSync(filePath, 'utf-8');
-    const content = JSON.parse(json);
-    return { success: true, content };
-  } catch (error: any) {
-    return { success: false, error: error.message };
+    const content = JSON.parse(json) as Notification[];
+    return { success: true, content};
+  }
+  catch(e: any) {
+    if(e.name === "SyntaxError") {
+      return { success: false, error: "Error 410 - File exists but JSON format is invalid"};
+    }
+    // error #1: e.name === SyntaxError - json format invalid - either someone messed with the file/file empty
+    // error #2: e.code === ENOENT - file not found
   }
 });
 
@@ -147,3 +155,5 @@ ipcMain.handle('show-notification', async (_event, title, body) => {
     return { success: false, error: error.message };
   }
 });
+
+
