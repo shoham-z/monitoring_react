@@ -1,4 +1,4 @@
-import { useState, useEffect, SetStateAction, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface errorFormat {
     title: string,
@@ -32,6 +32,7 @@ const useAppData: () => appDataValues = () => {
                 })
                 return;
             }
+            setError(null);
             let ip = response.content.SERVER_IP || '';
             setAppMode(response.content.MODE);
             setMaxMissedPings(response.content.MAX_MISSED_PINGS || 3);
