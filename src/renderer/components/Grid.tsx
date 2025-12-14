@@ -10,7 +10,7 @@ import {
   ReachableEntry,
   itemProps,
 } from '../utils';
-import useAppData from '../hooks/useAppData';
+import useAppData, { appDataValues } from '../hooks/useAppData';
 
 function Grid(props: {
   addNotification: (message: string, swId: number, color: string) => void;
@@ -23,11 +23,19 @@ function Grid(props: {
   const [alertMessage, setAlertMessage] = useState('');
 
   // Initial setup to get server IP and app mode
-  const [SERVER_IP, APP_MODE, MAX_MISSED_PINGS, isReady] = useAppData(
-    setAlertTitle,
-    setAlertMessage,
-  );
+  const {
+    serverIp,
+    appMode,
+    maxMissedPings,
+    isReady,
+    error: appDataError,
+  }: appDataValues = useAppData();
 
+  if (appDataError) {
+    setAlertTitle(appDataError.title);
+    setAlertMessage(appDataError.message);
+    setAlertOpen(true);
+  }
   const [selectedIp, setSelectedIp] = useState('');
   const [ItemList, setItemList] = useState<Array<PingableEntry>>([]);
   const [reachabilityList, setReachabilityList] = useState<
@@ -353,7 +361,7 @@ function Grid(props: {
 
     axios
       .post(
-        `${SERVER_IP}/api/add`,
+        `${serverIp}/api/add`,
         { ip, name: hostname },
         { headers: { 'Content-Type': 'application/json' } },
       )
@@ -409,7 +417,7 @@ function Grid(props: {
     const previousIp = ItemList.find((item) => item.id === numericId)?.ip;
 
     axios
-      .put(`${SERVER_IP}/api/edit`, {
+      .put(`${serverIp}/api/edit`, {
         id: index,
         ip: newIp,
         name: hostname,
@@ -464,7 +472,7 @@ function Grid(props: {
     }
 
     return axios
-      .delete(`${SERVER_IP}/api/delete`, { data: { ip } })
+      .delete(`${serverIp}/api/delete`, { data: { ip } })
       .then((response) => {
         if (response.status === 200) {
           // Mark server as online
@@ -535,7 +543,7 @@ function Grid(props: {
     const idList = getNoEventItemId();
     return reachabilityList
       .filter((el) => idList.includes(el.id))
-      .filter((el) => el.missedPings < MAX_MISSED_PINGS)
+      .filter((el) => el.missedPings < maxMissedPings)
       .map((el) => {
         const chosenElement = ItemList.find((sw) => sw.id === el.id);
         return chosenElement;
@@ -548,7 +556,7 @@ function Grid(props: {
     const idList = getNoEventItemId();
     return reachabilityList
       .filter((el) => idList.includes(el.id))
-      .filter((el) => el.missedPings >= MAX_MISSED_PINGS)
+      .filter((el) => el.missedPings >= maxMissedPings)
       .map((el) => {
         const chosenElement = ItemList.find((sw) => sw.id === el.id);
         return chosenElement;
@@ -558,7 +566,7 @@ function Grid(props: {
 
   const reachability = (x: PingableEntry) =>
     (reachabilityList.find((el) => el.id === x.id)?.missedPings || 0) <
-    MAX_MISSED_PINGS;
+    maxMissedPings;
 
   const isSelected = (x: PingableEntry) => selectedIp.toString() === x.ip;
 
