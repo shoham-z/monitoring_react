@@ -283,7 +283,6 @@ function Grid(props: {
       return;
     }
     const result = await window.electron.ipcRenderer.sendPing(ip);
-    console.log(`result for ip ${ip}: `, result);
 
     const message = updateReachability(ip, result.success);
 
@@ -564,13 +563,13 @@ function Grid(props: {
       .filter((el) => el !== undefined) as PingableEntry[];
   };
 
-  const reachability = (x: PingableEntry) =>
-    (reachabilityList.find((el) => el.id === x.id)?.missedPings || 0) <
+  const reachability = (item: PingableEntry) =>
+    (reachabilityList.find((el) => el.id === item.id)?.missedPings || 0) <
     maxMissedPings;
 
-  const isSelected = (x: PingableEntry) => selectedIp.toString() === x.ip;
+  const isSelected = (item: PingableEntry) => selectedIp.toString() === item.ip;
 
-  const setSelected = (x: PingableEntry) => () => handleSelect(x.ip);
+  const setSelected = (item: PingableEntry) => () => handleSelect(item.ip);
 
   const customProps: itemProps = {
     itemScale,

@@ -16,6 +16,7 @@ import 'react-contexify/ReactContexify.css';
 import PopupEditItem from './PopupEditItem';
 import ConfirmationDialog from './ConfirmationDialog';
 import ItemInfo from './ItemInfo';
+import useAppData, { appDataValues } from '../hooks/useAppData';
 
 function GridItem(props: {
   index: any;
@@ -47,17 +48,32 @@ function GridItem(props: {
   } = props;
   const MENU_ID = `switch-menu-${ip}`;
 
-  const { show, hideAll } = useContextMenu({ id: MENU_ID });
-  const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
+
+  // Used to get app mode on component mount
+  const {
+    _serverIp,
+    appMode,
+    _maxMissedPings,
+    _isReady,
+    error: appDataError,
+  }: appDataValues = useAppData();
+
+  if (appDataError) {
+    setAlertTitle(appDataError.title);
+    setAlertMessage(appDataError.message);
+    setAlertOpen(true);
+  }
+
+  const { show, hideAll } = useContextMenu({ id: MENU_ID });
+  const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
-  const [APP_MODE, SetAppMode] = useState('');
 
   const chooseImg = () => {
-    if (APP_MODE === 'SWITCH') return switchImg;
+    if (appMode === 'SWITCH') return switchImg;
 
     const lastOctet = parseInt(ip.split('.').pop(), 10);
     if (lastOctet > 240 && lastOctet < 255) {
@@ -70,20 +86,6 @@ function GridItem(props: {
   };
   const image = chooseImg();
   const reachabilityClass = reachability ? 'reachable' : 'unreachable';
-
-  // Used to get app mode on component mount
-  useEffect(() => {
-    const readServers = async () => {
-      const result = await window.electron.ipcRenderer.getVars();
-      if (result.success) {
-        SetAppMode(result.content.MODE);
-      } else {
-        // console.log(result.error || 'Unknown error');
-      }
-    };
-
-    readServers();
-  }, []);
 
   // Monitor menu visibility to update state and handle clicks outside
   useEffect(() => {
@@ -239,7 +241,7 @@ function GridItem(props: {
     e.stopPropagation();
     setIsContextMenuOpen(false);
     hideAll();
-    setSelected(ip);
+    setSelected();
   };
 
   return (
