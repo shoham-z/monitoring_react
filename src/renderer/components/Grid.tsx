@@ -10,16 +10,24 @@ import {
   ReachableEntry,
   itemProps,
 } from '../utils';
+import useAppData from '../hooks/useAppData';
 
 function Grid(props: {
   addNotification: (message: string, swId: number, color: string) => void;
   notifications: MyNotification[];
 }) {
   const { addNotification, notifications } = props;
-  const [SERVER_IP, SetServerIp] = useState('');
-  const [APP_MODE, SetAppMode] = useState('');
-  const [MAX_MISSED_PINGS, setMaxMissedPings] = useState(3);
-  const [isReady, setIsReady] = useState(false);
+
+  const [alertOpen, setAlertOpen] = useState(false);
+  const [alertTitle, setAlertTitle] = useState('');
+  const [alertMessage, setAlertMessage] = useState('');
+
+  // Initial setup to get server IP and app mode
+  const [SERVER_IP, APP_MODE, MAX_MISSED_PINGS, isReady] = useAppData(
+    setAlertTitle,
+    setAlertMessage,
+  );
+
   const [selectedIp, setSelectedIp] = useState('');
   const [ItemList, setItemList] = useState<Array<PingableEntry>>([]);
   const [reachabilityList, setReachabilityList] = useState<
@@ -27,9 +35,6 @@ function Grid(props: {
   >([]);
   const [filter, setFilter] = useState('');
   const lastNotifiedStatus = useRef<Record<string, boolean | undefined>>({});
-  const [alertOpen, setAlertOpen] = useState(false);
-  const [alertTitle, setAlertTitle] = useState('');
-  const [alertMessage, setAlertMessage] = useState('');
   const [itemScale, setItemScale] = useState(1);
   const [isServerOnline, setIsServerOnline] = useState(false);
   const missedPingsRef = useRef<Record<string, number>>({});
@@ -74,28 +79,6 @@ function Grid(props: {
     setAlertMessage(message);
     setAlertOpen(true);
   };
-
-  // Initial setup to get server IP and app mode
-  useEffect(() => {
-    const initialSetup = async () => {
-      const result = await window.electron.ipcRenderer.getVars();
-      if (result.success) {
-        let ip = result.content.SERVER_IP || '';
-        SetAppMode(result.content.MODE);
-        setMaxMissedPings(result.content.MAX_MISSED_PINGS || 3);
-        if (!ip.startsWith('http')) {
-          ip = `http://${ip}`;
-        }
-        SetServerIp(ip);
-        setIsReady(true);
-      } else {
-        // console.log(result.error || 'Unknown error');
-      }
-    };
-
-    initialSetup();
-    setInterval(() => initialSetup(), 60 * 1000);
-  }, []);
 
   // connects to an item using ip
   const onConnect = (ip: string, reachable: boolean) => {
@@ -194,10 +177,10 @@ function Grid(props: {
           const NOTIFICATION_TITLE = 'Basic Notification';
           const NOTIFICATION_BODY = 'Notification from the Main process';
 
-          window.electron.ipcRenderer.showNotification(
-            NOTIFICATION_TITLE,
-            NOTIFICATION_BODY,
-          );
+          // window.electron.ipcRenderer.showNotification(
+          //   NOTIFICATION_TITLE,
+          //   NOTIFICATION_BODY,
+          // );
         }
         return null;
       })
@@ -288,18 +271,19 @@ function Grid(props: {
   // used to send pings to items
   const onPing = async (ip: string, visible?: boolean) => {
     if (visible) {
-      await window.electron.ipcRenderer.sendPingVisible(ip);
+      window.electron.ipcRenderer.sendPingVisible(ip);
       return;
     }
     const result = await window.electron.ipcRenderer.sendPing(ip);
-    if (result.success === false) return;
-    const message = updateReachability(result.content, result.success);
+    console.log(`result for ip ${ip}: `, result);
+
+    const message = updateReachability(ip, result.success);
 
     if (message) {
       // console.log(`[NOTIFY] ${message}`);
       addNotification(
         message,
-        ItemList.find((r) => r.ip === result.content)?.id || 0,
+        ItemList.find((r) => r.ip === ip)?.id || 0,
         result.success === true ? 'green' : 'red',
       );
     } else {
