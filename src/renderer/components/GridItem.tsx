@@ -20,15 +20,15 @@ import ItemInfo from './ItemInfo';
 function GridItem(props: {
   index: any;
   name: string;
-  reachability: any;
+  reachability: boolean;
   ip: any;
-  scale: any;
-  setSelected: any;
-  isSelected: any;
-  onPing: any;
-  onConnect: any;
-  onEdit: any;
-  onDelete: any;
+  scale: number;
+  setSelected: () => void;
+  isSelected: boolean;
+  onPing: (ip: string, visible?: boolean | undefined) => Promise<void>;
+  onConnect: (ip: string, reachable: boolean) => void;
+  onEdit: (index: string, newIp: string, hostname: string) => void;
+  onDelete: (ip: string) => Promise<boolean>;
   isServerOnline: boolean;
 }) {
   const {
