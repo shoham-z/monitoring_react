@@ -1,16 +1,56 @@
-import { SetStateAction, useEffect, useRef, useState } from 'react';
+import { SetStateAction, useEffect, useRef, useState, JSX } from 'react';
 import axios from 'axios';
 import '../styles/Grid.css';
 import TopPanel from './TopPanel';
 import AlertDialog from './AlertDialog';
 import { MyNotification } from '../../main/util';
-import {
-  PingableEntry,
-  PingableList,
-  ReachableEntry,
-  itemProps,
-} from '../utils';
-import useAppData, { appDataValues } from '../hooks/useAppData';
+import { PingableEntry, ReachableEntry, itemProps } from '../utils';
+import useAppData, { AppDataValues } from '../hooks/useAppData';
+import useLocalStorage, {
+  localStorageLoadValues,
+  LocalStorageValues,
+} from '../hooks/useLocalStorage';
+import GridItem from './GridItem';
+
+class PingableList {
+  private pingables: PingableEntry[] = [];
+
+  constructor(pingables: PingableEntry[]) {
+    this.pingables = pingables;
+  }
+
+  // Custom method to filter pingables by name/ip
+  filter(filter: string): PingableEntry[] {
+    return this.pingables.filter((item) => {
+      if (filter === '') return item;
+      if (item.ip.includes(filter)) return item;
+      if (item.name.includes(filter)) return item;
+      return null;
+    });
+  }
+
+  build(filter: string, props: itemProps): JSX.Element[] {
+    return this.filter(filter).map((element) => (
+      <GridItem
+        key={element.id}
+        index={element.id}
+        name={element.name}
+        ip={element.ip}
+        scale={props.itemScale}
+        isServerOnline={props.isServerOnline}
+        reachability={props.reachability(element)}
+        isSelected={props.isSelected(element)}
+        setSelected={props.setSelected(element)}
+        onPing={props.onPing}
+        onConnect={props.onConnect}
+        onEdit={props.onEdit}
+        onDelete={props.onDelete}
+      />
+    ));
+  }
+}
+
+// ADD CUSTOM HOOK TO DISPLAY ERRORS AND RETURNS SET ERROR CALLBACK
 
 function Grid(props: {
   addNotification: (message: string, swId: number, color: string) => void;
@@ -21,21 +61,20 @@ function Grid(props: {
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
-
-  // Initial setup to get server IP and app mode
-  const {
-    serverIp,
-    appMode,
-    maxMissedPings,
-    isReady,
-    error: appDataError,
-  }: appDataValues = useAppData();
-
-  if (appDataError) {
-    setAlertTitle(appDataError.title);
-    setAlertMessage(appDataError.message);
+  // Helper function to show error alert
+  const showErrorAlert = (title: string, message: string) => {
+    setAlertTitle(title);
+    setAlertMessage(message);
     setAlertOpen(true);
+  };
+  // Initial setup to get server IP and app mode
+  const appData: AppDataValues = useAppData();
+
+  if (appData.error) {
+    showErrorAlert(appData.error.title, appData.error.message);
   }
+
+  const localStorage: LocalStorageValues = useLocalStorage();
   const [selectedIp, setSelectedIp] = useState('');
   const [ItemList, setItemList] = useState<Array<PingableEntry>>([]);
   const [reachabilityList, setReachabilityList] = useState<
@@ -46,6 +85,30 @@ function Grid(props: {
   const [itemScale, setItemScale] = useState(1);
   const [isServerOnline, setIsServerOnline] = useState(false);
   const missedPingsRef = useRef<Record<string, number>>({});
+
+  const loadFromLocalStorageHelper = async () => {
+    const { success, data }: localStorageLoadValues =
+      await localStorage.loadData();
+    if (success) {
+      // Instead save the data
+      setItemList(data);
+
+      setReachabilityList((prev) => {
+        if (prev.length === 0) {
+          return data.map((item: PingableEntry) => ({
+            id: item.id,
+            missedPings: 0,
+          }));
+        }
+        return prev;
+      });
+    } else {
+      console.log(localStorage.error);
+      if (localStorage.error) {
+        showErrorAlert(localStorage.error.title, localStorage.error.message);
+      }
+    }
+  };
 
   // Helper function to convert server error responses to human-readable messages
   const getHumanReadableError = (
@@ -81,17 +144,10 @@ function Grid(props: {
     }
   };
 
-  // Helper function to show error alert
-  const showErrorAlert = (title: string, message: string) => {
-    setAlertTitle(title);
-    setAlertMessage(message);
-    setAlertOpen(true);
-  };
-
   // connects to an item using ip
   const onConnect = (ip: string, reachable: boolean) => {
     if (reachable) {
-      if (appMode === 'SWITCH') {
+      if (appData.appMode === 'SWITCH') {
         window.electron.ipcRenderer.connectSSH(ip);
         return;
       }
@@ -117,58 +173,20 @@ function Grid(props: {
     }
   };
 
-  // loads items from local file
-  const loadFromLocalStorage = async () => {
-    try {
-      const result = await window.electron.ipcRenderer.loadSwitchList();
-      if (result.success && result.content && result.content.length > 0) {
-        setItemList(result.content);
-        setReachabilityList((prev) => {
-          if (prev.length === 0) {
-            return result.content.map((item: PingableEntry) => ({
-              id: item.id,
-              missedPings: 0,
-            }));
-          }
-          return prev;
-        });
-        return true;
-      }
-      return false;
-    } catch (error) {
-      return false;
-    }
-  };
-
-  // saves items to local file
-  const saveToLocalStorage = async (switches: Array<PingableEntry>) => {
-    // TODO: handle errors here
-    try {
-      const result = await window.electron.ipcRenderer.saveSwitchList(switches);
-      if (!result.success) {
-        console.error('Failed to save switch list:', result.error);
-      } else {
-        console.log('Saved switch list to local storage');
-      }
-    } catch (error) {
-      console.error('Error saving to local storage:', error);
-    }
-  };
-
   // used to fetch new items from server
   const fetchFromServer = () => {
     axios
-      .get(`${serverIp}/api/getAll`)
+      .get(`${appData.serverIp}/api/getAll`)
       // eslint-disable-next-line promise/always-return
       .then((response) => {
         if (response.status === 200) {
           const { data } = response;
 
-          // Set switch list
+          // Set Item list
           setItemList(data);
 
           // Save to local storage for offline use
-          saveToLocalStorage(data);
+          localStorage.saveData(data);
 
           // Mark server as online
           setIsServerOnline(true);
@@ -196,12 +214,10 @@ function Grid(props: {
       .catch(async (error) => {
         // Mark server as offline
         setIsServerOnline(false);
+
         // Try to load from local storage as fallback
-        const loaded = await loadFromLocalStorage();
-        if (loaded) {
-          // Don't show error if we successfully loaded from cache
-          return;
-        }
+        loadFromLocalStorageHelper();
+
         // Only show error if we couldn't load from cache either
         if (error.response) {
           const { status } = error.response;
@@ -219,10 +235,10 @@ function Grid(props: {
 
   // Load from local storage on startup
   useEffect(() => {
-    if (!isReady) return;
+    if (!appData.isReady) return;
 
     // Try to load from local storage first for immediate display
-    loadFromLocalStorage();
+    loadFromLocalStorageHelper();
 
     // Then try to fetch from server (will update if successful)
     fetchFromServer();
@@ -233,17 +249,17 @@ function Grid(props: {
       clearInterval(interval);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isReady]); // Empty dependency array = runs once on mount
+  }, [appData.isReady]); // Empty dependency array = runs once on mount
 
   // used to update visibility in list
   const updateReachability = (
     ip: string,
     pingSuccess: boolean,
   ): string | null => {
-    const matchedSwitch = ItemList.find((sw) => sw.ip === ip);
-    if (!matchedSwitch) return null;
+    const matchedItem = ItemList.find((sw) => sw.ip === ip);
+    if (!matchedItem) return null;
 
-    const { id } = matchedSwitch;
+    const { id } = matchedItem;
     const prev = missedPingsRef.current[id] ?? 0;
     const newMissedPings = pingSuccess ? 0 : prev + 1;
     missedPingsRef.current[id] = newMissedPings;
@@ -265,11 +281,14 @@ function Grid(props: {
       if (notifications.filter((el) => el.swId === id).length === 0)
         return notifyMessage;
       if (lastStatus !== true) {
-        notifyMessage = `${matchedSwitch.name} is up. IP is ${ip}`;
+        notifyMessage = `${matchedItem.name} is up. IP is ${ip}`;
         lastNotifiedStatus.current[id] = true;
       }
-    } else if (newMissedPings >= maxMissedPings && lastStatus !== false) {
-      notifyMessage = `${matchedSwitch.name} is down. IP is ${ip}`;
+    } else if (
+      newMissedPings >= appData.maxMissedPings &&
+      lastStatus !== false
+    ) {
+      notifyMessage = `${matchedItem.name} is down. IP is ${ip}`;
       lastNotifiedStatus.current[id] = false;
     }
 
@@ -360,7 +379,7 @@ function Grid(props: {
 
     axios
       .post(
-        `${serverIp}/api/add`,
+        `${appData.serverIp}/api/add`,
         { ip, name: hostname },
         { headers: { 'Content-Type': 'application/json' } },
       )
@@ -373,15 +392,15 @@ function Grid(props: {
             return Math.max(...list.map((item) => item.id), 0);
           };
           const newId = getMaxId(ItemList) + 1;
-          const newSwitch = {
+          const newItem = {
             id: newId,
             name: hostname,
             ip,
           };
-          const updatedList = [...ItemList, newSwitch];
+          const updatedList = [...ItemList, newItem];
           setItemList(updatedList);
           // Save to local storage
-          saveToLocalStorage(updatedList);
+          localStorage.saveData(updatedList);
         }
         return null;
       })
@@ -416,7 +435,7 @@ function Grid(props: {
     const previousIp = ItemList.find((item) => item.id === numericId)?.ip;
 
     axios
-      .put(`${serverIp}/api/edit`, {
+      .put(`${appData.serverIp}/api/edit`, {
         id: index,
         ip: newIp,
         name: hostname,
@@ -433,7 +452,7 @@ function Grid(props: {
                 : item,
             );
             // Save to local storage
-            saveToLocalStorage(updatedList);
+            localStorage.saveData(updatedList);
             return updatedList;
           });
 
@@ -471,7 +490,7 @@ function Grid(props: {
     }
 
     return axios
-      .delete(`${serverIp}/api/delete`, { data: { ip } })
+      .delete(`${appData.serverIp}/api/delete`, { data: { ip } })
       .then((response) => {
         if (response.status === 200) {
           // Mark server as online
@@ -482,7 +501,7 @@ function Grid(props: {
           });
           setItemList(updatedList);
           // Save to local storage
-          saveToLocalStorage(updatedList);
+          localStorage.saveData(updatedList);
           return true;
         }
         return false;
@@ -542,7 +561,7 @@ function Grid(props: {
     const idList = getNoEventItemId();
     return reachabilityList
       .filter((el) => idList.includes(el.id))
-      .filter((el) => el.missedPings < maxMissedPings)
+      .filter((el) => el.missedPings < appData.maxMissedPings)
       .map((el) => {
         const chosenElement = ItemList.find((sw) => sw.id === el.id);
         return chosenElement;
@@ -555,7 +574,7 @@ function Grid(props: {
     const idList = getNoEventItemId();
     return reachabilityList
       .filter((el) => idList.includes(el.id))
-      .filter((el) => el.missedPings >= maxMissedPings)
+      .filter((el) => el.missedPings >= appData.maxMissedPings)
       .map((el) => {
         const chosenElement = ItemList.find((sw) => sw.id === el.id);
         return chosenElement;
@@ -565,7 +584,7 @@ function Grid(props: {
 
   const reachability = (item: PingableEntry) =>
     (reachabilityList.find((el) => el.id === item.id)?.missedPings || 0) <
-    maxMissedPings;
+    appData.maxMissedPings;
 
   const isSelected = (item: PingableEntry) => selectedIp.toString() === item.ip;
 
@@ -586,7 +605,7 @@ function Grid(props: {
   return (
     <>
       <TopPanel
-        addSwitch={addItem}
+        addItem={addItem}
         updateFilter={updateFilter}
         isServerOnline={isServerOnline}
       />

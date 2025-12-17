@@ -1,19 +1,15 @@
 import { useState, useEffect, useCallback } from "react";
+import { errorFormat } from "../utils";
 
-interface errorFormat {
-    title: string,
-    message: string
+export interface AppDataValues {
+  serverIp: string;
+  appMode: string;
+  maxMissedPings: number;
+  isReady: boolean;
+  error: errorFormat | null;
 }
 
-export interface appDataValues {
-    serverIp: string,
-    appMode: string,
-    maxMissedPings: number,
-    isReady: boolean,
-    error: errorFormat | null
-}
-
-const useAppData: () => appDataValues = () => {
+const useAppData: () => AppDataValues = () => {
     const [serverIp, setServerIp] = useState('');
     const [appMode, setAppMode] = useState('');
     const [maxMissedPings, setMaxMissedPings] = useState(3);
@@ -21,7 +17,7 @@ const useAppData: () => appDataValues = () => {
     const [error, setError] = useState<errorFormat | null>(null);
 
     const initialSetup = useCallback(async () => {
-        try{
+        try {
             const response = await window.electron.ipcRenderer.getVars()
         
             if (!response.success) {

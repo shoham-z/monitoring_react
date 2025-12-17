@@ -28,7 +28,7 @@ export const NotificationSchema = z.object({
   swId: z.number(),
 });
 
-export const SwitchListSchema = z.array(
+export const ItemListSchema = z.array(
   z.object({
     id: z.number(),
     ip: IPAddressSchema,
@@ -84,12 +84,12 @@ export const validateNotification = (notification: unknown): MyNotification => {
   return NotificationSchema.parse(notification);
 };
 
-export const validateSwitchList = (list: unknown): PingableEntry[] => {
-  return SwitchListSchema.parse(list);
+export const validateItemList = (list: unknown): PingableEntry[] => {
+  return ItemListSchema.parse(list);
 };
 
-export const validateSwitchListResponse = (response: unknown) => {
-  return SwitchListSchema.parse(response);
+export const validateItemListResponse = (response: unknown) => {
+  return ItemListSchema.parse(response);
 };
 
 export const validateVarsResponse = (response: unknown) => {

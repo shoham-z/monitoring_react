@@ -7,8 +7,8 @@ import {
   validateNotificationParams,
   validateNotificationsResponse,
   ValidatePingResponse,
-  validateSwitchList,
-  validateSwitchListResponse,
+  validateItemList,
+  validateItemListResponse,
   validateVarsResponse,
   VarsResponseSchema,
 } from './validation';
@@ -60,17 +60,17 @@ const electronHandler = {
       return validateVarsResponse(response);
     },
 
-    saveSwitchList: async (switchList: PingableEntry[]) => {
-      if (!isArraysEqual(validateSwitchList(switchList), switchList)) {
+    saveItemList: async (itemList: PingableEntry[]) => {
+      if (!isArraysEqual(validateItemList(itemList), itemList)) {
         return;
       }
-      return ipcRenderer.invoke('save-switch-list', switchList);
+      return ipcRenderer.invoke('save-item-list', itemList);
     },
 
-    loadSwitchList: async () => {
+    loadItemList: async () => {
       try {
-      const response = await ipcRenderer.invoke('load-switch-list');
-      const validatedData = validateSwitchListResponse(response.content);
+      const response = await ipcRenderer.invoke('load-item-list');
+      const validatedData = validateItemListResponse(response.content);
       return {
           success: true,
           content: validatedData,

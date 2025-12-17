@@ -78,10 +78,10 @@ ipcMain.handle('get-vars', async (_event) => {
   }
 });
 
-ipcMain.handle('save-switch-list', async (_event, switchList) => {
+ipcMain.handle('save-item-list', async (_event, itemList) => {
   try {
-    const filePath = path.join(basePath, 'assets/switches.json');
-    const json = JSON.stringify(switchList, null, 2);
+    const filePath = path.join(basePath, 'assets/items.json');
+    const json = JSON.stringify(itemList, null, 2);
     fs.writeFileSync(filePath, json, 'utf-8');
     return { success: true };
   } catch (error: any) {
@@ -89,9 +89,9 @@ ipcMain.handle('save-switch-list', async (_event, switchList) => {
   }
 });
 
-ipcMain.handle('load-switch-list', async (_event) => {
+ipcMain.handle('load-item-list', async (_event) => {
   try {
-    const filePath = path.join(basePath, 'assets/switches.json');
+    const filePath = path.join(basePath, 'assets/items.json');
     if (!fs.existsSync(filePath)) {
       return { success: true, content: [] };
     }

@@ -1,5 +1,7 @@
-import { JSX } from 'react';
-import GridItem from './components/GridItem';
+interface errorFormat {
+  title: string;
+  message: string;
+}
 
 interface PingableEntry {
   id: number;
@@ -24,42 +26,4 @@ interface itemProps {
   onDelete: (ip: string) => Promise<boolean>;
 }
 
-export class PingableList {
-  private pingables: PingableEntry[] = [];
-
-  constructor(pingables: PingableEntry[]) {
-    this.pingables = pingables;
-  }
-
-  // Custom method to filter pingables by name/ip
-  filter(filter: string): PingableEntry[] {
-    return this.pingables.filter((item) => {
-      if (filter === '') return item;
-      if (item.ip.includes(filter)) return item;
-      if (item.name.includes(filter)) return item;
-      return null;
-    });
-  }
-
-  build(filter: string, props: itemProps): JSX.Element[] {
-    return this.filter(filter).map((element) => (
-      <GridItem
-        key={element.id}
-        index={element.id}
-        name={element.name}
-        ip={element.ip}
-        scale={props.itemScale}
-        isServerOnline={props.isServerOnline}
-        reachability={props.reachability(element)}
-        isSelected={props.isSelected(element)}
-        setSelected={props.setSelected(element)}
-        onPing={props.onPing}
-        onConnect={props.onConnect}
-        onEdit={props.onEdit}
-        onDelete={props.onDelete}
-      />
-    ));
-  }
-}
-
-export type { ReachableEntry, PingableEntry, itemProps };
+export type { errorFormat, PingableEntry, ReachableEntry, itemProps };

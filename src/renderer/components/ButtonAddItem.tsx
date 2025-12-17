@@ -48,7 +48,7 @@ function ButtonAddItem(props: {
       setOpen(false);
       reset();
     } catch (err) {
-      // alert(`Error while adding switch: ${err}`);
+      // alert(`Error while adding Item: ${err}`);
       // Optionally: show error message to user
     }
   };

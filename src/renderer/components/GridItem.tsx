@@ -16,7 +16,7 @@ import 'react-contexify/ReactContexify.css';
 import PopupEditItem from './PopupEditItem';
 import ConfirmationDialog from './ConfirmationDialog';
 import ItemInfo from './ItemInfo';
-import useAppData, { appDataValues } from '../hooks/useAppData';
+import useAppData, { AppDataValues } from '../hooks/useAppData';
 
 function GridItem(props: {
   index: any;
@@ -53,17 +53,11 @@ function GridItem(props: {
   const [alertMessage, setAlertMessage] = useState('');
 
   // Used to get app mode on component mount
-  const {
-    _serverIp,
-    appMode,
-    _maxMissedPings,
-    _isReady,
-    error: appDataError,
-  }: appDataValues = useAppData();
+  const appData: AppDataValues = useAppData();
 
-  if (appDataError) {
-    setAlertTitle(appDataError.title);
-    setAlertMessage(appDataError.message);
+  if (appData.error) {
+    setAlertTitle(appData.error.title);
+    setAlertMessage(appData.error.message);
     setAlertOpen(true);
   }
 
@@ -73,7 +67,7 @@ function GridItem(props: {
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
   const chooseImg = () => {
-    if (appMode === 'SWITCH') return switchImg;
+    if (appData.appMode === 'SWITCH') return switchImg;
 
     const lastOctet = parseInt(ip.split('.').pop(), 10);
     if (lastOctet > 240 && lastOctet < 255) {
@@ -147,7 +141,7 @@ function GridItem(props: {
     if (!choice) {
       // User cancelled
       setAlertTitle('Cancelled');
-      setAlertMessage('No switch was deleted');
+      setAlertMessage('No Item was deleted');
       setAlertOpen(true);
       return;
     }
@@ -157,9 +151,9 @@ function GridItem(props: {
       const success = await onDelete(ip);
       if (success) {
         // Only show success message if deletion actually succeeded
-        setAlertTitle('The switch was deleted');
+        setAlertTitle('The Item was deleted');
         setAlertMessage(
-          `The switch with the following IP address was deleted: ${ip}`,
+          `The Item with the following IP address was deleted: ${ip}`,
         );
         setAlertOpen(true);
       }
@@ -174,7 +168,7 @@ function GridItem(props: {
   };
 
   const handleShow = () => {
-    setAlertTitle('Switch info');
+    setAlertTitle('Item info');
     setAlertMessage(`IP Address: ${ip}\nName: ${name}`);
     setAlertOpen(true);
   };
@@ -312,7 +306,7 @@ function GridItem(props: {
           title={alertTitle}
           message={alertMessage}
           onDelete={() => {}}
-          switchId={index}
+          ItemId={index}
         />
       </div>
       <PopupEditItem

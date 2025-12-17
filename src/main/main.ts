@@ -159,7 +159,7 @@ app
     const tray = new Tray(icon);
     const contextMenu = Menu.buildFromTemplate([
       {
-        label: 'Ping All Switches',
+        label: 'Ping All Items',
         click: () => {
           mainWindow?.webContents.send('ping-all-devices');
         },

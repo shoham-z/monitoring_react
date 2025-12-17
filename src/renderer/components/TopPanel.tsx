@@ -3,11 +3,11 @@ import '../styles/TopPanel.css';
 import ButtonAddItem from './ButtonAddItem';
 
 function TopPanel(props: {
-  addSwitch: any;
+  addItem: any;
   updateFilter: any;
   isServerOnline: boolean;
 }) {
-  const { addSwitch, updateFilter, isServerOnline } = props;
+  const { addItem, updateFilter, isServerOnline } = props;
 
   const [formOpen, setFormOpen] = useState(false);
 
@@ -46,7 +46,7 @@ function TopPanel(props: {
         </button>
 
         <ButtonAddItem
-          callback={addSwitch}
+          callback={addItem}
           isOpen={formOpen}
           setOpen={setFormOpen}
         />

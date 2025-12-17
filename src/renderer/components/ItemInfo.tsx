@@ -10,9 +10,9 @@ function ItemInfo(props: {
   title: string;
   message: string;
   onDelete: any;
-  switchId: number;
+  ItemId: number;
 }) {
-  const { isOpen, setIsOpen, title, message, onDelete, switchId } = props;
+  const { isOpen, setIsOpen, title, message, onDelete, ItemId } = props;
 
   const [notifications, setNotifications] = useState<MyNotification[]>([]);
 
@@ -25,7 +25,7 @@ function ItemInfo(props: {
           if (response.success) {
             const newNotifications = response.content as MyNotification[];
             const filteredNotifications = newNotifications.filter(
-              (n) => n.swId === switchId,
+              (n) => n.swId === ItemId,
             );
             setNotifications(filteredNotifications);
             return true;
@@ -44,7 +44,7 @@ function ItemInfo(props: {
 
     readPastNotifications(); // Read notifications on setup
     return () => clearInterval(interval);
-  }, [switchId]);
+  }, [ItemId]);
 
   const handleClose = () => {
     setIsOpen(false);

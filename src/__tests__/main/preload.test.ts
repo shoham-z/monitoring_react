@@ -9,9 +9,9 @@ import _ from 'lodash';
 import {
   validateIPAddress,
   ValidatePingResponse,
-  validateSwitchListResponse,
+  validateItemListResponse,
   validateVarsResponse,
-  validateSwitchList,
+  validateItemList,
   validateNotification,
   validateNotificationsResponse,
   validateNotificationParams,
