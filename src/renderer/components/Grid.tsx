@@ -67,9 +67,9 @@ function Grid(props: {
     setAlertMessage(message);
     setAlertOpen(true);
   };
+
   // Initial setup to get server IP and app mode
   const appData: AppDataValues = useAppData();
-
   if (appData.error) {
     showErrorAlert(appData.error.title, appData.error.message);
   }
@@ -102,11 +102,13 @@ function Grid(props: {
         }
         return prev;
       });
+    } else if (localStorage.error) {
+      showErrorAlert(localStorage.error.title, localStorage.error.message);
     } else {
-      console.log(localStorage.error);
-      if (localStorage.error) {
-        showErrorAlert(localStorage.error.title, localStorage.error.message);
-      }
+      showErrorAlert(
+        'Unknown',
+        'An unknown error occured. Call the FBI to investigate this',
+      );
     }
   };
 
