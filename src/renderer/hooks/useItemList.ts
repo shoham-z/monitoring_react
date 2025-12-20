@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef, SetStateAction } from "react";
 import { errorFormat, PingableEntry, ReachableEntry } from "../utils";
-import useAppData, { AppDataValues } from "./useAppData";
+import { AppDataValues } from "./useAppData";
 import axios from "axios";
 import useLocalStorage, { localStorageLoadValues, LocalStorageValues } from "./useLocalStorage";
 import { MyNotification } from "../../main/util";
@@ -209,12 +209,10 @@ const useItemList: (arg0: MyNotification[], arg1: AppDataValues) => ItemListValu
         fetchFromServer();
         const interval = setInterval(() => fetchFromServer(), 30000);
 
-        // eslint-disable-next-line consistent-return
         return () => {
         clearInterval(interval);
         };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [appData.isReady]); // Empty dependency array = runs once on mount
+    }, [appData.isReady]);
 
     // Helper function to convert server error responses to human-readable messages
     const getHumanReadableError: (arg0: number, arg1?: string) => string = (

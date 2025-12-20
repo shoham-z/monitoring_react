@@ -1,9 +1,16 @@
-import { SetStateAction, useEffect, useState, JSX } from 'react';
+import {
+  SetStateAction,
+  useEffect,
+  useState,
+  JSX,
+  useMemo,
+  useCallback,
+} from 'react';
 import '../styles/Grid.css';
 import TopPanel from './TopPanel';
 import AlertDialog from './AlertDialog';
 import { MyNotification } from '../../main/util';
-import { PingableEntry, itemProps } from '../utils';
+import { PingableEntry, ReachableEntry, itemProps } from '../utils';
 import useAppData, { AppDataValues } from '../hooks/useAppData';
 import GridItem from './GridItem';
 import useItemList from '../hooks/useItemList';
@@ -102,26 +109,24 @@ function Grid(props: {
   };
 
   // used to send pings to items
-  const onPing = async (ip: string, visible?: boolean) => {
-    if (visible) {
-      window.electron.ipcRenderer.sendPingVisible(ip);
-      return;
-    }
-    const result = await window.electron.ipcRenderer.sendPing(ip);
-
-    const message = itemList.updateReachability(ip, result.success);
-
-    if (message) {
-      // console.log(`[NOTIFY] ${message}`);
-      addNotification(
-        message,
-        itemList.ItemList.find((r) => r.ip === ip)?.id || 0,
-        result.success === true ? 'green' : 'red',
-      );
-    } else {
-      // console.log(`[SKIP] No change for ${result.ip}`);
-    }
-  };
+  const onPing = useCallback(
+    async (ip: string, visible?: boolean) => {
+      if (visible) {
+        window.electron.ipcRenderer.sendPingVisible(ip);
+        return;
+      }
+      const result = await window.electron.ipcRenderer.sendPing(ip);
+      const message = itemList.updateReachability(ip, result.success);
+      if (message) {
+        addNotification(
+          message,
+          itemList.ItemList.find((r) => r.ip === ip)?.id || 0,
+          result.success ? 'green' : 'red',
+        );
+      }
+    },
+    [itemList, addNotification],
+  );
 
   // used for the global event to ping all devices
   useEffect(() => {
@@ -183,50 +188,67 @@ function Grid(props: {
   // used to update filter in search bar
   const updateFilter = (data: SetStateAction<string>) => setFilter(data);
 
+  const itemById = useMemo(() => {
+    const map = new Map<number, PingableEntry>();
+    itemList.ItemList.forEach((item) => {
+      map.set(item.id, item);
+    });
+    return map;
+  }, [itemList.ItemList]);
+
+  const reachabilityById = useMemo(() => {
+    const map = new Map<number, ReachableEntry>();
+    itemList.reachabilityList.forEach((r) => {
+      map.set(r.id, r);
+    });
+    return map;
+  }, [itemList.reachabilityList]);
+
+  const notificationIds = useMemo(
+    () => new Set(notifications.map((n) => n.swId)),
+    [notifications],
+  );
+
   // used to get items with new events
-  const getNewEventItem: () => PingableEntry[] = () => {
-    const ids = notifications.map((n) => n.swId);
-    return itemList.ItemList.filter((sw) => ids.includes(sw.id));
-  };
+  const getNewEventItem: () => PingableEntry[] = () =>
+    itemList.ItemList.filter((item) => notificationIds.has(item.id));
 
   // used to get the id of items with no new event
-  const getNoEventItemId: () => number[] = () => {
-    const ids = notifications.map((n) => n.swId);
-    const l = itemList.ItemList.filter((sw) => !ids.includes(sw.id)).map(
-      (el) => el.id,
+  const getNoEventItemId: () => number[] = () =>
+    itemList.ItemList.filter((item) => !notificationIds.has(item.id)).map(
+      (item) => item.id,
     );
-    return l;
-  };
 
   // used to get the items with no new events that are up
   const getUpItems: () => PingableEntry[] = () => {
-    const idList = getNoEventItemId();
+    const noEventIds = new Set(getNoEventItemId());
+
     return itemList.reachabilityList
-      .filter((el) => idList.includes(el.id))
-      .filter((el) => el.missedPings < appData.maxMissedPings)
-      .map((el) => {
-        const chosenElement = itemList.ItemList.find((sw) => sw.id === el.id);
-        return chosenElement;
-      })
-      .filter((el) => el !== undefined) as PingableEntry[];
+      .filter(
+        (el) =>
+          noEventIds.has(el.id) && el.missedPings < appData.maxMissedPings,
+      )
+      .map((el) => itemById.get(el.id))
+      .filter(Boolean) as PingableEntry[];
   };
 
   // used to get the items with no new events that are down
   const getDownItems: () => PingableEntry[] = () => {
-    const idList = getNoEventItemId();
+    const noEventIds = new Set(getNoEventItemId());
+
     return itemList.reachabilityList
-      .filter((el) => idList.includes(el.id))
-      .filter((el) => el.missedPings >= appData.maxMissedPings)
-      .map((el) => {
-        const chosenElement = itemList.ItemList.find((sw) => sw.id === el.id);
-        return chosenElement;
-      })
-      .filter((el) => el !== undefined) as PingableEntry[];
+      .filter(
+        (el) =>
+          noEventIds.has(el.id) && el.missedPings >= appData.maxMissedPings,
+      )
+      .map((el) => itemById.get(el.id))
+      .filter(Boolean) as PingableEntry[];
   };
 
-  const reachability = (item: PingableEntry) =>
-    (itemList.reachabilityList.find((el) => el.id === item.id)?.missedPings ||
-      0) < appData.maxMissedPings;
+  const reachability = (item: PingableEntry) => {
+    const entry = reachabilityById.get(item.id);
+    return (entry?.missedPings ?? 0) < appData.maxMissedPings;
+  };
 
   const isSelected = (item: PingableEntry) =>
     itemList.selecteditemIP.toString() === item.ip;
