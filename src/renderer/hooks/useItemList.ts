@@ -46,11 +46,32 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
     const [selectedIp, setSelectedIp] = useState('');
     const lastNotifiedStatus = useRef<Record<string, boolean | undefined>>({});
     const missedPingsRef = useRef<Record<string, number>>({});
-    const [reachabilityEvents, setReachabilityEvents] = useState<ReachabilityEvent[]>([]);
     const [error, setError] = useState<errorFormat | null>(null);
 
-    const clearReachabilityEvents = () => setReachabilityEvents([]);
+    const eventQueueRef = useRef<ReachabilityEvent[]>([]);
+    const [reachabilityEvents, setReachabilityEvents] =
+    useState<ReachabilityEvent[]>([]);
+    const flushScheduledRef = useRef(false);
 
+    const flushReachabilityEvents = () => {
+        if (flushScheduledRef.current) return;
+
+        flushScheduledRef.current = true;
+
+        queueMicrotask(() => {
+            setReachabilityEvents((prev) => [
+            ...prev,
+            ...eventQueueRef.current,
+            ]);
+
+            eventQueueRef.current = [];
+            flushScheduledRef.current = false;
+        });
+    };
+
+    const clearReachabilityEvents = () => {
+        setReachabilityEvents([]);
+    };
     const loadFromLocalStorageHelper = async () => {
         const { success, data }: localStorageLoadValues =
           await localStorage.loadData();
@@ -106,49 +127,46 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
         });
     };
 
+    const lastReachableRef = useRef<Record<number, boolean | undefined>>({});
+
     // used to update visibility in list
     const updateReachability = (ip: string, pingSuccess: boolean): void => {
-        const matchedItem = ItemList.find((sw) => sw.ip === ip);
-        if (!matchedItem) return;
+        const item = ItemList.find((sw) => sw.ip === ip);
+        if (!item) return;
 
-        const { id } = matchedItem;
+        const { id } = item;
+
         const prevMissed = missedPingsRef.current[id] ?? 0;
-        const newMissedPings = pingSuccess ? 0 : prevMissed + 1;
-        missedPingsRef.current[id] = newMissedPings;
+        const newMissed = pingSuccess ? 0 : prevMissed + 1;
+        missedPingsRef.current[id] = newMissed;
 
-        // Update UI state
-        setReachabilityList((prevList) => {
-            const found = prevList.some((r) => r.id === id);
-            const updated = prevList.map((r) =>
-                r.id === id ? { ...r, missedPings: newMissedPings } : r
+        const isReachable = newMissed < appData.maxMissedPings;
+        const wasReachable = lastReachableRef.current[id];
+
+        // --- update UI reachability ---
+        setReachabilityList((prev) => {
+            const found = prev.some((r) => r.id === id);
+            const updated = prev.map((r) =>
+            r.id === id ? { ...r, missedPings: newMissed } : r
             );
-            return found ? updated : [...updated, { id, missedPings: newMissedPings }];
+            return found ? updated : [...updated, { id, missedPings: newMissed }];
         });
 
-        const currentlyReachable = newMissedPings < appData.maxMissedPings;
-        const lastStatus = lastNotifiedStatus.current[id];
-
-        // Rules for sending notifications
-        if (lastStatus === undefined) {
-            // No previous notification
-            if (!currentlyReachable) {
-                lastNotifiedStatus.current[id] = false;
-                setReachabilityEvents((prev) => [...prev, { id, status: 'DOWN' }]);
+        // --- notification rules ---
+        if (wasReachable === undefined) {
+            if (!isReachable) {
+                eventQueueRef.current.push({ id, status: 'DOWN' });
+                flushReachabilityEvents();
             }
-            // if reachable, do nothing (rule 5)
-            return;
+        } else if (wasReachable && !isReachable) {
+            eventQueueRef.current.push({ id, status: 'DOWN' });
+            flushReachabilityEvents();
+        } else if (!wasReachable && isReachable) {
+            eventQueueRef.current.push({ id, status: 'UP' });
+            flushReachabilityEvents();
         }
 
-        if (lastStatus === true && !currentlyReachable) {
-            // reachable -> now down
-            lastNotifiedStatus.current[id] = false;
-            setReachabilityEvents((prev) => [...prev, { id, status: 'DOWN' }]);
-        } else if (lastStatus === false && currentlyReachable) {
-            // down -> now up
-            lastNotifiedStatus.current[id] = true;
-            setReachabilityEvents((prev) => [...prev, { id, status: 'UP' }]);
-        }
-        // else: reachable -> reachable or down -> down => do nothing
+        lastReachableRef.current[id] = isReachable;
     };
 
 

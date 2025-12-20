@@ -20,6 +20,7 @@ const buildGridItems = (
   filter: string,
   props: itemProps,
 ): JSX.Element[] => {
+  console.log(items);
   return items
     .filter((item) => {
       if (!filter) return true;
@@ -89,8 +90,8 @@ function Grid(props: {
     return map;
   }, [itemList.reachabilityList]);
 
-  const notificationIds = useMemo(
-    () => new Set(notifications.map((n) => n.swId)),
+  const eventIds = useMemo(
+    () => new Set(notifications.map((e) => e.swId)),
     [notifications],
   );
 
@@ -116,8 +117,7 @@ function Grid(props: {
       );
     });
 
-    // Clear events after processing
-    itemList.clearReachabilityEvents?.(); // optional safe call if you added clear function in hook
+    itemList.clearReachabilityEvents();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [itemList.reachabilityEvents, itemById, addNotification]);
 
@@ -229,40 +229,26 @@ function Grid(props: {
   const updateFilter = (data: SetStateAction<string>) => setFilter(data);
 
   // used to get items with new events
-  const getNewEventItem: () => PingableEntry[] = () =>
-    itemList.ItemList.filter((item) =>
-      itemList.reachabilityEvents.some((e) => e.id === item.id),
-    );
-
-  // used to get the id of items with no new event
-  const getNoEventItemId: () => number[] = () =>
-    itemList.ItemList.filter((item) => !notificationIds.has(item.id)).map(
-      (item) => item.id,
-    );
+  const getNewEventItem = (): PingableEntry[] =>
+    itemList.ItemList.filter((item) => eventIds.has(item.id));
 
   // Items that are reachable but have no new events
-  const getUpItems: () => PingableEntry[] = () => {
-    const noEventIds = new Set(getNoEventItemId()); // IDs with NO new events
-    return itemList.reachabilityList
+  const getUpItems = (): PingableEntry[] =>
+    itemList.reachabilityList
       .filter(
-        (el) =>
-          noEventIds.has(el.id) && el.missedPings < appData.maxMissedPings,
+        (r) => !eventIds.has(r.id) && r.missedPings < appData.maxMissedPings,
       )
-      .map((el) => itemById.get(el.id))
+      .map((r) => itemById.get(r.id))
       .filter(Boolean) as PingableEntry[];
-  };
 
   // Items that are unreachable but have no new events
-  const getDownItems: () => PingableEntry[] = () => {
-    const noEventIds = new Set(getNoEventItemId()); // IDs with NO new events
-    return itemList.reachabilityList
+  const getDownItems = (): PingableEntry[] =>
+    itemList.reachabilityList
       .filter(
-        (el) =>
-          noEventIds.has(el.id) && el.missedPings >= appData.maxMissedPings,
+        (r) => !eventIds.has(r.id) && r.missedPings >= appData.maxMissedPings,
       )
-      .map((el) => itemById.get(el.id))
+      .map((r) => itemById.get(r.id))
       .filter(Boolean) as PingableEntry[];
-  };
 
   const reachability = (item: PingableEntry) => {
     const entry = reachabilityById.get(item.id);
