@@ -71,13 +71,55 @@ function Grid(props: {
   const [filter, setFilter] = useState('');
   const [itemScale, setItemScale] = useState(1);
 
-  const itemList = useItemList(notifications, appData);
+  const itemList = useItemList(appData);
 
+  const itemById = useMemo(() => {
+    const map = new Map<number, PingableEntry>();
+    itemList.ItemList.forEach((item) => {
+      map.set(item.id, item);
+    });
+    return map;
+  }, [itemList.ItemList]);
+
+  const reachabilityById = useMemo(() => {
+    const map = new Map<number, ReachableEntry>();
+    itemList.reachabilityList.forEach((r) => {
+      map.set(r.id, r);
+    });
+    return map;
+  }, [itemList.reachabilityList]);
+
+  const notificationIds = useMemo(
+    () => new Set(notifications.map((n) => n.swId)),
+    [notifications],
+  );
+
+  // shows error if occurs inside 'ItemList'
   useEffect(() => {
     if (itemList.error) {
       showErrorAlert(itemList.error.title, itemList.error.message);
     }
   }, [itemList.error]);
+
+  // send new notifications if needed
+  useEffect(() => {
+    if (itemList.reachabilityEvents.length === 0) return;
+
+    itemList.reachabilityEvents.forEach((event) => {
+      const item = itemById.get(event.id);
+      if (!item) return;
+
+      addNotification(
+        `${item.name} is ${event.status === 'UP' ? 'up' : 'down'}`,
+        item.id,
+        event.status === 'UP' ? 'green' : 'red',
+      );
+    });
+
+    // Clear events after processing
+    itemList.clearReachabilityEvents?.(); // optional safe call if you added clear function in hook
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [itemList.reachabilityEvents, itemById, addNotification]);
 
   // connects to an item using ip
   const onConnect = (ip: string, reachable: boolean) => {
@@ -115,17 +157,11 @@ function Grid(props: {
         window.electron.ipcRenderer.sendPingVisible(ip);
         return;
       }
+
       const result = await window.electron.ipcRenderer.sendPing(ip);
-      const message = itemList.updateReachability(ip, result.success);
-      if (message) {
-        addNotification(
-          message,
-          itemList.ItemList.find((r) => r.ip === ip)?.id || 0,
-          result.success ? 'green' : 'red',
-        );
-      }
+      itemList.updateReachability(ip, result.success);
     },
-    [itemList, addNotification],
+    [itemList],
   );
 
   // used for the global event to ping all devices
@@ -138,8 +174,7 @@ function Grid(props: {
     return () => {
       unsubscribe();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemList.ItemList]);
+  }, [itemList.ItemList, addNotification, onPing]);
 
   // used for the event listener for clicked item
   useEffect(() => {
@@ -162,7 +197,12 @@ function Grid(props: {
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemList.selecteditemIP]);
+  }, [
+    itemList.ItemList,
+    itemList.reachabilityList,
+    itemList.selecteditemIP,
+    onPing,
+  ]);
 
   // used to send pings to the devices every 15 seconds
   useEffect(() => {
@@ -188,30 +228,11 @@ function Grid(props: {
   // used to update filter in search bar
   const updateFilter = (data: SetStateAction<string>) => setFilter(data);
 
-  const itemById = useMemo(() => {
-    const map = new Map<number, PingableEntry>();
-    itemList.ItemList.forEach((item) => {
-      map.set(item.id, item);
-    });
-    return map;
-  }, [itemList.ItemList]);
-
-  const reachabilityById = useMemo(() => {
-    const map = new Map<number, ReachableEntry>();
-    itemList.reachabilityList.forEach((r) => {
-      map.set(r.id, r);
-    });
-    return map;
-  }, [itemList.reachabilityList]);
-
-  const notificationIds = useMemo(
-    () => new Set(notifications.map((n) => n.swId)),
-    [notifications],
-  );
-
   // used to get items with new events
   const getNewEventItem: () => PingableEntry[] = () =>
-    itemList.ItemList.filter((item) => notificationIds.has(item.id));
+    itemList.ItemList.filter((item) =>
+      itemList.reachabilityEvents.some((e) => e.id === item.id),
+    );
 
   // used to get the id of items with no new event
   const getNoEventItemId: () => number[] = () =>
@@ -219,10 +240,9 @@ function Grid(props: {
       (item) => item.id,
     );
 
-  // used to get the items with no new events that are up
+  // Items that are reachable but have no new events
   const getUpItems: () => PingableEntry[] = () => {
-    const noEventIds = new Set(getNoEventItemId());
-
+    const noEventIds = new Set(getNoEventItemId()); // IDs with NO new events
     return itemList.reachabilityList
       .filter(
         (el) =>
@@ -232,10 +252,9 @@ function Grid(props: {
       .filter(Boolean) as PingableEntry[];
   };
 
-  // used to get the items with no new events that are down
+  // Items that are unreachable but have no new events
   const getDownItems: () => PingableEntry[] = () => {
-    const noEventIds = new Set(getNoEventItemId());
-
+    const noEventIds = new Set(getNoEventItemId()); // IDs with NO new events
     return itemList.reachabilityList
       .filter(
         (el) =>

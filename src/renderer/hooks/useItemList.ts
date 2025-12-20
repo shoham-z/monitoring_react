@@ -3,12 +3,13 @@ import { errorFormat, PingableEntry, ReachableEntry } from "../utils";
 import { AppDataValues } from "./useAppData";
 import axios from "axios";
 import useLocalStorage, { localStorageLoadValues, LocalStorageValues } from "./useLocalStorage";
-import { MyNotification } from "../../main/util";
 
 export interface ItemListValues {
     ItemList: Array<PingableEntry>;
     reachabilityList: Array<ReachableEntry>;
-    updateReachability: (ip: string, pingSuccess: boolean) => string | null;
+    updateReachability: (ip: string, pingSuccess: boolean) => void;
+    reachabilityEvents: ReachabilityEvent[];
+    clearReachabilityEvents: () => void;
     isServerOnline: boolean;
     selecteditemIP: string;
     addItem: (ip: string, hostname: string) => void;
@@ -17,6 +18,11 @@ export interface ItemListValues {
     handleSelect: (ip: SetStateAction<string>) => void
     error: errorFormat | null;
 }
+
+export type ReachabilityEvent = {
+  id: number;
+  status: 'UP' | 'DOWN';
+};
 
 enum Action{
     ADD, EDIT, DELETE, LOAD
@@ -29,8 +35,8 @@ const actionString: Record<Action, string> = {
     [Action.LOAD]: 'load',
 }
 
-const useItemList: (arg0: MyNotification[], arg1: AppDataValues) => ItemListValues 
-= (notifications: MyNotification[], appData: AppDataValues) => {
+const useItemList: (arg0: AppDataValues) => ItemListValues 
+= (appData: AppDataValues) => {
     const [ItemList, setItemList] = useState<Array<PingableEntry>>([]);
     const [reachabilityList, setReachabilityList] = useState<
     Array<ReachableEntry>
@@ -40,7 +46,10 @@ const useItemList: (arg0: MyNotification[], arg1: AppDataValues) => ItemListValu
     const [selectedIp, setSelectedIp] = useState('');
     const lastNotifiedStatus = useRef<Record<string, boolean | undefined>>({});
     const missedPingsRef = useRef<Record<string, number>>({});
+    const [reachabilityEvents, setReachabilityEvents] = useState<ReachabilityEvent[]>([]);
     const [error, setError] = useState<errorFormat | null>(null);
+
+    const clearReachabilityEvents = () => setReachabilityEvents([]);
 
     const loadFromLocalStorageHelper = async () => {
         const { success, data }: localStorageLoadValues =
@@ -98,48 +107,50 @@ const useItemList: (arg0: MyNotification[], arg1: AppDataValues) => ItemListValu
     };
 
     // used to update visibility in list
-    const updateReachability = (
-        ip: string,
-        pingSuccess: boolean,
-    ): string | null => {
+    const updateReachability = (ip: string, pingSuccess: boolean): void => {
         const matchedItem = ItemList.find((sw) => sw.ip === ip);
-        if (!matchedItem) return null;
+        if (!matchedItem) return;
 
         const { id } = matchedItem;
-        const prev = missedPingsRef.current[id] ?? 0;
-        const newMissedPings = pingSuccess ? 0 : prev + 1;
+        const prevMissed = missedPingsRef.current[id] ?? 0;
+        const newMissedPings = pingSuccess ? 0 : prevMissed + 1;
         missedPingsRef.current[id] = newMissedPings;
 
-        // keep UI state in sync (optional) — update once for display
+        // Update UI state
         setReachabilityList((prevList) => {
-        const found = prevList.some((r) => r.id === id);
-        const mapped = prevList.map((r) =>
-            r.id === id ? { ...r, missedPings: newMissedPings } : r,
-        );
-        if (!found) return [...mapped, { id, missedPings: newMissedPings }];
-        return mapped;
+            const found = prevList.some((r) => r.id === id);
+            const updated = prevList.map((r) =>
+                r.id === id ? { ...r, missedPings: newMissedPings } : r
+            );
+            return found ? updated : [...updated, { id, missedPings: newMissedPings }];
         });
 
+        const currentlyReachable = newMissedPings < appData.maxMissedPings;
         const lastStatus = lastNotifiedStatus.current[id];
-        let notifyMessage: string | null = null;
 
-        if (pingSuccess) {
-            if (notifications.filter((el) => el.swId === id).length === 0)
-                return notifyMessage;
-            if (lastStatus !== true) {
-                notifyMessage = `${matchedItem.name} is up. IP is ${ip}`;
-                lastNotifiedStatus.current[id] = true;
+        // Rules for sending notifications
+        if (lastStatus === undefined) {
+            // No previous notification
+            if (!currentlyReachable) {
+                lastNotifiedStatus.current[id] = false;
+                setReachabilityEvents((prev) => [...prev, { id, status: 'DOWN' }]);
             }
-        } else if (
-        newMissedPings >= appData.maxMissedPings &&
-        lastStatus !== false
-        ) {
-        notifyMessage = `${matchedItem.name} is down. IP is ${ip}`;
-        lastNotifiedStatus.current[id] = false;
+            // if reachable, do nothing (rule 5)
+            return;
         }
 
-        return notifyMessage;
+        if (lastStatus === true && !currentlyReachable) {
+            // reachable -> now down
+            lastNotifiedStatus.current[id] = false;
+            setReachabilityEvents((prev) => [...prev, { id, status: 'DOWN' }]);
+        } else if (lastStatus === false && currentlyReachable) {
+            // down -> now up
+            lastNotifiedStatus.current[id] = true;
+            setReachabilityEvents((prev) => [...prev, { id, status: 'UP' }]);
+        }
+        // else: reachable -> reachable or down -> down => do nothing
     };
+
 
     // used to fetch new items from server
     const fetchFromServer = (): void => {
@@ -391,6 +402,8 @@ const useItemList: (arg0: MyNotification[], arg1: AppDataValues) => ItemListValu
         ItemList,
         reachabilityList,
         updateReachability,
+        reachabilityEvents,
+        clearReachabilityEvents,
         isServerOnline,
         selecteditemIP: selectedIp,
         addItem,
