@@ -75,11 +75,11 @@ function Grid(props: {
 
   const itemById = useMemo(() => {
     const map = new Map<number, PingableEntry>();
-    itemList.ItemList.forEach((item) => {
+    itemList.list.forEach((item) => {
       map.set(item.id, item);
     });
     return map;
-  }, [itemList.ItemList]);
+  }, [itemList.list]);
 
   const reachabilityById = useMemo(() => {
     const map = new Map<number, ReachableEntry>();
@@ -100,25 +100,6 @@ function Grid(props: {
       showErrorAlert(itemList.error.title, itemList.error.message);
     }
   }, [itemList.error]);
-
-  // send new notifications if needed
-  useEffect(() => {
-    if (itemList.reachabilityEvents.length === 0) return;
-
-    itemList.reachabilityEvents.forEach((event) => {
-      const item = itemById.get(event.id);
-      if (!item) return;
-
-      addNotification(
-        `${item.name} is ${event.status === 'UP' ? 'up' : 'down'}`,
-        item.id,
-        event.status === 'UP' ? 'green' : 'red',
-      );
-    });
-
-    itemList.clearReachabilityEvents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemList.reachabilityEvents, itemById, addNotification]);
 
   // connects to an item using ip
   const onConnect = (ip: string, reachable: boolean) => {
@@ -179,14 +160,14 @@ function Grid(props: {
   // used for the global event to ping all devices
   useEffect(() => {
     const unsubscribe = window.electron.ipcRenderer.pingAllDevices(() => {
-      itemList.ItemList.forEach((element) => {
+      itemList.list.forEach((element) => {
         onPing(element.ip, true);
       });
     });
     return () => {
       unsubscribe();
     };
-  }, [itemList.ItemList, addNotification, onPing]);
+  }, [itemList.list, addNotification, onPing]);
 
   // used for the event listener for clicked item
   useEffect(() => {
@@ -196,7 +177,7 @@ function Grid(props: {
       if (event.ctrlKey && event.key === 'g') {
         onPing(itemList.selecteditemIP);
       } else if (event.ctrlKey && event.key === 'h') {
-        const selectedId = itemList.ItemList.find(
+        const selectedId = itemList.list.find(
           (item) => item.ip === itemList.selecteditemIP,
         )?.id;
         const missedPings = itemList.reachabilityList.find(
@@ -210,7 +191,7 @@ function Grid(props: {
     return () => window.removeEventListener('keydown', handleKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    itemList.ItemList,
+    itemList.list,
     itemList.reachabilityList,
     itemList.selecteditemIP,
     onPing,
@@ -219,7 +200,7 @@ function Grid(props: {
   // used to send pings to the devices every 15 seconds
   useEffect(() => {
     const sendPings = () => {
-      itemList.ItemList.forEach((element) => {
+      itemList.list.forEach((element) => {
         onPing(element.ip);
       });
     };
@@ -230,7 +211,7 @@ function Grid(props: {
     sendPings(); // Initial ping on setup
     return () => clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [itemList.ItemList]);
+  }, [itemList.list]);
 
   // used to handle zooming in/out
   const handleWheel = (event: { deltaY: number; ctrlKey?: boolean }) => {
@@ -242,7 +223,7 @@ function Grid(props: {
 
   // used to get items with new events
   const getNewEventItem = (): PingableEntry[] =>
-    itemList.ItemList.filter((item) => eventIds.has(item.id));
+    itemList.list.filter((item) => eventIds.has(item.id));
 
   // Items that are reachable but have no new events
   const getUpItems = (): PingableEntry[] =>

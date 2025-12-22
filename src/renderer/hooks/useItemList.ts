@@ -5,7 +5,7 @@ import axios from "axios";
 import useLocalStorage, { localStorageLoadValues, LocalStorageValues } from "./useLocalStorage";
 
 export interface ItemListValues {
-    ItemList: Array<PingableEntry>;
+    list: Array<PingableEntry>;
     reachabilityList: Array<ReachableEntry>;
     updateReachability: (ip: string, pingSuccess: boolean) => ReachabilityEvent;
     reachabilityEvents: ReachabilityEvent[];
@@ -37,7 +37,7 @@ const actionString: Record<Action, string> = {
 
 const useItemList: (arg0: AppDataValues) => ItemListValues 
 = (appData: AppDataValues) => {
-    const [ItemList, setItemList] = useState<Array<PingableEntry>>([]);
+    const [list, setItemList] = useState<Array<PingableEntry>>([]);
     const [reachabilityList, setReachabilityList] = useState<
     Array<ReachableEntry>
 >([]);
@@ -111,13 +111,12 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
         });
     };
 
-
     // used to update visibility in list
     const updateReachability = (ip: string, pingSuccess: boolean): ReachabilityEvent => {
         let data: {id: number, status: 'UP' | 'DOWN'} = { id: -1, status: 'DOWN'};
 
 
-        const item = ItemList.find((sw) => sw.ip === ip);
+        const item = list.find((sw) => sw.ip === ip);
         if (!item) return data;
 
         const { id } = item;
@@ -286,13 +285,13 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
                 const getMaxId = (list: any[]) => {
                     return Math.max(...list.map((item) => item.id), 0);
                 };
-                const newId = getMaxId(ItemList) + 1;
+                const newId = getMaxId(list) + 1;
                 const newItem = {
                     id: newId,
                     name: hostname,
                     ip,
                 };
-                const updatedList = [...ItemList, newItem];
+                const updatedList = [...list, newItem];
                 setItemList(updatedList);
                 // Save to local storage
                 localStorage.saveData(updatedList);
@@ -321,7 +320,7 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
         }
 
          const numericId = Number(index);
-        const previousIp = ItemList.find((item) => item.id === numericId)?.ip;
+        const previousIp = list.find((item) => item.id === numericId)?.ip;
 
         axios
             .put(`${appData.serverIp}/api/edit`, {
@@ -378,7 +377,7 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
                 // Mark server as online
                 setIsServerOnline(true);
                 // Only update UI if server successfully deleted the device
-                const updatedList = ItemList.filter((item) => {
+                const updatedList = list.filter((item) => {
                     return item.ip !== ip ? item : null;
                 });
                 setItemList(updatedList);
@@ -405,7 +404,7 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
      };
 
     return {
-        ItemList,
+        list,
         reachabilityList,
         updateReachability,
         reachabilityEvents,
