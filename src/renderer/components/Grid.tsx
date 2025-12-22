@@ -13,14 +13,13 @@ import { MyNotification } from '../../main/util';
 import { PingableEntry, ReachableEntry, itemProps } from '../utils';
 import useAppData, { AppDataValues } from '../hooks/useAppData';
 import GridItem from './GridItem';
-import useItemList from '../hooks/useItemList';
+import useItemList, { ReachabilityEvent } from '../hooks/useItemList';
 
 const buildGridItems = (
   items: PingableEntry[],
   filter: string,
   props: itemProps,
 ): JSX.Element[] => {
-  console.log(items);
   return items
     .filter((item) => {
       if (!filter) return true;
@@ -158,10 +157,23 @@ function Grid(props: {
         return;
       }
 
-      const result = await window.electron.ipcRenderer.sendPing(ip);
-      itemList.updateReachability(ip, result.success);
+      const response = await window.electron.ipcRenderer.sendPing(ip);
+      const result: ReachabilityEvent = itemList.updateReachability(
+        ip,
+        response.success,
+      );
+
+      const item = itemById.get(result.id);
+      if (!item) return;
+
+      const notificationColor = result.status === 'UP' ? 'green' : 'red';
+      addNotification(
+        `${item.name} is ${result.status === 'UP' ? 'up' : 'down'}. IP is ${item.ip}`,
+        item.id,
+        notificationColor,
+      );
     },
-    [itemList],
+    [itemList, itemById, addNotification],
   );
 
   // used for the global event to ping all devices

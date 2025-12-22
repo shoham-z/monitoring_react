@@ -7,7 +7,7 @@ import useLocalStorage, { localStorageLoadValues, LocalStorageValues } from "./u
 export interface ItemListValues {
     ItemList: Array<PingableEntry>;
     reachabilityList: Array<ReachableEntry>;
-    updateReachability: (ip: string, pingSuccess: boolean) => void;
+    updateReachability: (ip: string, pingSuccess: boolean) => ReachabilityEvent;
     reachabilityEvents: ReachabilityEvent[];
     clearReachabilityEvents: () => void;
     isServerOnline: boolean;
@@ -44,34 +44,18 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
     const [isServerOnline, setIsServerOnline] = useState(false);
     const localStorage: LocalStorageValues = useLocalStorage();
     const [selectedIp, setSelectedIp] = useState('');
-    const lastNotifiedStatus = useRef<Record<string, boolean | undefined>>({});
+    const lastReachableRef = useRef<Record<number, boolean | undefined>>({});
     const missedPingsRef = useRef<Record<string, number>>({});
     const [error, setError] = useState<errorFormat | null>(null);
 
-    const eventQueueRef = useRef<ReachabilityEvent[]>([]);
     const [reachabilityEvents, setReachabilityEvents] =
     useState<ReachabilityEvent[]>([]);
-    const flushScheduledRef = useRef(false);
 
-    const flushReachabilityEvents = () => {
-        if (flushScheduledRef.current) return;
-
-        flushScheduledRef.current = true;
-
-        queueMicrotask(() => {
-            setReachabilityEvents((prev) => [
-            ...prev,
-            ...eventQueueRef.current,
-            ]);
-
-            eventQueueRef.current = [];
-            flushScheduledRef.current = false;
-        });
-    };
 
     const clearReachabilityEvents = () => {
         setReachabilityEvents([]);
     };
+
     const loadFromLocalStorageHelper = async () => {
         const { success, data }: localStorageLoadValues =
           await localStorage.loadData();
@@ -127,12 +111,14 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
         });
     };
 
-    const lastReachableRef = useRef<Record<number, boolean | undefined>>({});
 
     // used to update visibility in list
-    const updateReachability = (ip: string, pingSuccess: boolean): void => {
+    const updateReachability = (ip: string, pingSuccess: boolean): ReachabilityEvent => {
+        let data: {id: number, status: 'UP' | 'DOWN'} = { id: -1, status: 'DOWN'};
+
+
         const item = ItemList.find((sw) => sw.ip === ip);
-        if (!item) return;
+        if (!item) return data;
 
         const { id } = item;
 
@@ -152,21 +138,23 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
             return found ? updated : [...updated, { id, missedPings: newMissed }];
         });
 
+        
         // --- notification rules ---
         if (wasReachable === undefined) {
             if (!isReachable) {
-                eventQueueRef.current.push({ id, status: 'DOWN' });
-                flushReachabilityEvents();
+                console.log('bad')
+                data = { id, status: 'DOWN' };
+                lastReachableRef.current[id] = false;
             }
         } else if (wasReachable && !isReachable) {
-            eventQueueRef.current.push({ id, status: 'DOWN' });
-            flushReachabilityEvents();
+            console.log('good')
+            data = { id, status: 'DOWN' };
         } else if (!wasReachable && isReachable) {
-            eventQueueRef.current.push({ id, status: 'UP' });
-            flushReachabilityEvents();
+            lastReachableRef.current[id] = false;
+            data = { id, status: 'UP' };
         }
 
-        lastReachableRef.current[id] = isReachable;
+        return data;
     };
 
 
