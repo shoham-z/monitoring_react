@@ -15,8 +15,12 @@ import {
 import z from 'zod';
 import { PingableEntry } from '../renderer/utils';
 
+const normalize = (arr: any[]) =>
+  [...arr].sort((a, b) => a.id - b.id);
+
 export function isArraysEqual(array1: PingableEntry[], array2: PingableEntry[]) {
-  return JSON.stringify(array1) === JSON.stringify(array2);
+
+  return JSON.stringify(normalize(array1)) === JSON.stringify(normalize(array2));
 }
 
 const electronHandler = {
@@ -64,6 +68,7 @@ const electronHandler = {
       if (!isArraysEqual(validateItemList(itemList), itemList)) {
         return;
       }
+      
       return ipcRenderer.invoke('save-item-list', itemList);
     },
 
