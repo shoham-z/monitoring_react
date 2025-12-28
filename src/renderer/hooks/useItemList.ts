@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback, useRef, SetStateAction } from "react";
+import { useState, useEffect, useRef, SetStateAction } from "react";
 import { errorFormat, PingableEntry, ReachableEntry } from "../utils";
 import { AppDataValues } from "./useAppData";
-import axios from "axios";
 import useLocalStorage, { localStorageLoadValues, LocalStorageValues } from "./useLocalStorage";
+import useServerActions, { ServerActionsValues } from "./useServerActions";
 
 export interface ItemListValues {
     list: Array<PingableEntry>;
@@ -24,32 +24,29 @@ export type ReachabilityEvent = {
   status: 'UP' | 'DOWN';
 };
 
-enum Action{
+enum ItemAction{
     ADD, EDIT, DELETE, LOAD
 }
 
-const actionString: Record<Action, string> = {
-    [Action.ADD]: 'add',
-    [Action.EDIT]: 'edit',
-    [Action.DELETE]: 'delete',
-    [Action.LOAD]: 'load',
+const actionString: Record<ItemAction, string> = {
+    [ItemAction.ADD]: 'add',
+    [ItemAction.EDIT]: 'edit',
+    [ItemAction.DELETE]: 'delete',
+    [ItemAction.LOAD]: 'load',
 }
 
 const useItemList: (arg0: AppDataValues) => ItemListValues 
 = (appData: AppDataValues) => {
     const [list, setItemList] = useState<Array<PingableEntry>>([]);
-    const [reachabilityList, setReachabilityList] = useState<
-    Array<ReachableEntry>
->([]);
+    const [reachabilityList, setReachabilityList] = useState<Array<ReachableEntry>>([]);
     const [isServerOnline, setIsServerOnline] = useState(false);
     const localStorage: LocalStorageValues = useLocalStorage();
     const [selectedIp, setSelectedIp] = useState('');
     const lastReachableRef = useRef<Record<number, boolean | undefined>>({});
     const missedPingsRef = useRef<Record<string, number>>({});
+    const [reachabilityEvents, setReachabilityEvents] = useState<ReachabilityEvent[]>([]);
+    const serverActions: ServerActionsValues = useServerActions(appData.serverIp);
     const [error, setError] = useState<errorFormat | null>(null);
-
-    const [reachabilityEvents, setReachabilityEvents] =
-    useState<ReachabilityEvent[]>([]);
 
 
     const clearReachabilityEvents = () => {
@@ -82,11 +79,11 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
         }
     };
 
-    const setFailedActionError = (action: Action, message: string) => {
+    const setFailedActionError = (action: ItemAction, message: string) => {
         setError({ title: `Failed to ${actionString[action]} Device`, message: message });
     }
 
-    const setItemActionFailedError = (action: Action) => {
+    const setItemActionFailedError = (action: ItemAction) => {
         setError({
             title: 'Server Offline',
             message: `Cannot ${actionString[action]} devices while the server is offline. Please wait for the server to come back online.`,
@@ -141,15 +138,14 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
         // --- notification rules ---
         if (wasReachable === undefined) {
             if (!isReachable) {
-                console.log('bad')
                 data = { id, status: 'DOWN' };
                 lastReachableRef.current[id] = false;
             }
         } else if (wasReachable && !isReachable) {
-            console.log('good')
+            lastReachableRef.current[id] = false;
             data = { id, status: 'DOWN' };
         } else if (!wasReachable && isReachable) {
-            lastReachableRef.current[id] = false;
+            lastReachableRef.current[id] = true;
             data = { id, status: 'UP' };
         }
 
@@ -158,12 +154,18 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
 
 
     // used to fetch new items from server
-    const fetchFromServer = (): void => {
-        axios
-        .get(`${appData.serverIp}/api/getAll`)
-        // eslint-disable-next-line promise/always-return
-        .then((response) => {
-            if (response.status === 200) {
+    const fetchFromServer = async (): Promise<void> => {
+        const NOTIFICATION_TITLE = 'Basic Notification';
+        const NOTIFICATION_BODY = 'Notification from the Main process';
+
+        // window.electron.ipcRenderer.showNotification(
+        //   NOTIFICATION_TITLE,
+        //   NOTIFICATION_BODY,
+        // );
+
+
+        const onSuccess = (response: { status?: any; data?: any; }) => {
+        if (response.status !== 200) return;
             const { data } = response;
 
             // Set Item list
@@ -184,18 +186,9 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
                 }
                 return prev;
             });
-            const NOTIFICATION_TITLE = 'Basic Notification';
-            const NOTIFICATION_BODY = 'Notification from the Main process';
-
-            // window.electron.ipcRenderer.showNotification(
-            //   NOTIFICATION_TITLE,
-            //   NOTIFICATION_BODY,
-            // );
-            }
-            return null;
-        })
-        // Update state with fetched data
-        .catch(async (error) => {
+        }
+    
+        const onFail = (error: { response: { data?: any; status?: any; }; }) => {
             // Mark server as offline
             setIsServerOnline(false);
 
@@ -207,11 +200,13 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
             const { status } = error.response;
             const errorMsg = error.response.data?.error || '';
             const humanReadable = getHumanReadableError(status, errorMsg);
-            setFailedActionError(Action.LOAD, humanReadable);
+            setFailedActionError(ItemAction.LOAD, humanReadable);
             } else {
             setConnectionError();
             }
-        });
+        };
+
+       serverActions.get(`api/getAll`, onSuccess, onFail);
     };
 
     // Load from local storage on startup
@@ -267,140 +262,141 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
     // used to add item to list and send to server
     const addItem = (ip: string, hostname: string): void => {
         if (!isServerOnline) {
-            setItemActionFailedError(Action.ADD);
+            setItemActionFailedError(ItemAction.ADD);
             return;
         }
 
-        axios
-            .post(
-                `${appData.serverIp}/api/add`,
-                { ip, name: hostname },
-                { headers: { 'Content-Type': 'application/json' } },
-            )
-            .then((response) => {
-                if (response.status === 201) {
-                // Mark server as online
-                setIsServerOnline(true);
-                // Only update UI if server successfully added the device
-                const getMaxId = (list: any[]) => {
-                    return Math.max(...list.map((item) => item.id), 0);
-                };
-                const newId = getMaxId(list) + 1;
-                const newItem = {
-                    id: newId,
-                    name: hostname,
-                    ip,
-                };
-                const updatedList = [...list, newItem];
-                setItemList(updatedList);
+        const data = { ip, name: hostname };
+
+        const headers = { headers: { 'Content-Type': 'application/json' } };
+
+        const onSuccess = (response: { status: number; }) => {
+            if (response.status !== 201) 
+                return;
+            // Mark server as online
+            setIsServerOnline(true);
+            // Only update UI if server successfully added the device
+            const getMaxId = (list: any[]) => {
+                return Math.max(...list.map((item) => item.id), 0);
+            };
+            const newId = getMaxId(list) + 1;
+            const newItem = {
+                id: newId,
+                ip,
+                name: hostname,
+            };
+            const updatedList = [...list, newItem];
+            setItemList(updatedList);
+            // Save to local storage
+            localStorage.saveData(updatedList); 
+        };
+
+        const onFail = (error: { response: { data?: any; status?: any; }; }) => {
+            // Mark server as offline on connection error
+            if (error.response) {
+            const { status } = error.response;
+            const errorMsg = error.response.data?.error || '';
+            const humanReadable = getHumanReadableError(status, errorMsg);
+            setFailedActionError(ItemAction.ADD, humanReadable);
+            } else {
+            setIsServerOnline(false);
+            setConnectionError();
+            }
+        };
+
+        serverActions.post(`api/add`, data, headers, onSuccess, onFail);
+    };
+  
+    // used to edit item in list and send to server
+    const editItem = (index: string, newIp: string, hostname: string): void => {
+        if (!isServerOnline) {
+            setItemActionFailedError(ItemAction.EDIT);
+            return;
+        }
+
+        const numericId = Number(index);
+        const previousIp = list.find((item) => item.id === numericId)?.ip;
+
+        const data = { id: index, ip: newIp, name: hostname };
+
+        const onSuccess = (response: { status: number; }) => {
+            if (response.status !== 200) 
+                return;
+            // Mark server as online
+            setIsServerOnline(true);
+            // Only update UI if server successfully edited the device
+            setItemList((prevList) => {
+                const updatedList = prevList.map((item) =>
+                item.id === numericId
+                    ? { ...item, name: hostname, ip: newIp }
+                    : item,
+                );
                 // Save to local storage
                 localStorage.saveData(updatedList);
-                }
-            })
-            .catch((error) => {
-                // Mark server as offline on connection error
-                if (error.response) {
+                return updatedList;
+            });
+
+            if (previousIp && selectedIp === previousIp) {
+                setSelectedIp(newIp);
+            }
+        };
+        
+        const onFail = (error: { response: { data?: any; status?: any; }; }) => {
+            // Mark server as offline on connection error
+            if (error.response) {
                 const { status } = error.response;
                 const errorMsg = error.response.data?.error || '';
                 const humanReadable = getHumanReadableError(status, errorMsg);
-                setFailedActionError(Action.ADD, humanReadable);
-                } else {
+                setFailedActionError(ItemAction.EDIT, humanReadable);
+            } else {
                 setIsServerOnline(false);
                 setConnectionError();
-                }
-            });
-    };
+            }
+        };
 
-  
-  // used to edit item in list and send to server
-    const editItem = (index: string, newIp: string, hostname: string): void => {
-        if (!isServerOnline) {
-            setItemActionFailedError(Action.EDIT);
-            return;
-        }
-
-         const numericId = Number(index);
-        const previousIp = list.find((item) => item.id === numericId)?.ip;
-
-        axios
-            .put(`${appData.serverIp}/api/edit`, {
-                id: index,
-                ip: newIp,
-                name: hostname,
-            })
-            .then((response) => {
-                if (response.status === 200) {
-                // Mark server as online
-                setIsServerOnline(true);
-                // Only update UI if server successfully edited the device
-                setItemList((prevList) => {
-                    const updatedList = prevList.map((item) =>
-                    item.id === numericId
-                        ? { ...item, name: hostname, ip: newIp }
-                        : item,
-                    );
-                    // Save to local storage
-                    localStorage.saveData(updatedList);
-                    return updatedList;
-                });
-
-                if (previousIp && selectedIp === previousIp) {
-                    setSelectedIp(newIp);
-                }
-                }
-                })
-            .catch((error) => {
-                // Mark server as offline on connection error
-                if (error.response) {
-                    const { status } = error.response;
-                    const errorMsg = error.response.data?.error || '';
-                    const humanReadable = getHumanReadableError(status, errorMsg);
-                    setFailedActionError(Action.EDIT, humanReadable);
-                } else {
-                    setIsServerOnline(false);
-                    setConnectionError();
-                }
-            });
+        serverActions.put(`api/edit`, data, onSuccess, onFail);
     };
 
     // used to delete item and update server
-    const deleteItem = (ip: string): Promise<boolean> => {
+    const deleteItem = async (ip: string): Promise<boolean> => {
         if (!isServerOnline) {
-            setItemActionFailedError(Action.DELETE);
-            return Promise.resolve(false);
+            setItemActionFailedError(ItemAction.DELETE);
+            return false;
         }
 
-        return axios
-            .delete(`${appData.serverIp}/api/delete`, { data: { ip } })
-            .then((response) => {
-                if (response.status === 200) {
-                // Mark server as online
-                setIsServerOnline(true);
-                // Only update UI if server successfully deleted the device
-                const updatedList = list.filter((item) => {
-                    return item.ip !== ip ? item : null;
-                });
-                setItemList(updatedList);
-                // Save to local storage
-                localStorage.saveData(updatedList);
-                return true;
-                }
-                return false;
-            })
-            .catch((error) => {
-                // Mark server as offline on connection error
-                if (error.response) {
-                const { status } = error.response;
-                const errorMsg = error.response.data?.error || '';
-                const humanReadable = getHumanReadableError(status, errorMsg);
-                setFailedActionError(Action.DELETE, humanReadable);
-                return false;
-                } else {
-                setIsServerOnline(false);
-                setConnectionError();
-                return false;
-            }
+        const data = { data: { ip } };
+
+        const onSuccess = (response: { status: number; }) => {
+            if (response.status !== 200) return false;
+            // Mark server as online
+            setIsServerOnline(true);
+            // Only update UI if server successfully deleted the device
+            const updatedList = list.filter((item) => {
+                return item.ip !== ip ? item : null;
             });
+            setItemList(updatedList);
+            // Save to local storage
+            localStorage.saveData(updatedList);
+            return true;
+        };
+
+        const onFail = (error: { response: { data?: any; status?: any; }; }) => {
+            // Mark server as offline on connection error
+            if (error.response) {
+            const { status } = error.response;
+            const errorMsg = error.response.data?.error || '';
+            const humanReadable = getHumanReadableError(status, errorMsg);
+            setFailedActionError(ItemAction.DELETE, humanReadable);
+            return false;
+            } else {
+            setIsServerOnline(false);
+            setConnectionError();
+            return false;
+            }
+        };
+
+        return await serverActions.remove(`api/delete`, data, onSuccess, onFail);
+
      };
 
     return {
@@ -420,3 +416,5 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
 };
 
 export default useItemList;
+
+
