@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, SetStateAction } from "react";
 import { errorFormat, PingableEntry, ReachableEntry } from "../utils";
 import { AppDataValues } from "./useAppData";
-import useLocalStorage, { localStorageLoadValues, LocalStorageValues } from "./useLocalStorage";
+import useLocalStorage from "./useLocalStorage";
+import type { localStorageLoadValues, LocalStorageValues } from "./useLocalStorage";
 import useServerActions, { ServerActionsValues } from "./useServerActions";
 
 export interface ItemListValues {

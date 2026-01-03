@@ -19,6 +19,7 @@ const buildGridItems = (
   items: PingableEntry[],
   filter: string,
   props: itemProps,
+  appData: AppDataValues,
 ): JSX.Element[] => {
   return items
     .filter((item) => {
@@ -40,6 +41,7 @@ const buildGridItems = (
         onConnect={props.onConnect}
         onEdit={props.onEdit}
         onDelete={props.onDelete}
+        appData={appData}
       />
     ));
 };
@@ -287,19 +289,19 @@ function Grid(props: {
           <p className="div_header">
             <span>Devices With New Events</span>
           </p>
-          {buildGridItems(getNewEventItem(), filter, customProps)}
+          {buildGridItems(getNewEventItem(), filter, customProps, appData)}
         </div>
         <div className="container_flex" id="container_flex">
           <p className="div_header">
             <span>Unreachable Devices</span>
           </p>
-          {buildGridItems(getDownItems(), filter, customProps)}
+          {buildGridItems(getDownItems(), filter, customProps, appData)}
         </div>
         <div className="container_flex" id="container_flex">
           <p className="div_header">
             <span>Reachable Devices</span>
           </p>
-          {buildGridItems(getUpItems(), filter, customProps)}
+          {buildGridItems(getUpItems(), filter, customProps, appData)}
         </div>
       </div>
       <AlertDialog

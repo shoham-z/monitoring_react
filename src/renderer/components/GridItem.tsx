@@ -1,22 +1,14 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
-import { MouseEvent, useEffect, useState } from 'react';
-import {
-  Item,
-  ItemParams,
-  Menu,
-  RightSlot,
-  useContextMenu,
-} from 'react-contexify';
+import { useMemo, useState } from 'react';
 import switchImg from '../../img/switch.png';
 import computerImg from '../../img/computer.png';
 import encryptorImg from '../../img/encryptor.png';
 import '../styles/GridItem.css';
-import 'react-contexify/ReactContexify.css';
 import PopupEditItem from './PopupEditItem';
 import ConfirmationDialog from './ConfirmationDialog';
 import ItemInfo from './ItemInfo';
-import useAppData, { AppDataValues } from '../hooks/useAppData';
+import { AppDataValues } from '../hooks/useAppData';
 
 function GridItem(props: {
   index: any;
@@ -31,6 +23,7 @@ function GridItem(props: {
   onEdit: (index: string, newIp: string, hostname: string) => void;
   onDelete: (ip: string) => Promise<boolean>;
   isServerOnline: boolean;
+  appData: AppDataValues;
 }) {
   const {
     index,
@@ -45,26 +38,16 @@ function GridItem(props: {
     onConnect,
     onEdit,
     onDelete,
+    appData,
   } = props;
-  const MENU_ID = `switch-menu-${ip}`;
+  const MENU_ID = useMemo(() => `switch-menu-${ip}`, [ip]);
 
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
   const [alertMessage, setAlertMessage] = useState('');
 
-  // Used to get app mode on component mount
-  const appData: AppDataValues = useAppData();
-
-  if (appData.error) {
-    setAlertTitle(appData.error.title);
-    setAlertMessage(appData.error.message);
-    setAlertOpen(true);
-  }
-
-  const { show, hideAll } = useContextMenu({ id: MENU_ID });
   const [confirmationOpen, setConfirmationOpen] = useState(false);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
   const chooseImg = () => {
     if (appData.appMode === 'SWITCH') return switchImg;
@@ -80,48 +63,6 @@ function GridItem(props: {
   };
   const image = chooseImg();
   const reachabilityClass = reachability ? 'reachable' : 'unreachable';
-
-  // Monitor menu visibility to update state and handle clicks outside
-  useEffect(() => {
-    if (!isContextMenuOpen) return undefined;
-
-    const checkMenuVisibility = () => {
-      const menuElement = document.querySelector(
-        `.react-contexify[data-id="${MENU_ID}"]`,
-      );
-      if (
-        !menuElement ||
-        (menuElement as HTMLElement).style.display === 'none'
-      ) {
-        setIsContextMenuOpen(false);
-      }
-    };
-
-    const handleDocumentClick = (e: Event) => {
-      const target = e.target as HTMLElement;
-      // Check if click is on the menu itself
-      const clickedOnMenu = target.closest('.react-contexify');
-
-      // If clicking on the menu, don't close it
-      if (clickedOnMenu) return;
-
-      // If clicking anywhere else (including this switch item or other switches), close the menu
-      const menus = document.querySelectorAll('.react-contexify');
-      menus.forEach((menu) => {
-        (menu as HTMLElement).style.display = 'none';
-      });
-      setIsContextMenuOpen(false);
-    };
-
-    const interval = setInterval(checkMenuVisibility, 100);
-    // Use capture phase to catch clicks before they bubble
-    document.addEventListener('click', handleDocumentClick, true);
-
-    return () => {
-      clearInterval(interval);
-      document.removeEventListener('click', handleDocumentClick, true);
-    };
-  }, [isContextMenuOpen, MENU_ID]);
 
   const handleDelete = () => {
     setConfirmationOpen(true);
@@ -177,73 +118,16 @@ function GridItem(props: {
     onConnect(ip, reachability);
   };
 
-  const handleItemClick = (event: ItemParams<any, any>) => {
-    switch (event.id) {
-      case 'show':
-        handleShow();
-        break;
-      case 'ping':
-        handlePing();
-        break;
-      case 'connect':
-        handleConnect();
-        break;
-      case 'edit':
-        handleEdit();
-        break;
-      case 'delete':
-        handleDelete();
-        break;
-      default:
-      // console.log(`default ${ip}`);
-    }
-  };
-
-  const handleMenuClick = (event: ItemParams<any, any>) => {
-    const isRestrictedAction = event.id === 'edit' || event.id === 'delete';
-
-    event.event?.stopPropagation?.();
-
-    if (!isServerOnline && isRestrictedAction) {
-      event.event?.preventDefault?.();
-      return;
-    }
-
-    setIsContextMenuOpen(false);
-    handleItemClick(event);
-  };
-
-  const displayMenu = (e: MouseEvent) => {
-    if (isEditOpen || confirmationOpen || alertOpen) return;
-    setIsContextMenuOpen(true);
-    show({ event: e });
-  };
-
-  const matchShortcutPing = (e: { ctrlKey: any; key: string }): boolean => {
-    return e.ctrlKey && e.key === 'g';
-  };
-
-  const matchShortcutConnect = (e: { ctrlKey: any; key: string }): boolean => {
-    return e.ctrlKey && e.key === 'h';
-  };
-
   const doubleClicked = () => {
     handleShow();
-  };
-
-  const displaySwitch = (e: MouseEvent) => {
-    e.stopPropagation();
-    setIsContextMenuOpen(false);
-    hideAll();
-    setSelected();
   };
 
   return (
     <>
       <div
         className={`switch-item-container ${isSelected ? 'selected' : ''}`}
-        onClick={displaySwitch}
-        onContextMenu={displayMenu}
+        onClick={() => {}}
+        onContextMenu={() => {}}
         onDoubleClick={doubleClicked}
         style={{ ['--scale' as any]: scale }}
       >
@@ -251,48 +135,6 @@ function GridItem(props: {
           <img src={image} alt="Switch" />
         </div>
         <p className="switch-item-text">{name}</p>
-
-        <Menu id={MENU_ID} className="context-menu">
-          <Item id="show" onClick={handleMenuClick}>
-            Show
-          </Item>
-          <Item
-            id="ping"
-            onClick={handleMenuClick}
-            keyMatcher={matchShortcutPing}
-          >
-            Ping <RightSlot>Ctrl G</RightSlot>
-          </Item>
-          <Item
-            id="connect"
-            onClick={handleMenuClick}
-            keyMatcher={matchShortcutConnect}
-          >
-            Connect <RightSlot>Ctrl H</RightSlot>
-          </Item>
-          <Item
-            id="edit"
-            onClick={handleMenuClick}
-            disabled={!isServerOnline}
-            className={!isServerOnline ? 'context-menu-offline' : undefined}
-          >
-            <span className="context-menu-label">Edit</span>
-            {!isServerOnline && (
-              <span className="context-menu-offline-tag">&nbsp;Offline</span>
-            )}
-          </Item>
-          <Item
-            id="delete"
-            onClick={handleMenuClick}
-            disabled={!isServerOnline}
-            className={!isServerOnline ? 'context-menu-offline' : undefined}
-          >
-            <span className="context-menu-label">Delete</span>
-            {!isServerOnline && (
-              <span className="context-menu-offline-tag">&nbsp;Offline</span>
-            )}
-          </Item>
-        </Menu>
         <ConfirmationDialog
           ip={ip}
           isOpen={confirmationOpen}

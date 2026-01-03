@@ -3,12 +3,12 @@ import { PingableEntry } from "../utils"
 import { AppDataValues } from "./useAppData"
 import { ItemListValues } from "./useItemList"
 
-export interface ServerActionsValues {
-    get: () => {}
-    post: () => {}
-    put: () => {}
-    remove: () => {}
-}
+export type ItemSortValues = [
+    get: (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>) => PingableEntry[],
+    post: (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>) => PingableEntry[],
+    put: (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>) => PingableEntry[]
+]
+
 
 const lastOctet = (ip: string) => {
     if(validateIPAddress(ip) !== ip) return -1;
@@ -16,12 +16,9 @@ const lastOctet = (ip: string) => {
     return Number(ip.split('.')[3]);
 }
 
-const useItemSort = (appData: AppDataValues) => {
-
-
-
+const useItemSort: (arg0: AppDataValues) => ItemSortValues = (appData: AppDataValues) => {
     // used to get items with new events
-    const getNewEventItem = (itemList: ItemListValues, eventIds: Set<number>): PingableEntry[] => 
+    const getNewEventItem = (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>): PingableEntry[] => 
         itemList.list.filter((item) => eventIds.has(item.id));
 
     // Items that are reachable but have no new events
@@ -73,20 +70,10 @@ const useItemSort = (appData: AppDataValues) => {
         return [ ...list1, ...list2];
     }
 
-    const get = () => {};
+    const switchMode: ItemSortValues = [getNewEventItem, getDownItems, getUpItems];
+    const encryptorMode: ItemSortValues = [getRemoteSiteItems, getRamleCoreItems, getOfaritCoreItems];
 
-    const post = () => {};
-
-    const put = () => {};
-
-    const remove = () => {};
-
-    return {
-        get,
-        post,
-        put,
-        remove,
-    };
+    return appData.appMode === "SWITCH" ? switchMode : encryptorMode;
 };
 
 export default useItemSort;
