@@ -4,11 +4,10 @@ import { AppDataValues } from "./useAppData"
 import { ItemListValues } from "./useItemList"
 
 export type ItemSortValues = [
-    get: (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>) => PingableEntry[],
-    post: (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>) => PingableEntry[],
-    put: (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>) => PingableEntry[]
+    (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>) => PingableEntry[],
+    (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>) => PingableEntry[],
+    (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>) => PingableEntry[]
 ]
-
 
 const lastOctet = (ip: string) => {
     if(validateIPAddress(ip) !== ip) return -1;

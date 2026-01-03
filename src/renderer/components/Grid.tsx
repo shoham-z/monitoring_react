@@ -177,7 +177,7 @@ function Grid(props: {
       if (!itemList.selecteditemIP) return;
 
       if (event.ctrlKey && event.key === 'g') {
-        onPing(itemList.selecteditemIP);
+        onPing(itemList.selecteditemIP, true);
       } else if (event.ctrlKey && event.key === 'h') {
         const selectedId = itemList.list.find(
           (item) => item.ip === itemList.selecteditemIP,
