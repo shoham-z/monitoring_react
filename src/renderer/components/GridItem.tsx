@@ -1,10 +1,8 @@
 /* eslint-disable jsx-a11y/no-static-element-interactions */
 /* eslint-disable jsx-a11y/click-events-have-key-events */
 import { MouseEvent, useState } from 'react';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import ListItemText from '@mui/material/ListItemText';
-import Typography from '@mui/material/Typography';
+import { ControlledMenu, MenuItem } from '@szhsin/react-menu';
+import '@szhsin/react-menu/dist/index.css';
 import switchImg from '../../img/switch.png';
 import computerImg from '../../img/computer.png';
 import encryptorImg from '../../img/encryptor.png';
@@ -44,10 +42,8 @@ function GridItem(props: {
     onDelete,
     appData,
   } = props;
-  const [contextMenu, setContextMenu] = useState<{
-    mouseX: number;
-    mouseY: number;
-  } | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [anchorPoint, setAnchorPoint] = useState({ x: 0, y: 0 });
 
   const [alertOpen, setAlertOpen] = useState(false);
   const [alertTitle, setAlertTitle] = useState('');
@@ -72,7 +68,7 @@ function GridItem(props: {
   const reachabilityClass = reachability ? 'reachable' : 'unreachable';
 
   const handleClose = () => {
-    setContextMenu(null);
+    setMenuOpen(false);
   };
 
   const handleDelete = () => {
@@ -146,29 +142,10 @@ function GridItem(props: {
   };
 
   const handleContextMenu = (event: MouseEvent) => {
+    if (typeof document.hasFocus === 'function' && !document.hasFocus()) return;
     event.preventDefault();
-
-    setContextMenu(
-      contextMenu === null
-        ? {
-            mouseX: event.clientX + 2,
-            mouseY: event.clientY - 6,
-          }
-        : // repeated contextmenu when it is already open closes it with Chrome 84 on Ubuntu
-          // Other native context menus might behave different.
-          // With this behavior we prevent contextmenu from the backdrop to re-locale existing context menus.
-          null,
-    );
-
-    // Prevent text selection lost after opening the context menu on Safari and Firefox
-    const selection = document.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-
-      setTimeout(() => {
-        selection.addRange(range);
-      });
-    }
+    setAnchorPoint({ x: event.clientX, y: event.clientY });
+    setMenuOpen(true);
   };
 
   const displaySwitch = (e: MouseEvent) => {
@@ -205,32 +182,25 @@ function GridItem(props: {
           onDelete={() => {}}
           ItemId={index}
         />
-        <Menu
-          open={contextMenu !== null}
+
+        <ControlledMenu
+          anchorPoint={anchorPoint}
+          state={menuOpen ? 'open' : 'closed'}
           onClose={handleClose}
-          anchorReference="anchorPosition"
-          anchorPosition={
-            contextMenu !== null
-              ? { top: contextMenu.mouseY, left: contextMenu.mouseX }
-              : undefined
-          }
         >
           <MenuItem onClick={handleShow}>Show</MenuItem>
           <MenuItem onClick={handlePing}>
-            <ListItemText>Ping</ListItemText>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Ctrl + G
-            </Typography>
+            Ping{' '}
+            <span style={{ marginLeft: 'auto', opacity: 0.6 }}>Ctrl G</span>
           </MenuItem>
+
           <MenuItem onClick={handleConnect}>
-            <ListItemText>Connect</ListItemText>
-            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-              Ctrl + H
-            </Typography>
+            Connect{' '}
+            <span style={{ marginLeft: 'auto', opacity: 0.6 }}>Ctrl H</span>
           </MenuItem>
           <MenuItem onClick={handleEdit}>Edit</MenuItem>
           <MenuItem onClick={handleDelete}>Delete</MenuItem>
-        </Menu>
+        </ControlledMenu>
       </div>
       <PopupEditItem
         isOpen={isEditOpen}
