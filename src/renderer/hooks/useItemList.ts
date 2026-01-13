@@ -4,6 +4,7 @@ import { AppDataValues } from "./useAppData";
 import useLocalStorage from "./useLocalStorage";
 import type { localStorageLoadValues, LocalStorageValues } from "./useLocalStorage";
 import useServerActions, { ServerActionsValues } from "./useServerActions";
+import { serialize } from "v8";
 
 export interface ItemListValues {
     list: Array<PingableEntry>;
@@ -48,6 +49,7 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
     const [reachabilityEvents, setReachabilityEvents] = useState<ReachabilityEvent[]>([]);
     const serverActions: ServerActionsValues = useServerActions(appData.serverIp);
     const [error, setError] = useState<errorFormat | null>(null);
+    const serverDownCounterRef = useRef(10); // 5 minutes
 
 
     const clearReachabilityEvents = () => {
@@ -92,6 +94,14 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
     }
 
     const setConnectionError = () => {
+        const count = serverDownCounterRef.current;
+        console.log(count);
+        if(count !== 10){
+            serverDownCounterRef.current += 1;
+            return;
+        }
+
+        serverDownCounterRef.current = 0;
         setError({
             title: 'Connection Error',
             message: 'Unable to connect to the server. Please check your connection and try again.',
@@ -198,12 +208,12 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
 
             // Only show error if we couldn't load from cache either
             if (error.response) {
-            const { status } = error.response;
-            const errorMsg = error.response.data?.error || '';
-            const humanReadable = getHumanReadableError(status, errorMsg);
-            setFailedActionError(ItemAction.LOAD, humanReadable);
+                const { status } = error.response;
+                const errorMsg = error.response.data?.error || '';
+                const humanReadable = getHumanReadableError(status, errorMsg);
+                setFailedActionError(ItemAction.LOAD, humanReadable);
             } else {
-            setConnectionError();
+               setConnectionError();
             }
         };
 
