@@ -198,8 +198,8 @@ function GridItem(props: {
             Connect{' '}
             <span style={{ marginLeft: 'auto', opacity: 0.6 }}>Ctrl H</span>
           </MenuItem>
-          <MenuItem onClick={handleEdit}>Edit</MenuItem>
-          <MenuItem onClick={handleDelete}>Delete</MenuItem>
+          <MenuItem disabled={!isServerOnline} onClick={handleEdit}>Edit</MenuItem>
+          <MenuItem disabled={!isServerOnline} onClick={handleDelete}>Delete</MenuItem>
         </ControlledMenu>
       </div>
       <PopupEditItem
