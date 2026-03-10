@@ -2,7 +2,6 @@ import {
   SetStateAction,
   useEffect,
   useState,
-  JSX,
   useMemo,
   useCallback,
 } from 'react';
@@ -12,39 +11,8 @@ import AlertDialog from './AlertDialog';
 import { MyNotification } from '../../main/util';
 import { PingableEntry, ReachableEntry, itemProps } from '../utils';
 import useAppData, { AppDataValues } from '../hooks/useAppData';
-import GridItem from './GridItem';
 import useItemList, { ReachabilityEvent } from '../hooks/useItemList';
-
-const buildGridItems = (
-  items: PingableEntry[],
-  filter: string,
-  props: itemProps,
-  appData: AppDataValues,
-): JSX.Element[] => {
-  return items
-    .filter((item) => {
-      if (!filter) return true;
-      return item.ip.includes(filter) || item.name.includes(filter);
-    })
-    .map((element) => (
-      <GridItem
-        key={element.id}
-        index={element.id}
-        name={element.name}
-        ip={element.ip}
-        scale={props.itemScale}
-        isServerOnline={props.isServerOnline}
-        reachability={props.reachability(element)}
-        isSelected={props.isSelected(element)}
-        setSelected={props.setSelected(element)}
-        onPing={props.onPing}
-        onConnect={props.onConnect}
-        onEdit={props.onEdit}
-        onDelete={props.onDelete}
-        appData={appData}
-      />
-    ));
-};
+import ItemListView from './ItemListView';
 
 function Grid(props: {
   addNotification: (message: string, swId: number, color: string) => void;
@@ -223,28 +191,6 @@ function Grid(props: {
   // used to update filter in search bar
   const updateFilter = (data: SetStateAction<string>) => setFilter(data);
 
-  // used to get items with new events
-  const getNewEventItem = (): PingableEntry[] =>
-    itemList.list.filter((item) => eventIds.has(item.id));
-
-  // Items that are reachable but have no new events
-  const getUpItems = (): PingableEntry[] =>
-    itemList.reachabilityList
-      .filter(
-        (r) => !eventIds.has(r.id) && r.missedPings < appData.maxMissedPings,
-      )
-      .map((r) => itemById.get(r.id))
-      .filter(Boolean) as PingableEntry[];
-
-  // Items that are unreachable but have no new events
-  const getDownItems = (): PingableEntry[] =>
-    itemList.reachabilityList
-      .filter(
-        (r) => !eventIds.has(r.id) && r.missedPings >= appData.maxMissedPings,
-      )
-      .map((r) => itemById.get(r.id))
-      .filter(Boolean) as PingableEntry[];
-
   const reachability = (item: PingableEntry) => {
     const entry = reachabilityById.get(item.id);
     return (entry?.missedPings ?? 0) < appData.maxMissedPings;
@@ -285,24 +231,14 @@ function Grid(props: {
         role="button"
         tabIndex={0}
       >
-        <div className="container_flex" id="container_flex">
-          <p className="div_header">
-            <span>Devices With New Events</span>
-          </p>
-          {buildGridItems(getNewEventItem(), filter, customProps, appData)}
-        </div>
-        <div className="container_flex" id="container_flex">
-          <p className="div_header">
-            <span>Unreachable Devices</span>
-          </p>
-          {buildGridItems(getDownItems(), filter, customProps, appData)}
-        </div>
-        <div className="container_flex" id="container_flex">
-          <p className="div_header">
-            <span>Reachable Devices</span>
-          </p>
-          {buildGridItems(getUpItems(), filter, customProps, appData)}
-        </div>
+        <ItemListView
+          itemList={itemList}
+          eventIds={eventIds}
+          itemById={itemById}
+          appData={appData}
+          customProps={customProps}
+          filter={filter}
+        />
       </div>
       <AlertDialog
         isOpen={alertOpen}

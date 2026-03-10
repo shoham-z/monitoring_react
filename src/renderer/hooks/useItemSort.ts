@@ -33,7 +33,7 @@ const useItemSort: (arg0: AppDataValues) => ItemSortValues = (appData: AppDataVa
     const getDownItems = (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>): PingableEntry[] =>
         itemList.reachabilityList
         .filter(
-            (r) => !eventIds.has(r.id) && r.missedPings >= appData.maxMissedPings,
+            (r) => eventIds.has(r.id) && (r.missedPings >= appData.maxMissedPings),
         )
         .map((r) => itemById.get(r.id))
         .filter(Boolean) as PingableEntry[];
@@ -70,7 +70,7 @@ const useItemSort: (arg0: AppDataValues) => ItemSortValues = (appData: AppDataVa
     }
 
     const switchMode: ItemSortValues = [getNewEventItem, getDownItems, getUpItems];
-    const encryptorMode: ItemSortValues = [getRemoteSiteItems, getRamleCoreItems, getOfaritCoreItems];
+    const encryptorMode: ItemSortValues = [getRamleCoreItems, getOfaritCoreItems, getRemoteSiteItems];
 
     return appData.appMode === "SWITCH" ? switchMode : encryptorMode;
 };

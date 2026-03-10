@@ -95,7 +95,6 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
 
     const setConnectionError = () => {
         const count = serverDownCounterRef.current;
-        console.log(count);
         if(count !== 10){
             serverDownCounterRef.current += 1;
             return;
