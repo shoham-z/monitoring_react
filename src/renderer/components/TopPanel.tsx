@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import '../styles/TopPanel.css';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import DeleteIcon from '@mui/icons-material/Delete';
 import ButtonAddItem from './ButtonAddItem';
 
 function TopPanel(props: {
@@ -9,6 +12,7 @@ function TopPanel(props: {
 }) {
   const { addItem, updateFilter, isServerOnline } = props;
 
+  const [filter, setFilter] = useState('');
   const [formOpen, setFormOpen] = useState(false);
 
   useEffect(() => {
@@ -17,8 +21,18 @@ function TopPanel(props: {
     }
   }, [isServerOnline]);
 
+  useEffect(() => {
+    updateFilter(filter);
+  }, [filter, updateFilter]);
+
   const inputHandler = (e: { target: { value: any } }) => {
+    setFilter(e.target.value);
     updateFilter(e.target.value);
+  };
+
+  const clearFilter = () => {
+    setFilter('');
+    updateFilter('');
   };
 
   return (
@@ -52,7 +66,11 @@ function TopPanel(props: {
         />
       </div>
 
-      <input type="text" onChange={inputHandler} />
+      <input type="text" onChange={inputHandler} value={filter} />
+
+      <IconButton aria-label="delete" onClick={clearFilter}>
+        <CloseIcon color="primary" />
+      </IconButton>
     </div>
   );
 }

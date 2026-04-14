@@ -10,6 +10,7 @@
   max-width: 100%;
   overflow: hidden; /* Prevents content from expanding beyond div */
   box-sizing: border-box;
+  position: relative;
 }
 
 .top-panel__button-group {
