@@ -33,7 +33,7 @@ const useItemSort: (arg0: AppDataValues) => ItemSortValues = (appData: AppDataVa
     const getDownItems = (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>): PingableEntry[] =>
         itemList.reachabilityList
         .filter(
-            (r) => eventIds.has(r.id) && (r.missedPings >= appData.maxMissedPings),
+            (r) => !eventIds.has(r.id) && (r.missedPings >= appData.maxMissedPings),
         )
         .map((r) => itemById.get(r.id))
         .filter(Boolean) as PingableEntry[];
@@ -41,32 +41,35 @@ const useItemSort: (arg0: AppDataValues) => ItemSortValues = (appData: AppDataVa
 
     const getRamleCoreItems = (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>) => {
         
-        const filterByIP = (l: PingableEntry[]) => l.filter((item) => 50 > lastOctet(item.ip) && lastOctet(item.ip) > 0);
+        const filterByIP = (l: PingableEntry[]) => l.filter((item) => 50 >= lastOctet(item.ip) && lastOctet(item.ip) > 0);
+        
+        const list1 = filterByIP(getNewEventItem(itemList, eventIds, itemById));
+        const list2 = filterByIP(getDownItems(itemList, eventIds, itemById));
+        const list3 = filterByIP(getUpItems(itemList, eventIds, itemById));
 
-        const list1 = filterByIP(getDownItems(itemList, eventIds, itemById))
-        const list2 = filterByIP(getUpItems(itemList, eventIds, itemById))
-
-        return [ ...list1, ...list2];
+        return [ ...list1, ...list2, ...list3];
     }
     
     const getOfaritCoreItems = (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>) => {
 
-        const filterByIP = (l: PingableEntry[]) => l.filter((item) => 100 > lastOctet(item.ip) && lastOctet(item.ip) > 50);
+        const filterByIP = (l: PingableEntry[]) => l.filter((item) => 100 >= lastOctet(item.ip) && lastOctet(item.ip) > 50);
 
-        const list1 = filterByIP(getDownItems(itemList, eventIds, itemById))
-        const list2 = filterByIP(getUpItems(itemList, eventIds, itemById))
+        const list1 = filterByIP(getNewEventItem(itemList, eventIds, itemById));
+        const list2 = filterByIP(getDownItems(itemList, eventIds, itemById));
+        const list3 = filterByIP(getUpItems(itemList, eventIds, itemById));
 
-        return [ ...list1, ...list2];
+        return [ ...list1, ...list2, ...list3];
     }
 
     const getRemoteSiteItems = (itemList: ItemListValues, eventIds: Set<number>, itemById: Map<number, PingableEntry>) => {
         
-        const filterByIP = (l: PingableEntry[]) => l.filter((item) => 150 > lastOctet(item.ip) && lastOctet(item.ip) > 100);
+        const filterByIP = (l: PingableEntry[]) => l.filter((item) => 150 >= lastOctet(item.ip) && lastOctet(item.ip) > 100);
 
-        const list1 = filterByIP(getDownItems(itemList, eventIds, itemById))
-        const list2 = filterByIP(getUpItems(itemList, eventIds, itemById))
+        const list1 = filterByIP(getNewEventItem(itemList, eventIds, itemById));
+        const list2 = filterByIP(getDownItems(itemList, eventIds, itemById));
+        const list3 = filterByIP(getUpItems(itemList, eventIds, itemById));
 
-        return [ ...list1, ...list2];
+        return [ ...list1, ...list2, ...list3];
     }
 
     const switchMode: ItemSortValues = [getNewEventItem, getDownItems, getUpItems];
