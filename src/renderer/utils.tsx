@@ -7,6 +7,7 @@ interface PingableEntry {
   id: number;
   name: string;
   ip: string;
+  location: string;
 }
 
 interface ReachableEntry {
@@ -22,8 +23,14 @@ interface itemProps {
   setSelected: (arg0: PingableEntry) => () => void;
   onPing: (ip: string, visible?: boolean | undefined) => Promise<void>;
   onConnect: (ip: string, reachable: boolean) => void;
-  onEdit: (index: string, newIp: string, hostname: string) => void;
+  onEdit: (
+    index: string,
+    newIp: string,
+    hostname: string,
+    newLocation: string,
+  ) => void;
   onDelete: (ip: string) => Promise<boolean>;
 }
 
 export type { errorFormat, PingableEntry, ReachableEntry, itemProps };
+export const LOCATION_OPTIONS = ['Ramle', 'Ofarit', 'Nafa'] as const;

@@ -31,7 +31,7 @@ const useLocalStorage: () => LocalStorageValues = () => {
             return {success: false, data: null};
         }
     };
-    
+
     // saves items to local file
     const saveData = async (items: Array<PingableEntry>) => {
         // TODO: handle errors here

@@ -16,13 +16,19 @@ function GridItem(props: {
   index: any;
   name: string;
   reachability: boolean;
-  ip: any;
+  ip: string;
+  location: string;
   scale: number;
   setSelected: () => void;
   isSelected: boolean;
   onPing: (ip: string, visible?: boolean | undefined) => Promise<void>;
   onConnect: (ip: string, reachable: boolean) => void;
-  onEdit: (index: string, newIp: string, hostname: string) => void;
+  onEdit: (
+    index: string,
+    newIp: string,
+    hostname: string,
+    newLocation: string,
+  ) => void;
   onDelete: (ip: string) => Promise<boolean>;
   isServerOnline: boolean;
   appData: AppDataValues;
@@ -32,6 +38,7 @@ function GridItem(props: {
     name,
     reachability,
     ip,
+    location,
     isServerOnline,
     scale,
     setSelected,
@@ -79,8 +86,12 @@ function GridItem(props: {
     handleClose();
   };
 
-  const handlesubmitEdit = (newIp: string, newName: string) => {
-    onEdit(index, newIp, newName);
+  const handlesubmitEdit = (
+    newIp: string,
+    newName: string,
+    newLocation: string,
+  ) => {
+    onEdit(index, newIp, newName, newLocation);
   };
 
   const handleEdit = () => {
@@ -127,7 +138,7 @@ function GridItem(props: {
 
   const handleShow = () => {
     setAlertTitle('Item info');
-    setAlertMessage(`IP Address: ${ip}\nName: ${name}`);
+    setAlertMessage(`IP Address: ${ip}\nName: ${name}\nLocation: ${location}`);
     setAlertOpen(true);
     handleClose();
   };
@@ -211,6 +222,7 @@ function GridItem(props: {
         setIsOpen={setIsEditOpen}
         initialHostname={name}
         initialIpAddress={ip}
+        initialLocation={location}
         onSubmitEdit={handlesubmitEdit}
       />
     </>

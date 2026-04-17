@@ -1,10 +1,13 @@
+/* eslint-disable react/jsx-props-no-spreading */
 import { useForm } from 'react-hook-form';
 import '../styles/ButtonAddItem.css';
 import { Dispatch, SetStateAction } from 'react';
+import { LOCATION_OPTIONS } from '../utils';
 
 type Inputs = {
   hostname: string;
   ipAddress: string;
+  location: string;
 };
 
 // Validation functions
@@ -44,7 +47,8 @@ function ButtonAddItem(props: {
       // Trim values before submitting
       const trimmedIp = data.ipAddress.trim();
       const trimmedHostname = data.hostname.trim();
-      callback(trimmedIp, trimmedHostname);
+      const trimmedLocation = data.location.trim();
+      callback(trimmedIp, trimmedHostname, trimmedLocation);
       setOpen(false);
       reset();
     } catch (err) {
@@ -113,6 +117,26 @@ function ButtonAddItem(props: {
             />
             {errors.hostname && (
               <span className="mui-error">{errors.hostname.message}</span>
+            )}
+          </div>
+
+          <div className="mui-form-group">
+            <p className="mui-label">Location</p>
+            <select
+              defaultValue="Ramle"
+              className="mui-input"
+              {...register('location', {
+                required: 'Location is required',
+              })}
+            >
+              {LOCATION_OPTIONS.map((location) => (
+                <option key={location} value={location}>
+                  {location}
+                </option>
+              ))}
+            </select>
+            {errors.location && (
+              <span className="mui-error">{errors.location.message}</span>
             )}
           </div>
 

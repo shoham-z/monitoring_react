@@ -2,10 +2,12 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Popup from 'reactjs-popup';
 import '../styles/PopupEditItem.css';
+import { LOCATION_OPTIONS } from '../utils';
 
 type Inputs = {
   hostname: string;
   ipAddress: string;
+  location: string;
 };
 
 // Validation functions
@@ -31,7 +33,8 @@ type PopupEditItemProps = {
   setIsOpen: (open: boolean) => void;
   initialHostname: string;
   initialIpAddress: string;
-  onSubmitEdit: (ip: string, hostname: string) => void;
+  initialLocation: string;
+  onSubmitEdit: (ip: string, hostname: string, location: string) => void;
 };
 
 function PopupEditItem({
@@ -39,6 +42,7 @@ function PopupEditItem({
   setIsOpen,
   initialHostname,
   initialIpAddress,
+  initialLocation,
   onSubmitEdit,
 }: PopupEditItemProps) {
   const {
@@ -53,15 +57,17 @@ function PopupEditItem({
       reset({
         hostname: initialHostname,
         ipAddress: initialIpAddress,
+        location: initialLocation,
       });
     }
-  }, [isOpen, initialHostname, initialIpAddress, reset]);
+  }, [isOpen, initialHostname, initialIpAddress, initialLocation, reset]);
 
   const onSubmit = (data: Inputs) => {
     // Trim values before submitting
     const trimmedIp = data.ipAddress.trim();
     const trimmedHostname = data.hostname.trim();
-    onSubmitEdit(trimmedIp, trimmedHostname);
+    const trimmedLocation = data.location.trim();
+    onSubmitEdit(trimmedIp, trimmedHostname, trimmedLocation);
     setIsOpen(false);
     reset();
   };
@@ -84,6 +90,10 @@ function PopupEditItem({
       notEmpty: (value) =>
         isNotEmptyOrWhitespace(value) || 'Hostname is required',
     },
+  });
+
+  const locationRegister = register('location', {
+    required: 'Location is required',
   });
 
   return (
@@ -135,6 +145,25 @@ function PopupEditItem({
           />
           {errors.hostname && (
             <span className="edit-error">{errors.hostname.message}</span>
+          )}
+
+          <p className="edit-label">Location</p>
+          <select
+            className="edit-input"
+            name={locationRegister.name}
+            onChange={locationRegister.onChange}
+            onBlur={locationRegister.onBlur}
+            ref={locationRegister.ref}
+            defaultValue={initialLocation}
+          >
+            {LOCATION_OPTIONS.map((loc) => (
+              <option key={loc} value={loc}>
+                {loc}
+              </option>
+            ))}
+          </select>
+          {errors.location && (
+            <span className="edit-error">{errors.location.message}</span>
           )}
 
           <div className="edit-dialog-actions center">

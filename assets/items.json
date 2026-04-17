@@ -2,31 +2,127 @@
   {
     "id": 1,
     "ip": "1.1.1.1",
-    "name": "Test1"
+    "name": "Test1",
+    "location": "Ramle"
+  },
+  {
+    "id": 2,
+    "ip": "2.2.2.2",
+    "name": "Test2",
+    "location": "Ramle"
+  },
+  {
+    "id": 3,
+    "ip": "3.3.3.3",
+    "name": "Test3",
+    "location": "Ramle"
+  },
+  {
+    "id": 4,
+    "ip": "4.4.4.4",
+    "name": "Test4",
+    "location": "Ramle"
+  },
+  {
+    "id": 5,
+    "ip": "5.5.5.5",
+    "name": "Test5",
+    "location": "Ramle"
+  },
+  {
+    "id": 6,
+    "ip": "6.6.6.6",
+    "name": "Test6",
+    "location": "Ramle"
+  },
+  {
+    "id": 7,
+    "ip": "7.7.7.7",
+    "name": "Test7",
+    "location": "Ramle"
   },
   {
     "id": 8,
     "ip": "8.8.8.8",
-    "name": "מפקדת אלון מניפה צרה"
+    "name": "Test8",
+    "location": "Ramle"
   },
   {
     "id": 9,
-    "ip": "8.8.8.34",
-    "name": "bobobobobobobob"
+    "ip": "9.9.9.9",
+    "name": "Test9",
+    "location": "Ofarit"
   },
   {
-    "id": 52,
-    "ip": "192.168.1.74",
-    "name": "router"
+    "id": 10,
+    "ip": "10.10.10.10",
+    "name": "Test10",
+    "location": "Ramle"
   },
   {
-    "id": 53,
-    "ip": "12.12.12.102",
-    "name": "בדיקה"
+    "id": 11,
+    "ip": "11.11.11.11",
+    "name": "Test11",
+    "location": "Ramle"
   },
   {
-    "id": 54,
-    "ip": "192.168.1.120",
-    "name": "bob"
+    "id": 12,
+    "ip": "12.12.12.12",
+    "name": "Test12",
+    "location": "Ramle"
+  },
+  {
+    "id": 13,
+    "ip": "13.13.13.13",
+    "name": "Test13",
+    "location": "Ramle"
+  },
+  {
+    "id": 14,
+    "ip": "14.14.14.14",
+    "name": "Test14",
+    "location": "Ramle"
+  },
+  {
+    "id": 15,
+    "ip": "15.15.15.15",
+    "name": "Test15",
+    "location": "Ramle"
+  },
+  {
+    "id": 16,
+    "ip": "16.16.16.16",
+    "name": "Test16",
+    "location": "Ramle"
+  },
+  {
+    "id": 17,
+    "ip": "17.17.17.17",
+    "name": "Test17",
+    "location": "Ramle"
+  },
+  {
+    "id": 18,
+    "ip": "18.18.18.18",
+    "name": "Test18",
+    "location": "Ramle"
+  },
+  {
+    "id": 19,
+    "ip": "19.19.19.19",
+    "name": "מפקדת אלון מניפה רחבה",
+    "location": "Ramle"
+  },
+  {
+    "id": 20,
+    "ip": "20.20.20.20",
+    "name": "Test69",
+    "location": "Ramle"
+  },
+  {
+    "id": 26,
+    "ip": "192.168.8.8",
+    "name": "bobby",
+    "location": "Ofarit"
   }
 ]

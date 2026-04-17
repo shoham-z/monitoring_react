@@ -33,6 +33,7 @@ export const ItemListSchema = z.array(
     id: z.number(),
     ip: IPAddressSchema,
     name: z.string().min(1).max(50),
+    location: z.string().min(1).max(100),
   }),
 );
 

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import '../styles/TopPanel.css';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
-import DeleteIcon from '@mui/icons-material/Delete';
 import ButtonAddItem from './ButtonAddItem';
 
 function TopPanel(props: {

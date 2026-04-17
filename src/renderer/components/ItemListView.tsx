@@ -22,6 +22,7 @@ const buildGridItems = (
         index={element.id}
         name={element.name}
         ip={element.ip}
+        location={element.location}
         scale={props.itemScale}
         isServerOnline={props.isServerOnline}
         reachability={props.reachability(element)}
@@ -52,11 +53,24 @@ function ItemListView(props: {
     'Devices With New Events',
     'Unreachable Devices',
     'Reachable Devices',
+    '',
   ];
 
-  const encryptorTexts = ['Ramle Encryptor', 'Ofarit Encryptor', 'Nafot'];
+  const encryptorTexts = [
+    'Ramle Encryptors',
+    'Ofarit Encryptors',
+    'Nafot',
+    'Other Location',
+  ];
 
   const texts = appData.appMode === 'SWITCH' ? switchTexts : encryptorTexts;
+
+  const category4Items = buildGridItems(
+    sortFunctions[3](itemList, eventIds, itemById),
+    filter,
+    customProps,
+    appData,
+  );
 
   return (
     <div>
@@ -93,6 +107,15 @@ function ItemListView(props: {
           appData,
         )}
       </div>
+      {/* 4th category - only show if it has items */}
+      {category4Items.length > 0 && (
+        <div className="container_flex" id="container_flex">
+          <p className="div_header">
+            <span>{texts[3]}</span>
+          </p>
+          {category4Items}
+        </div>
+      )}
     </div>
   );
 }

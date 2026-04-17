@@ -4,7 +4,6 @@ import { AppDataValues } from "./useAppData";
 import useLocalStorage from "./useLocalStorage";
 import type { localStorageLoadValues, LocalStorageValues } from "./useLocalStorage";
 import useServerActions, { ServerActionsValues } from "./useServerActions";
-import { serialize } from "v8";
 
 export interface ItemListValues {
     list: Array<PingableEntry>;
@@ -14,8 +13,8 @@ export interface ItemListValues {
     clearReachabilityEvents: () => void;
     isServerOnline: boolean;
     selecteditemIP: string;
-    addItem: (ip: string, hostname: string) => void;
-    editItem: (index: string, newIp: string, hostname: string) => void;
+    addItem: (ip: string, hostname: string, location: string) => void;
+    editItem: (index: string, newIp: string, hostname: string, location: string) => void;
     deleteItem: (ip: string) => Promise<boolean>;
     handleSelect: (ip: SetStateAction<string>) => void
     error: errorFormat | null;
@@ -37,7 +36,7 @@ const actionString: Record<ItemAction, string> = {
     [ItemAction.LOAD]: 'load',
 }
 
-const useItemList: (arg0: AppDataValues) => ItemListValues 
+const useItemList: (arg0: AppDataValues) => ItemListValues
 = (appData: AppDataValues) => {
     const [list, setItemList] = useState<Array<PingableEntry>>([]);
     const [reachabilityList, setReachabilityList] = useState<Array<ReachableEntry>>([]);
@@ -62,7 +61,7 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
         if (success) {
           // Instead save the data
           setItemList(data);
-    
+
           setReachabilityList((prev) => {
             if (prev.length === 0) {
               return data.map((item: PingableEntry) => ({
@@ -75,7 +74,7 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
         } else if (localStorage.error) {
           setError({title: localStorage.error.title, message: localStorage.error.message});
         } else {
-          setError({title: 
+          setError({title:
             'Unknown',
             message: 'An unknown error occured. Call the FBI to investigate this',
         });
@@ -144,7 +143,7 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
             return found ? updated : [...updated, { id, missedPings: newMissed }];
         });
 
-        
+
         // --- notification rules ---
         if (wasReachable === undefined) {
             if (!isReachable) {
@@ -197,7 +196,7 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
                 return prev;
             });
         }
-    
+
         const onFail = (error: { response: { data?: any; status?: any; }; }) => {
             // Mark server as offline
             setIsServerOnline(false);
@@ -270,18 +269,18 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
     };
 
     // used to add item to list and send to server
-    const addItem = (ip: string, hostname: string): void => {
+    const addItem = (ip: string, hostname: string, location: string): void => {
         if (!isServerOnline) {
             setItemActionFailedError(ItemAction.ADD);
             return;
         }
 
-        const data = { ip, name: hostname };
+        const data = { ip, name: hostname, location };
 
         const headers = { headers: { 'Content-Type': 'application/json' } };
 
         const onSuccess = (response: { status: number; }) => {
-            if (response.status !== 201) 
+            if (response.status !== 201)
                 return;
             // Mark server as online
             setIsServerOnline(true);
@@ -294,11 +293,12 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
                 id: newId,
                 ip,
                 name: hostname,
+                location,
             };
             const updatedList = [...list, newItem];
             setItemList(updatedList);
             // Save to local storage
-            localStorage.saveData(updatedList); 
+            localStorage.saveData(updatedList);
         };
 
         const onFail = (error: { response: { data?: any; status?: any; }; }) => {
@@ -316,9 +316,9 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
 
         serverActions.post(`api/add`, data, headers, onSuccess, onFail);
     };
-  
+
     // used to edit item in list and send to server
-    const editItem = (index: string, newIp: string, hostname: string): void => {
+    const editItem = (index: string, newIp: string, hostname: string, newLocation: string): void => {
         if (!isServerOnline) {
             setItemActionFailedError(ItemAction.EDIT);
             return;
@@ -327,10 +327,10 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
         const numericId = Number(index);
         const previousIp = list.find((item) => item.id === numericId)?.ip;
 
-        const data = { id: index, ip: newIp, name: hostname };
+        const data = { id: index, ip: newIp, name: hostname, location: newLocation };
 
         const onSuccess = (response: { status: number; }) => {
-            if (response.status !== 200) 
+            if (response.status !== 200)
                 return;
             // Mark server as online
             setIsServerOnline(true);
@@ -338,7 +338,7 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
             setItemList((prevList) => {
                 const updatedList = prevList.map((item) =>
                 item.id === numericId
-                    ? { ...item, name: hostname, ip: newIp }
+                    ? { ...item, name: hostname, ip: newIp, location: newLocation }
                     : item,
                 );
                 // Save to local storage
@@ -350,7 +350,7 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
                 setSelectedIp(newIp);
             }
         };
-        
+
         const onFail = (error: { response: { data?: any; status?: any; }; }) => {
             // Mark server as offline on connection error
             if (error.response) {
