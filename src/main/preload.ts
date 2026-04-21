@@ -89,7 +89,7 @@ const electronHandler = {
     },
 
     appendNotification: async (notification: MyNotification) => {
-      if (validateNotification(notification) !== notification) {
+      if (JSON.stringify(validateNotification(notification)) !== JSON.stringify(notification)) {
         return;
       }
       return ipcRenderer.invoke('append-notification', notification);
