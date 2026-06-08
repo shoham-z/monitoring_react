@@ -155,5 +155,3 @@ ipcMain.handle('show-notification', async (_event, title, body) => {
     return { success: false, error: error.message };
   }
 });
-
-

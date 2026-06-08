@@ -1,6 +1,8 @@
 import '../styles/NotificationPanel.css';
 import { FaCheck } from 'react-icons/fa';
 import { MdDeleteSweep } from 'react-icons/md';
+import { useTranslation } from 'react-i18next';
+
 import { MyNotification } from '../../main/util';
 
 function NotificationPanel(props: {
@@ -10,10 +12,12 @@ function NotificationPanel(props: {
 }) {
   const { notifications, deleteNotification, deleteAllNotifications } = props;
 
+  const { t } = useTranslation();
+
   return (
     <div className="notification-panel">
       <div className="panel-header">
-        <h2>Notifications</h2>
+        <h2>{t('notifications')}</h2>
         <button
           type="button"
           className="clear-btn"
@@ -26,9 +30,9 @@ function NotificationPanel(props: {
       <table className="notification-table">
         <thead>
           <tr>
-            <th>Message</th>
-            <th>Time</th>
-            <th>Action</th>
+            <th>{t('notificationMessage')}</th>
+            <th>{t('notificationTime')}</th>
+            <th>{t('notificationAction')}</th>
           </tr>
         </thead>
         <tbody>
@@ -51,7 +55,7 @@ function NotificationPanel(props: {
           {notifications.length === 0 && (
             <tr>
               <td colSpan={3} className="no-notifications">
-                No notifications
+                {t('notificationEmpty')}
               </td>
             </tr>
           )}

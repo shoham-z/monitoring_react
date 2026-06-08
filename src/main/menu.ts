@@ -184,13 +184,31 @@ export default class MenuBuilder {
       ],
     };
 
+    const subMenuLanguage: MenuItemConstructorOptions = {
+      label: 'Language',
+      submenu: [
+        {
+          label: 'English',
+          click: () => {
+            this.mainWindow.webContents.send('change-language', 'en');
+          },
+        },
+        {
+          label: 'Hebrew',
+          click: () => {
+            this.mainWindow.webContents.send('change-language', 'he');
+          },
+        },
+      ],
+    };
+
     const subMenuView =
       process.env.NODE_ENV === 'development' ||
       process.env.DEBUG_PROD === 'true'
         ? subMenuViewDev
         : subMenuViewProd;
 
-    return [subMenuAbout, subMenuEdit, subMenuView, subMenuWindow, subMenuHelp];
+    return [subMenuAbout, subMenuEdit, subMenuLanguage, subMenuView, subMenuWindow, subMenuHelp];
   }
 
   openVarsFile() {
@@ -218,6 +236,23 @@ export default class MenuBuilder {
             accelerator: 'Ctrl+W',
             click: () => {
               this.mainWindow.close();
+            },
+          },
+        ],
+      },
+      {
+        label: '&Language',
+        submenu: [
+          {
+            label: 'English',
+            click: () => {
+              this.mainWindow.webContents.send('change-language', 'en');
+            },
+          },
+          {
+            label: 'Hebrew',
+            click: () => {
+              this.mainWindow.webContents.send('change-language', 'he');
             },
           },
         ],

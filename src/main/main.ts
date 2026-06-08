@@ -159,6 +159,24 @@ app
     const tray = new Tray(icon);
     const contextMenu = Menu.buildFromTemplate([
       {
+        label: 'Language',
+        submenu: [
+          {
+            label: 'English',
+            click: () => {
+              mainWindow?.webContents.send('change-language', 'en');
+            },
+          },
+          {
+            label: 'Hebrew',
+            click: () => {
+              mainWindow?.webContents.send('change-language', 'he');
+            },
+          },
+        ],
+      },
+      { type: 'separator' },
+      {
         label: 'Ping All Items',
         click: () => {
           mainWindow?.webContents.send('ping-all-devices');
@@ -196,4 +214,3 @@ app
     });
   })
   .catch(console.log);
-

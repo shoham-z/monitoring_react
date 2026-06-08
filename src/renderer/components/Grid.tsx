@@ -87,15 +87,15 @@ function Grid(props: {
       } else if (lastOctet > 0 && lastOctet < 151) {
         window.electron.ipcRenderer.connectRemotely(ip);
       } else {
-        setAlertTitle('Cant connect to this device');
+        setAlertTitle('Cant connect to this device')
         setAlertMessage(
           'This device seems to be a computer and is not remotely connectable',
-        );
+        )
         setAlertOpen(true);
       }
     } else {
-      setAlertTitle('Device Unreachable');
-      // setAlertMessage('This device is not reachable');
+      setAlertTitle('Device Unreachable')
+      setAlertMessage('');
       setAlertOpen(true);
     }
   };

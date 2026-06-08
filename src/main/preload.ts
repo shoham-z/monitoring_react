@@ -128,6 +128,15 @@ const electronHandler = {
       validateNotificationParams({ title, body });
       return ipcRenderer.invoke('show-notification', title, body);
     },
+
+    onChangeLanguage: (callback: (lng: string) => void) => {
+      const listener = (_event: Electron.IpcRendererEvent, lng: string) => callback(lng);
+      ipcRenderer.on('change-language', listener);
+
+      return () => {
+        ipcRenderer.removeListener('change-language', listener);
+      };
+    },
   },
 };
 
