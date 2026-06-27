@@ -6,6 +6,7 @@
  * When running `npm run build` or `npm run build:main`, this file is compiled to
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
+import fs from 'fs';
 import path from 'path';
 import {
   app,
@@ -35,10 +36,25 @@ export const basePath = app.isPackaged
   ? process.resourcesPath // for production
   : path.join(__dirname, '../..'); // for development
 
+const setAppLanguage = (language: 'en' | 'he') => {
+  const varsFilePath = path.join(basePath, 'assets', 'vars.json');
+
+  try {
+    const raw = fs.readFileSync(varsFilePath, 'utf-8');
+    const vars = JSON.parse(raw);
+    vars.LANGUAGE = language;
+    fs.writeFileSync(varsFilePath, JSON.stringify(vars, null, 2), 'utf-8');
+  } catch {
+    // ignore write errors; app language still changes in UI
+  }
+
+  mainWindow?.webContents.send('change-language', language);
+};
+
 // Set Windows AppUserModelId for proper notification branding
 if (process.platform === 'win32') {
   app.setAppUserModelId('GoldenApple');
-}  
+}
 
 let mainWindow: BrowserWindow | null = null;
 
@@ -164,13 +180,13 @@ app
           {
             label: 'English',
             click: () => {
-              mainWindow?.webContents.send('change-language', 'en');
+              setAppLanguage('en');
             },
           },
           {
             label: 'Hebrew',
             click: () => {
-              mainWindow?.webContents.send('change-language', 'he');
+              setAppLanguage('he');
             },
           },
         ],

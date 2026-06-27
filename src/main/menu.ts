@@ -5,6 +5,7 @@ import {
   BrowserWindow,
   MenuItemConstructorOptions,
 } from 'electron';
+import fs from 'fs';
 import path from 'path';
 
 interface DarwinMenuItemConstructorOptions extends MenuItemConstructorOptions {
@@ -190,13 +191,13 @@ export default class MenuBuilder {
         {
           label: 'English',
           click: () => {
-            this.mainWindow.webContents.send('change-language', 'en');
+            this.setLanguage('en');
           },
         },
         {
           label: 'Hebrew',
           click: () => {
-            this.mainWindow.webContents.send('change-language', 'he');
+            this.setLanguage('he');
           },
         },
       ],
@@ -211,9 +212,26 @@ export default class MenuBuilder {
     return [subMenuAbout, subMenuEdit, subMenuLanguage, subMenuView, subMenuWindow, subMenuHelp];
   }
 
+  setLanguage(language: 'en' | 'he') {
+    const varsFilePath = app.isPackaged
+      ? path.join(process.resourcesPath, 'assets', 'vars.json')
+      : path.join(__dirname, '../../assets/vars.json');
+
+    try {
+      const raw = fs.readFileSync(varsFilePath, 'utf-8');
+      const vars = JSON.parse(raw);
+      vars.LANGUAGE = language;
+      fs.writeFileSync(varsFilePath, JSON.stringify(vars, null, 2), 'utf-8');
+    } catch {
+      // ignore write errors; app language still changes in UI
+    }
+
+    this.mainWindow.webContents.send('change-language', language);
+  }
+
   openVarsFile() {
     const varsFilePath = app.isPackaged
-      ? path.join(process.resourcesPath, '/assets/vars.json')
+      ? path.join(process.resourcesPath, 'assets', 'vars.json')
       : path.join(__dirname, '../../assets/vars.json');
 
     shell.openPath(varsFilePath);
@@ -246,13 +264,13 @@ export default class MenuBuilder {
           {
             label: 'English',
             click: () => {
-              this.mainWindow.webContents.send('change-language', 'en');
+              this.setLanguage('en');
             },
           },
           {
             label: 'Hebrew',
             click: () => {
-              this.mainWindow.webContents.send('change-language', 'he');
+              this.setLanguage('he');
             },
           },
         ],

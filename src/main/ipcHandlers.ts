@@ -61,16 +61,15 @@ ipcMain.on('connect-remotely', (event, ip) => {
 /// ========= START OF SECTION LOAD/SAVE LOCAL DATA =========
 ipcMain.handle('get-vars', async (_event) => {
   const filePath = path.join(basePath, 'assets/vars.json');
-  if(!fs.existsSync(filePath)) {
+  if (!fs.existsSync(filePath)) {
     return { success: false, error: 'vars_not_found' };
   }
   try {
     const json = fs.readFileSync(filePath, 'utf-8');
-    const content = JSON.parse(json) as Notification[];
-    return { success: true, content};
-  }
-  catch(e: any) {
-    if(e.name === "SyntaxError") {
+    const content = JSON.parse(json);
+    return { success: true, content };
+  } catch (e: any) {
+    if (e.name === 'SyntaxError') {
       return { success: false, error: 'vars_invalid_json' };
     }
     return { success: false, error: 'vars_read_failed' };
