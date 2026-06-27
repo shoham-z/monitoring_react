@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-props-no-spreading */
 import { useForm } from 'react-hook-form';
 import '../styles/ButtonAddItem.css';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { LOCATION_OPTIONS, LOCATION_OPTION_KEYS } from '../utils';
 
@@ -41,9 +41,22 @@ function ButtonAddItem(props: {
     handleSubmit,
     formState: { errors },
     reset,
-  } = useForm<Inputs>();
+  } = useForm<Inputs>({
+    defaultValues: {
+      ipAddress: '192.168.',
+      hostname: '',
+      location: 'Ramle',
+    },
+  });
 
   const { t } = useTranslation();
+
+  // Reset the form whenever the modal closes
+  useEffect(() => {
+    if (!isOpen) {
+      reset();
+    }
+  }, [isOpen, reset]);
 
   const onSubmit = (data: Inputs) => {
     try {
@@ -57,10 +70,6 @@ function ButtonAddItem(props: {
     } catch (err) {
       console.error(err);
     }
-  };
-
-  const handleClose = () => {
-    setOpen(false);
   };
 
   const ipAddressRegister = register('ipAddress', {
@@ -79,6 +88,10 @@ function ButtonAddItem(props: {
     },
   });
 
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   return (
     isOpen && (
       <div className="popup-wrapper">
@@ -93,7 +106,6 @@ function ButtonAddItem(props: {
             <p className="mui-label">{t('addressField')}</p>
             <input
               className="mui-input"
-              defaultValue="192.168."
               name={ipAddressRegister.name}
               onChange={ipAddressRegister.onChange}
               onBlur={ipAddressRegister.onBlur}
@@ -121,7 +133,6 @@ function ButtonAddItem(props: {
           <div className="mui-form-group">
             <p className="mui-label">{t('locationField')}</p>
             <select
-              defaultValue="Ramle"
               className="mui-input"
               {...register('location', {
                 required: t('requiredLocation'),
@@ -142,7 +153,7 @@ function ButtonAddItem(props: {
             <button
               type="button"
               className="mui-button cancel"
-              onClick={() => handleClose()} // assuming you have a close handler
+              onClick={() => handleClose()}
             >
               {t('cancel')}
             </button>
