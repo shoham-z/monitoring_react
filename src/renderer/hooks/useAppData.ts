@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useTranslation } from 'react-i18next';
 import { errorFormat } from "../utils";
 
 export interface AppDataValues {
@@ -15,16 +16,22 @@ const useAppData: () => AppDataValues = () => {
     const [maxMissedPings, setMaxMissedPings] = useState(3);
     const [isReady, setIsReady] = useState(false);
     const [error, setError] = useState<errorFormat | null>(null);
+    const { t } = useTranslation();
+
+    const translateVarsError = useCallback((errorCode: string): string => {
+        const key = `varsErrors.${errorCode}`;
+        return t(key, { defaultValue: errorCode });
+    }, [t]);
 
     const initialSetup = useCallback(async () => {
         try {
             const response = await window.electron.ipcRenderer.getVars()
-        
+
             if (!response.success) {
-                const errorMessage = response.error;
+                const errorMessage = translateVarsError(response.error);
                 setError({
-                    title: 'Error reading vars',
-                    message: `${errorMessage}\nPlease Fix or create the file and restart the app.`
+                    title: t('errorVars'),
+                    message: t('fixVars', { errorMessage })
                 })
                 return;
             }
@@ -39,12 +46,9 @@ const useAppData: () => AppDataValues = () => {
             setIsReady(true);
 
         } catch (err) {
-            setError({
-                        title: 'Unexpected error',
-                        message: String(err)
-                    })
+            setError({title: t('unexpectedError') ,message: String(err)})
         }
-    }, []);
+    }, [t, translateVarsError]);
 
     useEffect(() => {
         initialSetup();

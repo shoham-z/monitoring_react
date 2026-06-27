@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, SetStateAction } from "react";
+import { useTranslation } from 'react-i18next';
 import { errorFormat, PingableEntry, ReachableEntry } from "../utils";
 import { AppDataValues } from "./useAppData";
 import useLocalStorage from "./useLocalStorage";
@@ -29,15 +30,23 @@ enum ItemAction{
     ADD, EDIT, DELETE, LOAD
 }
 
-const actionString: Record<ItemAction, string> = {
-    [ItemAction.ADD]: 'add',
-    [ItemAction.EDIT]: 'edit',
-    [ItemAction.DELETE]: 'delete',
-    [ItemAction.LOAD]: 'load',
+const actionVerbKey: Record<ItemAction, string> = {
+    [ItemAction.ADD]: 'actionVerbAdd',
+    [ItemAction.EDIT]: 'actionVerbEdit',
+    [ItemAction.DELETE]: 'actionVerbDelete',
+    [ItemAction.LOAD]: 'actionVerbLoad',
+}
+
+const failedActionTitleKey: Record<ItemAction, string> = {
+    [ItemAction.ADD]: 'failedToAddDevice',
+    [ItemAction.EDIT]: 'failedToEditDevice',
+    [ItemAction.DELETE]: 'failedToDeleteDevice',
+    [ItemAction.LOAD]: 'failedToLoadDevices',
 }
 
 const useItemList: (arg0: AppDataValues) => ItemListValues
 = (appData: AppDataValues) => {
+    const { t } = useTranslation();
     const [list, setItemList] = useState<Array<PingableEntry>>([]);
     const [reachabilityList, setReachabilityList] = useState<Array<ReachableEntry>>([]);
     const [isServerOnline, setIsServerOnline] = useState(false);
@@ -75,20 +84,20 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
           setError({title: localStorage.error.title, message: localStorage.error.message});
         } else {
           setError({title:
-            'Unknown',
-            message: 'An unknown error occured. Call the FBI to investigate this',
+            t('unexpectedError'),
+            message: t('unexpectedErrorMessage'),
         });
         }
     };
 
     const setFailedActionError = (action: ItemAction, message: string) => {
-        setError({ title: `Failed to ${actionString[action]} Device`, message: message });
+        setError({ title: t(failedActionTitleKey[action]), message });
     }
 
     const setItemActionFailedError = (action: ItemAction) => {
         setError({
-            title: 'Server Offline',
-            message: `Cannot ${actionString[action]} devices while the server is offline. Please wait for the server to come back online.`,
+            title: t('serverOffline'),
+            message: t('cannotActionWhileOffline', { action: t(actionVerbKey[action]) }),
         });
     }
 
@@ -101,8 +110,8 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
 
         serverDownCounterRef.current = 0;
         setError({
-            title: 'Connection Error',
-            message: 'Unable to connect to the server. Please check your connection and try again.',
+            title: t('connectionError'),
+            message: t('connectionErrorMessage'),
         });
     }
 
@@ -242,29 +251,29 @@ const useItemList: (arg0: AppDataValues) => ItemListValues
         switch (status) {
         case 400:
             if (errorMessage?.includes('Missing required fields')) {
-            return 'Some required information is missing.\n Please check that all fields are filled correctly.';
+            return t('errorMissingFields');
             }
             if (errorMessage?.includes('Invalid IPv4 address')) {
-            return 'The IP address you entered is not valid.\n Please enter a valid IP address (e.g., 192.168.1.1).';
+            return t('errorInvalidIPv4');
             }
             if (errorMessage?.includes('Name cannot be empty')) {
-            return 'The name cannot be empty.\n Please enter a name for this device.';
+            return t('errorEmptyName');
             }
-            return 'The information you provided is not valid.\n Please check your input and try again.';
+            return t('errorInvalidInput');
         case 404:
-            return 'The device you are trying to modify was not found.\n It may have been deleted by another user.';
+            return t('errorDeviceNotFound');
         case 409:
             if (errorMessage?.includes('UNIQUE constraint')) {
-            return 'A device with this IP address already exists.\n Please use a different IP address.';
+            return t('errorDuplicateIP');
             }
-            return 'This action conflicts with existing data.\n The device may already exist';
+            return t('errorConflict');
         case 500:
-            return 'The server encountered an unexpected error.\n Please try again later or contact support if the problem persists.';
+            return t('errorServerUnexpected');
         default:
             if (errorMessage) {
             return errorMessage;
             }
-            return 'An unexpected error occurred.\n Please try again.';
+            return t('errorUnexpected');
         }
     };
 

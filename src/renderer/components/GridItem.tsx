@@ -3,6 +3,7 @@
 import { MouseEvent, useState } from 'react';
 import { ControlledMenu, MenuItem } from '@szhsin/react-menu';
 import '@szhsin/react-menu/dist/index.css';
+import { useTranslation } from 'react-i18next';
 import switchImg from '../../img/switch.png';
 import computerImg from '../../img/computer.png';
 import encryptorImg from '../../img/encryptor.png';
@@ -102,13 +103,15 @@ function GridItem(props: {
     handleClose();
   };
 
+  const { t } = useTranslation();
+
   const handleChoice = async (choice: boolean) => {
     setConfirmationOpen(false);
 
     if (!choice) {
       // User cancelled
-      setAlertTitle('Cancelled');
-      setAlertMessage('No Item was deleted');
+      setAlertTitle(t('cancelled'));
+      setAlertMessage(t('noItemWasDeleted'));
       setAlertOpen(true);
       return;
     }
@@ -118,10 +121,8 @@ function GridItem(props: {
       const success = await onDelete(ip);
       if (success) {
         // Only show success message if deletion actually succeeded
-        setAlertTitle('The Item was deleted');
-        setAlertMessage(
-          `The Item with the following IP address was deleted: ${ip}`,
-        );
+        setAlertTitle(t('itemWasDeletedTitle'));
+        setAlertMessage(t('itemWasDeletedMessage', { ip }));
         setAlertOpen(true);
       }
       // If deletion failed, error message is already shown by Grid
@@ -137,8 +138,8 @@ function GridItem(props: {
   };
 
   const handleShow = () => {
-    setAlertTitle('Item info');
-    setAlertMessage(`IP Address: ${ip}\nName: ${name}\nLocation: ${location}`);
+    setAlertTitle(t('itemInfo'));
+    setAlertMessage(t('itemInfoMessage', { ip, name, location }));
     setAlertOpen(true);
     handleClose();
   };
@@ -199,21 +200,21 @@ function GridItem(props: {
           state={menuOpen ? 'open' : 'closed'}
           onClose={handleClose}
         >
-          <MenuItem onClick={handleShow}>Show</MenuItem>
+          <MenuItem onClick={handleShow}>{t('show')}</MenuItem>
           <MenuItem onClick={handlePing}>
-            Ping{' '}
+            {t('ping')}{' '}
             <span style={{ marginLeft: 'auto', opacity: 0.6 }}>Ctrl G</span>
           </MenuItem>
 
           <MenuItem onClick={handleConnect}>
-            Connect{' '}
+            {t('connect')}{' '}
             <span style={{ marginLeft: 'auto', opacity: 0.6 }}>Ctrl H</span>
           </MenuItem>
           <MenuItem disabled={!isServerOnline} onClick={handleEdit}>
-            Edit
+            {t('edit')}
           </MenuItem>
           <MenuItem disabled={!isServerOnline} onClick={handleDelete}>
-            Delete
+            {t('delete')}
           </MenuItem>
         </ControlledMenu>
       </div>

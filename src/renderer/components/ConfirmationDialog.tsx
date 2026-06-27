@@ -1,4 +1,5 @@
 import '../styles/ConfirmationDialog.css';
+import { useTranslation } from 'react-i18next';
 
 function ConfirmationDialog(props: {
   ip: string;
@@ -13,12 +14,14 @@ function ConfirmationDialog(props: {
     returnChoice(choice);
   };
 
+  const { t } = useTranslation();
+
   return (
     isOpen && (
       <div className="custom-dialog-backdrop">
         <div className="custom-dialog">
           <div className="custom-dialog-title">
-            Are you sure you want to delete item {ip}?
+            {t('confirmationDialogTitle', { ip })}
           </div>
           <div className="custom-dialog-actions">
             <button
@@ -26,14 +29,14 @@ function ConfirmationDialog(props: {
               type="button"
               onClick={() => handleClose(false)}
             >
-              No
+              {t('no')}
             </button>
             <button
               className="custom-dialog-button primary"
               type="button"
               onClick={() => handleClose(true)}
             >
-              Yes
+              {t('yes')}
             </button>
           </div>
         </div>

@@ -2,7 +2,8 @@
 import { useForm } from 'react-hook-form';
 import '../styles/ButtonAddItem.css';
 import { Dispatch, SetStateAction } from 'react';
-import { LOCATION_OPTIONS } from '../utils';
+import { useTranslation } from 'react-i18next';
+import { LOCATION_OPTIONS, LOCATION_OPTION_KEYS } from '../utils';
 
 type Inputs = {
   hostname: string;
@@ -42,6 +43,8 @@ function ButtonAddItem(props: {
     reset,
   } = useForm<Inputs>();
 
+  const { t } = useTranslation();
+
   const onSubmit = (data: Inputs) => {
     try {
       // Trim values before submitting
@@ -53,7 +56,6 @@ function ButtonAddItem(props: {
       reset();
     } catch (err) {
       console.error(err);
-      // Optionally: show error message to user
     }
   };
 
@@ -62,22 +64,18 @@ function ButtonAddItem(props: {
   };
 
   const ipAddressRegister = register('ipAddress', {
-    required: 'IP address is required',
+    required: t('requiredIP'),
     validate: {
-      notEmpty: (value) =>
-        isNotEmptyOrWhitespace(value) ||
-        'IP address cannot be empty or just spaces',
-      validIPv4: (value) =>
-        isValidIPv4(value.trim()) ||
-        'Please enter a valid IPv4 address (e.g., 192.168.1.1)',
+      notEmpty: (value) => isNotEmptyOrWhitespace(value) || t('notEmptyIP'),
+      validIPv4: (value) => isValidIPv4(value.trim()) || t('validIPv4'),
     },
   });
 
   const hostnameRegister = register('hostname', {
-    required: 'Hostname is required',
+    required: t('requiredHostname'),
     validate: {
       notEmpty: (value) =>
-        isNotEmptyOrWhitespace(value) || 'Hostname is required',
+        isNotEmptyOrWhitespace(value) || t('requiredHostname'),
     },
   });
 
@@ -92,7 +90,7 @@ function ButtonAddItem(props: {
           }}
         >
           <div className="mui-form-group">
-            <p className="mui-label">IP Address</p>
+            <p className="mui-label">{t('addressField')}</p>
             <input
               className="mui-input"
               defaultValue="192.168."
@@ -107,7 +105,7 @@ function ButtonAddItem(props: {
           </div>
 
           <div className="mui-form-group">
-            <p className="mui-label">Hostname</p>
+            <p className="mui-label">{t('hostnameField')}</p>
             <input
               className="mui-input"
               name={hostnameRegister.name}
@@ -121,17 +119,17 @@ function ButtonAddItem(props: {
           </div>
 
           <div className="mui-form-group">
-            <p className="mui-label">Location</p>
+            <p className="mui-label">{t('locationField')}</p>
             <select
               defaultValue="Ramle"
               className="mui-input"
               {...register('location', {
-                required: 'Location is required',
+                required: t('requiredLocation'),
               })}
             >
               {LOCATION_OPTIONS.map((location) => (
                 <option key={location} value={location}>
-                  {location}
+                  {t(LOCATION_OPTION_KEYS[location])}
                 </option>
               ))}
             </select>
@@ -146,12 +144,12 @@ function ButtonAddItem(props: {
               className="mui-button cancel"
               onClick={() => handleClose()} // assuming you have a close handler
             >
-              Cancel
+              {t('cancel')}
             </button>
             <input
               className="mui-button primary"
               type="submit"
-              value="Submit"
+              value={t('submit')}
             />
           </div>
         </form>

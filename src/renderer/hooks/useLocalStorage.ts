@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useTranslation } from 'react-i18next';
 import { errorFormat, PingableEntry } from "../utils";
 
 export interface localStorageLoadValues {
@@ -14,6 +15,7 @@ export interface LocalStorageValues  {
 }
 
 const useLocalStorage: () => LocalStorageValues = () => {
+    const { t } = useTranslation();
     const [error, setError] = useState<errorFormat | null>(null);
     const [itemList, setItemList] = useState<any>([]);
 
@@ -27,7 +29,7 @@ const useLocalStorage: () => LocalStorageValues = () => {
             }
             return {success: false, data: null};
         } catch (error) {
-            setError({title: 'Failed to load item list:', message: String(error)})
+            setError({title: t('failedToLoadItemList'), message: String(error)})
             return {success: false, data: null};
         }
     };
@@ -38,13 +40,13 @@ const useLocalStorage: () => LocalStorageValues = () => {
         try {
         const result = await window.electron.ipcRenderer.saveItemList(items);
         if (!result.success) {
-            setError({title: 'Failed to save item list:', message: result.error})
+            setError({title: t('failedToSaveItemList'), message: result.error})
             console.error('Failed to save item list:', result.error);
         } else {
             console.log('Saved Item list to local storage');
         }
         } catch (error) {
-            setError({title: 'Failed to save item list:', message: String(error)})
+            setError({title: t('failedToSaveItemList'), message: String(error)})
             console.error('Error saving to local storage:', error);
         }
     };

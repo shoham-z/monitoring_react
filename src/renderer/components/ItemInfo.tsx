@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Buffer } from 'buffer';
 import '../styles/ItemInfo.css';
+import { useTranslation } from 'react-i18next';
 import { MyNotification } from '../../main/util';
 import SmallNotificationPanel from './SmallNotificationPanel';
 
@@ -15,6 +16,8 @@ function ItemInfo(props: {
   const { isOpen, setIsOpen, title, message, onDelete, ItemId } = props;
 
   const [notifications, setNotifications] = useState<MyNotification[]>([]);
+
+  const { t } = useTranslation();
 
   // reads older notifications from file
   useEffect(() => {
@@ -78,7 +81,7 @@ function ItemInfo(props: {
               {title}
             </div>
 
-            <div className="mui-dialog-content">
+            <div className="mui-dialog-content" dir="ltr">
               {/* Render each line of the message */}
               {messageLines}
             </div>
@@ -89,7 +92,7 @@ function ItemInfo(props: {
                 type="button"
                 onClick={handleClose}
               >
-                Okay
+                {t('okay')}
               </button>
             </div>
           </div>

@@ -18,4 +18,6 @@ export interface MyNotification {
   timestamp: string;
   color: string;
   swId: number;
+  messageKey?: string;
+  messageParams?: Record<string, string | number>;
 }

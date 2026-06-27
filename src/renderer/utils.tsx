@@ -34,3 +34,10 @@ interface itemProps {
 
 export type { errorFormat, PingableEntry, ReachableEntry, itemProps };
 export const LOCATION_OPTIONS = ['Ramle', 'Ofarit', 'Nafa'] as const;
+export type LocationOption = (typeof LOCATION_OPTIONS)[number];
+
+export const LOCATION_OPTION_KEYS: Record<LocationOption, string> = {
+  Ramle: 'locationRamle',
+  Ofarit: 'locationOfarit',
+  Nafa: 'locationNafa',
+};

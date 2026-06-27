@@ -1,5 +1,6 @@
 import { Buffer } from 'buffer';
 import '../styles/AlertDialog.css';
+import { useTranslation } from 'react-i18next';
 
 function AlertDialog(props: {
   isOpen: boolean;
@@ -23,6 +24,7 @@ function AlertDialog(props: {
       </p>
     );
   });
+  const { t } = useTranslation();
 
   return (
     isOpen && (
@@ -52,7 +54,7 @@ function AlertDialog(props: {
                 type="button"
                 onClick={handleClose}
               >
-                Okay
+                {t('okay')}
               </button>
             </div>
           </div>

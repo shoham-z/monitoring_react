@@ -2,7 +2,6 @@ import '../styles/NotificationPanel.css';
 import { FaCheck } from 'react-icons/fa';
 import { MdDeleteSweep } from 'react-icons/md';
 import { useTranslation } from 'react-i18next';
-
 import { MyNotification } from '../../main/util';
 
 function NotificationPanel(props: {
@@ -14,6 +13,18 @@ function NotificationPanel(props: {
 
   const { t } = useTranslation();
 
+  const getNotificationMessage = (notification: MyNotification) => {
+    const message = notification.messageKey
+      ? t(notification.messageKey, notification.messageParams || {})
+      : notification.message;
+
+    if (typeof message === 'string' && message.includes('<strong>')) {
+      return <span dangerouslySetInnerHTML={{ __html: message }} />;
+    }
+
+    return <span>{message}</span>;
+  };
+
   return (
     <div className="notification-panel">
       <div className="panel-header">
@@ -22,7 +33,7 @@ function NotificationPanel(props: {
           type="button"
           className="clear-btn"
           onClick={deleteAllNotifications}
-          title="Clear All"
+          title={t('clearAll')}
         >
           <MdDeleteSweep size={18} />
         </button>
@@ -38,14 +49,14 @@ function NotificationPanel(props: {
         <tbody>
           {notifications.map((notif) => (
             <tr key={notif.id} className={`tr-${notif.color}`}>
-              <td>{notif.message}</td>
+              <td>{getNotificationMessage(notif)}</td>
               <td>{notif.timestamp}</td>
               <td>
                 <button
                   type="button"
                   className="read-btn"
                   onClick={() => deleteNotification(notif.id)}
-                  title="Mark as read"
+                  title={t('markRead')}
                 >
                   <FaCheck />
                 </button>

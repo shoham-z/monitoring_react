@@ -6,6 +6,7 @@ import {
   useCallback,
 } from 'react';
 import '../styles/Grid.css';
+import { useTranslation } from 'react-i18next';
 import TopPanel from './TopPanel';
 import AlertDialog from './AlertDialog';
 import { MyNotification } from '../../main/util';
@@ -64,6 +65,8 @@ function Grid(props: {
     [notifications],
   );
 
+  const { t } = useTranslation();
+
   // shows error if occurs inside 'ItemList'
   useEffect(() => {
     if (itemList.error) {
@@ -87,14 +90,12 @@ function Grid(props: {
       } else if (lastOctet > 0 && lastOctet < 151) {
         window.electron.ipcRenderer.connectRemotely(ip);
       } else {
-        setAlertTitle('Cant connect to this device')
-        setAlertMessage(
-          'This device seems to be a computer and is not remotely connectable',
-        )
+        setAlertTitle(t('cantConnect'));
+        setAlertMessage(t('deviceIsComputer'));
         setAlertOpen(true);
       }
     } else {
-      setAlertTitle('Device Unreachable')
+      setAlertTitle(t('deviceUnreachable'));
       setAlertMessage('');
       setAlertOpen(true);
     }
@@ -118,13 +119,20 @@ function Grid(props: {
       if (!item) return;
 
       const notificationColor = result.status === 'UP' ? 'green' : 'red';
+      const messageKey = result.status === 'UP' ? 'deviceStatusUp' : 'deviceStatusDown';
+      const messageParams = {
+        name: item.name,
+        ip: item.ip,
+      };
       addNotification(
-        `${item.name} is ${result.status === 'UP' ? 'up' : 'down'}. IP is ${item.ip}`,
+        t(messageKey, { ...messageParams, lng: 'en' }),
         item.id,
         notificationColor,
+        messageKey,
+        messageParams,
       );
     },
-    [itemList, itemById, addNotification],
+    [itemList, itemById, addNotification, t],
   );
 
   // used for the global event to ping all devices

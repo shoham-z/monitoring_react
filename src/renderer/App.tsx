@@ -26,14 +26,22 @@ function Window() {
     window.electron.ipcRenderer.appendNotification(notification);
   };
 
-  const addNotification = (message: string, swId: number, color?: string) => {
+  const addNotification = (
+    message: string,
+    swId: number,
+    color?: string,
+    messageKey?: string,
+    messageParams?: Record<string, string | number>,
+  ) => {
     const id = uuidv4();
-    const notification = {
-      id, // simple unique ID
+    const notification: MyNotification = {
+      id,
       message,
       timestamp: new Date().toLocaleString('en-GB'),
       color: color || 'white',
       swId,
+      messageKey,
+      messageParams,
     };
     appendNewNotification(notification);
     setNotifications((prev) => [...prev, notification]);

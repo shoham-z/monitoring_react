@@ -62,7 +62,7 @@ ipcMain.on('connect-remotely', (event, ip) => {
 ipcMain.handle('get-vars', async (_event) => {
   const filePath = path.join(basePath, 'assets/vars.json');
   if(!fs.existsSync(filePath)) {
-    return { success: false, error: "Error 404 - File does not exist."};
+    return { success: false, error: 'vars_not_found' };
   }
   try {
     const json = fs.readFileSync(filePath, 'utf-8');
@@ -71,10 +71,9 @@ ipcMain.handle('get-vars', async (_event) => {
   }
   catch(e: any) {
     if(e.name === "SyntaxError") {
-      return { success: false, error: "Error 410 - File exists but JSON format is invalid"};
+      return { success: false, error: 'vars_invalid_json' };
     }
-    // error #1: e.name === SyntaxError - json format invalid - either someone messed with the file/file empty
-    // error #2: e.code === ENOENT - file not found
+    return { success: false, error: 'vars_read_failed' };
   }
 });
 

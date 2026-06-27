@@ -1,4 +1,5 @@
 import { JSX } from 'react';
+import { useTranslation } from 'react-i18next';
 import { AppDataValues } from '../hooks/useAppData';
 import { ItemListValues } from '../hooks/useItemList';
 import { itemProps, PingableEntry } from '../utils';
@@ -49,19 +50,15 @@ function ItemListView(props: {
 
   const sortFunctions: ItemSortValues = useItemSort(appData);
 
-  const switchTexts = [
-    'Devices With New Events',
-    'Unreachable Devices',
-    'Reachable Devices',
-    '',
-  ];
+  const { t } = useTranslation();
 
-  const encryptorTexts = [
-    'Ramle Encryptors',
-    'Ofarit Encryptors',
-    'Nafot',
-    'Other Location',
-  ];
+  const switchTexts = t('switchTexts', {
+    returnObjects: true,
+  }) as string[];
+
+  const encryptorTexts = t('encryptorTexts', {
+    returnObjects: true,
+  }) as string[];
 
   const texts = appData.appMode === 'SWITCH' ? switchTexts : encryptorTexts;
 

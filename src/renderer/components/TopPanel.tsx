@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import '../styles/TopPanel.css';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import { useTranslation } from 'react-i18next';
 import ButtonAddItem from './ButtonAddItem';
 
 function TopPanel(props: {
@@ -34,11 +35,13 @@ function TopPanel(props: {
     updateFilter('');
   };
 
+  const { t } = useTranslation();
+
   return (
     <div className="top-panel">
       <div className="top-panel__button-group">
         {!isServerOnline && (
-          <span className="server-status offline">Server Offline</span>
+          <span className="server-status offline">{t('serverOffline')}</span>
         )}
         <button
           type="button"
@@ -50,12 +53,10 @@ function TopPanel(props: {
           }}
           disabled={!isServerOnline}
           title={
-            !isServerOnline
-              ? 'Server is offline. Cannot add devices.'
-              : 'Add a new switch'
+            !isServerOnline ? t('serverOfflineExplained') : t('addExplained')
           }
         >
-          Add Switch
+          {t('add')}
         </button>
 
         <ButtonAddItem

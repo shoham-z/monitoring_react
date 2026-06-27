@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import Popup from 'reactjs-popup';
 import '../styles/PopupEditItem.css';
-import { LOCATION_OPTIONS } from '../utils';
+import { useTranslation } from 'react-i18next';
+import { LOCATION_OPTIONS, LOCATION_OPTION_KEYS } from '../utils';
 
 type Inputs = {
   hostname: string;
@@ -72,28 +73,26 @@ function PopupEditItem({
     reset();
   };
 
+  const { t } = useTranslation();
+
   const ipAddressRegister = register('ipAddress', {
-    required: 'IP address is required',
+    required: t('requiredIP'),
     validate: {
-      notEmpty: (value) =>
-        isNotEmptyOrWhitespace(value) ||
-        'IP address cannot be empty or just spaces',
-      validIPv4: (value) =>
-        isValidIPv4(value.trim()) ||
-        'Please enter a valid IPv4 address (e.g., 192.168.1.1)',
+      notEmpty: (value) => isNotEmptyOrWhitespace(value) || t('notEmptyIP'),
+      validIPv4: (value) => isValidIPv4(value.trim()) || t('validIPv4'),
     },
   });
 
   const hostnameRegister = register('hostname', {
-    required: 'Hostname is required',
+    required: t('requiredHostname'),
     validate: {
       notEmpty: (value) =>
-        isNotEmptyOrWhitespace(value) || 'Hostname is required',
+        isNotEmptyOrWhitespace(value) || t('requiredHostname'),
     },
   });
 
   const locationRegister = register('location', {
-    required: 'Location is required',
+    required: t('requiredLocation'),
   });
 
   return (
@@ -112,7 +111,7 @@ function PopupEditItem({
           &times;
         </button>
 
-        <div className="edit-dialog-title">Edit Switch</div>
+        <div className="edit-dialog-title">{t('editSwitch')}</div>
 
         <form
           className="edit-dialog-content"
@@ -121,7 +120,7 @@ function PopupEditItem({
             handleSubmit(onSubmit)(e);
           }}
         >
-          <p className="edit-label">IP Address</p>
+          <p className="edit-label">{t('addressField')}</p>
           <input
             className="edit-input"
             placeholder={initialIpAddress}
@@ -134,7 +133,7 @@ function PopupEditItem({
             <span className="edit-error">{errors.ipAddress.message}</span>
           )}
 
-          <p className="edit-label">Hostname</p>
+          <p className="edit-label">{t('hostnameField')}</p>
           <input
             className="edit-input"
             placeholder={initialHostname}
@@ -147,7 +146,7 @@ function PopupEditItem({
             <span className="edit-error">{errors.hostname.message}</span>
           )}
 
-          <p className="edit-label">Location</p>
+          <p className="edit-label">{t('locationField')}</p>
           <select
             className="edit-input"
             name={locationRegister.name}
@@ -158,7 +157,7 @@ function PopupEditItem({
           >
             {LOCATION_OPTIONS.map((loc) => (
               <option key={loc} value={loc}>
-                {loc}
+                {t(LOCATION_OPTION_KEYS[loc])}
               </option>
             ))}
           </select>
@@ -172,10 +171,10 @@ function PopupEditItem({
               className="edit-button"
               onClick={() => setIsOpen(false)}
             >
-              Cancel
+              {t('cancel')}
             </button>
             <button className="edit-button primary" type="submit">
-              Update Switch
+              {t('updateSwitch')}
             </button>
           </div>
         </form>
