@@ -50,11 +50,23 @@ ipcMain.on('connect-ssh', (event, ip) => {
 ipcMain.on('connect-remotely', (event, ip) => {
   console.log(`connecting to ${ip}`);
 
-  // Launch it in a new console window
-  spawn('cmd.exe', ['/c', 'start', '', 'C:\\RemoteCliClient_2_Windows.exe'], {
+  console.log('Executable:', 'C:\\RemoteRotemCLI.exe');
+  console.log('Args:', [ip]);
+
+  // Launch a new console window from C:\ and keep it open after running the command
+  const child = spawn('cmd.exe', ['/c', 'start', '', 'cmd', '/k', `C:\\RemoteRotemCLI.exe ${ip}`,],
+  {
+    cwd: 'C:\\',
     detached: true,
-    stdio: 'ignore', // Important: don't tie input/output to Electron
+    stdio: 'ignore',
+    env: {
+      ...process.env,
+      NODE_OPTIONS: undefined,
+      ELECTRON_RUN_AS_NODE: undefined,
+    },
   });
+
+  child.unref();
 });
 /// ========= END OF SECTION CONNECT REMOTELY =========
 
