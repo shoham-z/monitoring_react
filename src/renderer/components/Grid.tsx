@@ -88,18 +88,7 @@ function Grid(props: {
         return;
       }
 
-      const lastOctet = parseInt(ip.split('.').pop() || '', 10);
-
-      if (lastOctet > 240 && lastOctet < 255) {
-        // if address between 240 and 250
-        window.electron.ipcRenderer.connectSSH(ip);
-      } else if (lastOctet > 0 && lastOctet < 151) {
-        window.electron.ipcRenderer.connectRemotely(ip);
-      } else {
-        setAlertTitle(t('cantConnect'));
-        setAlertMessage(t('deviceIsComputer'));
-        setAlertOpen(true);
-      }
+      window.electron.ipcRenderer.connectRemotely(ip);
     } else {
       setAlertTitle(t('deviceUnreachable'));
       setAlertMessage('');

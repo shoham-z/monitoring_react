@@ -62,15 +62,7 @@ function GridItem(props: {
 
   const chooseImg = () => {
     if (appData.appMode === 'SWITCH') return switchImg;
-
-    const lastOctet = parseInt(ip.split('.').pop(), 10);
-    if (lastOctet > 240 && lastOctet < 255) {
-      return switchImg;
-    }
-    if (lastOctet > 0 && lastOctet < 151) {
-      return encryptorImg;
-    }
-    return computerImg;
+    return encryptorImg;
   };
   const image = chooseImg();
   const reachabilityClass = reachability ? 'reachable' : 'unreachable';
