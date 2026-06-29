@@ -15,7 +15,7 @@ function NotificationPanel(props: {
 
   const getNotificationMessage = (notification: MyNotification) => {
     const message = notification.messageKey
-      ? t(notification.messageKey, notification.messageParams || {})
+      ? t(notification.messageKey, { name: notification.name, ip: notification.ip, ...(notification.messageParams || {}) })
       : notification.message;
 
     if (typeof message === 'string' && message.includes('<strong>')) {

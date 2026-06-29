@@ -116,17 +116,12 @@ function Grid(props: {
 
       const notificationColor = result.status === 'UP' ? 'green' : 'red';
       const messageKey = result.status === 'UP' ? 'deviceStatusUp' : 'deviceStatusDown';
-      const messageParams = {
-        name: item.name,
-        ip: item.ip,
-      };
       addNotification(
         item.id,
         notificationColor,
         item.name,
         item.ip,
         messageKey,
-        messageParams,
       );
     },
     [itemList, itemById, addNotification, t],

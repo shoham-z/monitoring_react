@@ -32,7 +32,7 @@ function Window() {
     name?: string,
     ip?: string,
     messageKey?: string,
-    messageParams?: Record<string, string | number>,
+    messageParams?: Record<string, string>,
   ) => {
     const id = uuidv4();
     const notification: MyNotification = {
