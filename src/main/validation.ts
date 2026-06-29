@@ -20,13 +20,25 @@ const ipAddressWithPortSchema = z.string().regex(
   "Invalid IP address and port format. Expected format: 'ip.address.here:port'"
 );
 
-export const NotificationSchema = z.object({
-  id: z.string().uuid(),
-  message: z.string().min(1).max(500),
-  timestamp: z.string(),
-  color: z.enum(['white', 'red', 'yellow', 'green']),
-  swId: z.number(),
-});
+export const NotificationSchema = z
+  .object({
+    id: z.string().uuid(),
+    message: z.string().min(0).max(500).optional(),
+    timestamp: z.string(),
+    color: z.enum(['white', 'red', 'yellow', 'green']),
+    swId: z.number(),
+    name: z.string().min(1).max(100).optional(),
+    ip: z.string().min(1).max(100).optional(),
+    messageKey: z.string().min(1).optional(),
+    messageParams: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
+  })
+  .refine(
+    (data) => Boolean(data.messageKey) || Boolean(data.message),
+    {
+      message: 'Notification must contain either messageKey or message',
+      path: ['message', 'messageKey'],
+    },
+  );
 
 export const ItemListSchema = z.array(
   z.object({

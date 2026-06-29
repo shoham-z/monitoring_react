@@ -17,9 +17,10 @@ import ItemListView from './ItemListView';
 
 function Grid(props: {
   addNotification: (
-    message: string,
     swId: number,
     color?: string,
+    name?: string,
+    ip?: string,
     messageKey?: string,
     messageParams?: Record<string, string | number>,
   ) => void;
@@ -120,9 +121,10 @@ function Grid(props: {
         ip: item.ip,
       };
       addNotification(
-        t(messageKey, { ...messageParams, lng: 'en' }),
         item.id,
         notificationColor,
+        item.name,
+        item.ip,
         messageKey,
         messageParams,
       );

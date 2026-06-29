@@ -27,19 +27,21 @@ function Window() {
   };
 
   const addNotification = (
-    message: string,
     swId: number,
     color?: string,
+    name?: string,
+    ip?: string,
     messageKey?: string,
     messageParams?: Record<string, string | number>,
   ) => {
     const id = uuidv4();
     const notification: MyNotification = {
       id,
-      message,
       timestamp: new Date().toLocaleString('en-GB'),
       color: color || 'white',
       swId,
+      name,
+      ip,
       messageKey,
       messageParams,
     };

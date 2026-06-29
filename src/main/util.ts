@@ -14,10 +14,12 @@ export function resolveHtmlPath(htmlFileName: string) {
 
 export interface MyNotification {
   id: string;
-  message: string;
+  message?: string;
   timestamp: string;
   color: string;
   swId: number;
+  name?: string;
+  ip?: string;
   messageKey?: string;
   messageParams?: Record<string, string | number>;
 }
