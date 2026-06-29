@@ -9,8 +9,9 @@ function TopPanel(props: {
   addItem: any;
   updateFilter: any;
   isServerOnline: boolean;
+  network: string;
 }) {
-  const { addItem, updateFilter, isServerOnline } = props;
+  const { addItem, updateFilter, isServerOnline, network } = props;
 
   const [filter, setFilter] = useState('');
   const [formOpen, setFormOpen] = useState(false);
@@ -67,10 +68,13 @@ function TopPanel(props: {
       </div>
 
       <input type="text" onChange={inputHandler} value={filter} />
-
       <IconButton aria-label="delete" onClick={clearFilter}>
         <CloseIcon color="primary" />
       </IconButton>
+
+      <div className="top-panel__network-info">
+        <strong>{network || 'No network'}</strong>
+      </div>
     </div>
   );
 }

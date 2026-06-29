@@ -6,6 +6,7 @@ export interface AppDataValues {
   serverIp: string;
   appMode: string;
   maxMissedPings: number;
+  network: string;
   isReady: boolean;
   error: errorFormat | null;
 }
@@ -14,6 +15,7 @@ const useAppData: () => AppDataValues = () => {
     const [serverIp, setServerIp] = useState('');
     const [appMode, setAppMode] = useState('');
     const [maxMissedPings, setMaxMissedPings] = useState(3);
+    const [network, setNetwork] = useState('');
     const [isReady, setIsReady] = useState(false);
     const [error, setError] = useState<errorFormat | null>(null);
     const { t } = useTranslation();
@@ -39,6 +41,7 @@ const useAppData: () => AppDataValues = () => {
             let ip = response.content.SERVER_IP || '';
             setAppMode(response.content.MODE);
             setMaxMissedPings(response.content.MAX_MISSED_PINGS || 3);
+            setNetwork(response.content.NETWORK || '');
             if (!ip.startsWith('http')) {
             ip = `http://${ip}`;
             }
@@ -61,6 +64,7 @@ const useAppData: () => AppDataValues = () => {
     serverIp,
     appMode,
     maxMissedPings,
+    network,
     isReady,
     error
 };

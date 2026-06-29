@@ -42,6 +42,7 @@ export const VarsSchema = z.object({
   MODE: z.enum(['SWITCH', 'ENCRYPTOR']),
   MAX_MISSED_PINGS: z.number().min(1).max(10),
   LANGUAGE: z.enum(['en', 'he']).optional(),
+  NETWORK: z.string().optional(),
 });
 
 export const VarsResponseSchema = z.union([

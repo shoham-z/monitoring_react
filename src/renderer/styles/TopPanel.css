@@ -18,6 +18,16 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 4px;
+  flex: 0 0 auto;
+}
+
+.top-panel__network-info {
+  flex: 0 0 auto;
+  font-size: 3rem;
+  font-weight: 700;
+  white-space: nowrap;
+  margin-left: 8px;
+  color: #555;
 }
 
 .server-status {
@@ -34,7 +44,8 @@
 
 /* Input */
 input[type="text"] {
-  flex: 1; /* Takes up remaining space */
+  flex: 1 1 280px; /* Takes up remaining space while leaving room for network text */
+  min-width: 180px;
   padding: 10px;
   font-size: 16px;
   border: 1px solid #ccc;

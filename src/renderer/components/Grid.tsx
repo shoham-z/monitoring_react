@@ -16,7 +16,13 @@ import useItemList, { ReachabilityEvent } from '../hooks/useItemList';
 import ItemListView from './ItemListView';
 
 function Grid(props: {
-  addNotification: (message: string, swId: number, color: string) => void;
+  addNotification: (
+    message: string,
+    swId: number,
+    color?: string,
+    messageKey?: string,
+    messageParams?: Record<string, string | number>,
+  ) => void;
   notifications: MyNotification[];
 }) {
   const { addNotification, notifications } = props;
@@ -228,6 +234,7 @@ function Grid(props: {
         addItem={itemList.addItem}
         updateFilter={updateFilter}
         isServerOnline={itemList.isServerOnline}
+        network={appData.network}
       />
       <div
         className="switch_div"
