@@ -28,9 +28,9 @@
   },
   "contributors": [
     {
-      "name": "Amila Welihinda",
-      "email": "amilajack@gmail.com",
-      "url": "https://github.com/amilajack"
+      "name": "Yonatan Heled",
+      "email": "yonahel0001@gmail.com",
+      "url": "https://github.com/YTG667"
     }
   ],
   "main": "./.erb/dll/main.bundle.dev.js",

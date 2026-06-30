@@ -1,6 +1,6 @@
 {
   "name": "golden-apple",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A Monitoring Client App Based on Electron",
   "license": "MIT",
   "author": {
@@ -8,6 +8,13 @@
     "email": "shozeh123@gmail.com",
     "url": "https://github.com/shoham-z"
   },
+  "contributors": [
+    {
+      "name": "Yonatan Heled",
+      "email": "yonahel0001@gmail.com",
+      "url": "https://github.com/YTG667"
+    }
+  ],
   "main": "./dist/main/main.js",
   "scripts": {
     "rebuild": "node -r ts-node/register ../../.erb/scripts/electron-rebuild.js",
